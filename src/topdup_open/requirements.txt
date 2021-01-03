@@ -1,6 +1,7 @@
 aniso8601==8.0.0
 astroid==2.4.2
 autopep8==1.5.4
+argparse==1.4.0
 cachetools==4.1.1
 click==7.1.2
 Flask==1.1.2
