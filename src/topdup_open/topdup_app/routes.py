@@ -5,6 +5,8 @@ from cachetools import cached,  TTLCache
 import re
 import json
 from . import _config
+from flask import request
+from autoload_data.data_utils import compare_document
 
 
 @app.route("/")
@@ -36,6 +38,15 @@ def home():
             p.domain = re.search(_config.split, p.url).group(1)
     return render_template('index.html', posts=posts, all_posts=all_posts)
 
+@app.route("/compare_doc")
+def compare_doc():
+    return render_template('compare_doc.html', title='Compare Documents')
+
+@app.route("/compare_doc", methods=['post'])
+def compare_doc_post():
+    doc = request.form.get('doc')
+    score = compare_document(doc)
+    return render_template('compare_doc_post.html', data=str(score))
 
 @app.route("/about")
 def about():
