@@ -103,6 +103,48 @@ def handle_post(new_posts):
     session.commit()
     session.close()
 
+def compare_document(text: str):
+    session = create_session()
+
+    # Get the embeded vector of the text through tf-idf model
+    embeded_vec = doc2vec(text)
+
+    # Get all the old_posts
+    old_posts = load_pickle_data(EMBEDDING_FILE)
+
+    # Use tf idf vectorizer to vectorize and compute cosine sim with the k-most similar doc
+    # compute and search nearest post
+    print(len(old_posts))
+    if len(old_posts) > 0:
+        old_ids = [post['id'] for post in old_posts]
+        old_vectors = vstack([post['vector'] for post in old_posts])
+        new_vectors = vstack([embeded_vec])
+
+        # sim_matrix[i,j] - similarity score of (new_posts[i], old_posts[j])
+        sim_matrix = cosine_similarity(new_vectors, old_vectors)
+        del new_vectors
+        del old_vectors
+
+        score_list = enumerate(list(sim_matrix[0]))
+        topK_score = sorted(
+            score_list, key=lambda x: x[1], reverse=True)[:TOP_K]
+        print(len(topK_score))
+        
+        mx_score = -1e8
+        # get similarity score with compute_doc_similarity function
+        for index, _ in topK_score:
+            sim_id = old_ids[index]
+            sim_post = session.query(Post).get(sim_id)
+            if sim_post is not None:
+                # print(sim_post.content)
+                # print(text)
+                score = compute_doc_similarity(text, sim_post.content)
+                mx_score = max(mx_score, score)
+
+        del sim_matrix
+    session.commit()
+    session.close()
+    return mx_score
 
 """
 HOW TO USE
