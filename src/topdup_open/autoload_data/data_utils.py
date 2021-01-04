@@ -114,7 +114,6 @@ def compare_document(text: str):
 
     # Use tf idf vectorizer to vectorize and compute cosine sim with the k-most similar doc
     # compute and search nearest post
-    print(len(old_posts))
     if len(old_posts) > 0:
         old_ids = [post['id'] for post in old_posts]
         old_vectors = vstack([post['vector'] for post in old_posts])
