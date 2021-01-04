@@ -135,8 +135,6 @@ def compare_document(text: str):
             sim_id = old_ids[index]
             sim_post = session.query(Post).get(sim_id)
             if sim_post is not None:
-                # print(sim_post.content)
-                # print(text)
                 score = compute_doc_similarity(text, sim_post.content)
                 mx_score = max(mx_score, score)
 
