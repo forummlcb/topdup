@@ -42,7 +42,7 @@ def home():
 def compare_doc():
     return render_template('compare_doc.html', title='Compare Documents')
 
-@app.route("/compare_doc", methods=['post'])
+@app.route("/docs/compare", methods=['post'])
 def compare_doc_post():
     doc = request.form.get('doc')
     score = compare_document(doc)
