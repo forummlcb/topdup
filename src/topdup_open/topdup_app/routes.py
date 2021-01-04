@@ -38,7 +38,7 @@ def home():
             p.domain = re.search(_config.split, p.url).group(1)
     return render_template('index.html', posts=posts, all_posts=all_posts)
 
-@app.route("/compare_doc")
+@app.route("/docs/compare")
 def compare_doc():
     return render_template('compare_doc.html', title='Compare Documents')
 
