@@ -128,7 +128,6 @@ def compare_document(text: str):
         score_list = enumerate(list(sim_matrix[0]))
         topK_score = sorted(
             score_list, key=lambda x: x[1], reverse=True)[:TOP_K]
-        print(len(topK_score))
         
         mx_score = -1e8
         # get similarity score with compute_doc_similarity function
