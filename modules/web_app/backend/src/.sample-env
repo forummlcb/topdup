@@ -1,0 +1,5 @@
+DB_USERNAME=admin
+DB_HOST=localhost
+DB_NAME=topdup_db
+DB_PASS=admin
+DB_PORT=5432
