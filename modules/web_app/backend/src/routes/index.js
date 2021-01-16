@@ -1,7 +1,7 @@
 import express from "express";
 const routers = express();
 import User from "./users/index"
-import Reports from "./reports/reports"
+import Reports from "./reports/index"
 
 routers.use("/api/v1/", User);
 routers.use("/api/v1/reports/", Reports);
