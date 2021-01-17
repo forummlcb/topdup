@@ -1,20 +1,16 @@
 import express from "express";
 import routes from "./routes";
-import {Server} from 'http';
+import logger from "morgan"
+const cors = require("cors");
+import { Server } from 'http';
 import bodyParser from "body-parser";
 // import hpp from 'hpp'
 // import xXssProtection from "x-xss-protection"
-import initDatabase from './initDatabase'
-import seedDatabase from './seedDatabase'
-
-const cors = require("cors");
-
 require('dotenv').config();
 export const app = express();
 const port = 5000;
 app.use(bodyParser.json());
 app.use(cors());
-
 export const server = Server(app);
 
 
@@ -83,13 +79,6 @@ process.on('unhandledRejection', error => {
     // Will print "unhandledRejection err is not defined"
     console.log('unhandledRejection', error);
 });
-
-async function main() {
-    await initDatabase.init()
-    await seedDatabase.seed()
-    server.listen(port)
-}
-
-main()
+server.listen(port);
 
 export default app;

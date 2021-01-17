@@ -9,7 +9,8 @@
     "clean": "rimraf  dist",
     "start": "npm run clean && npm run build && node ./dist/src/bin/www",
     "start-watch": "nodemon --exec babel-node --presets es2015 ./src/app.js",
-    "dev": "nodemon ./src/bin/www"
+    "dev": "nodemon ./src/bin/www",
+    "init-database": "node ./src/initDatabase/main.js"
   },
   "keywords": [],
   "author": "",

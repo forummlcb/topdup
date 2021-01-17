@@ -1,16 +1,16 @@
-import {Client} from 'pg'
-import logger from 'winston'
+const {Client} = require('pg')
+const logger = require('winston')
 
 const configDatabase = {
-    user: 'admin',
-    host: 'localhost',
-    database: 'topdup_db',
-    password: 'admin',
-    port: '5432'
+  user: 'admin',
+  host: 'localhost',
+  database: 'topdup_db',
+  password: 'admin',
+  port: '5432'
 }
 
 const client = new Client(
-    configDatabase
+  configDatabase
 );
 
 client.connect()
@@ -31,22 +31,22 @@ async function wipeDatabase() {
 }
 
 async function initDatabase() {
-    try {
-        await createUserTable()
-        logger.info("Create user table successfully")
-        await createArticleTable()
-        logger.info('Create article table successfully')
-        await createVoteTable()
-        logger.info('Create vote table successfully')
-        await createSimilarityReportTable()
-        logger.info('Create similarity report table successfully')
-    } catch (err) {
-        logger.error(err)
-    }
+  try {
+    await createUserTable()
+    logger.info("Create user table successfully")
+    await createArticleTable()
+    logger.info('Create article table successfully')
+    await createVoteTable()
+    logger.info('Create vote table successfully')
+    await createSimilarityReportTable()
+    logger.info('Create similarity report table successfully')
+  } catch (err) {
+    logger.error(err)
+  }
 }
 
 function createUserTable() {
-    const query = `
+  const query = `
         create table if not exists public."user"
         (
             id        serial     not null primary key,
@@ -58,11 +58,11 @@ function createUserTable() {
         )
     `
 
-    client.query(query)
+  client.query(query)
 }
 
 function createArticleTable() {
-    const query = `
+  const query = `
         create table if not exists article
         (
             id              serial      not null primary key,
@@ -74,11 +74,11 @@ function createArticleTable() {
         )
     `
 
-    client.query(query);
+  client.query(query)
 }
 
 function createVoteTable() {
-    const query = `
+  const query = `
         create table if not exists vote
         (
             id          serial primary key,
@@ -91,11 +91,11 @@ function createVoteTable() {
         )
     `
 
-    client.query(query)
+  client.query(query)
 }
 
 function createSimilarityReportTable() {
-    const query = `
+  const query = `
         create table if not exists similarity_report
         (
             source_article_id integer not null,
@@ -109,22 +109,22 @@ function createSimilarityReportTable() {
         )
     `
 
-    client.query(query)
+  client.query(query)
 }
 
 
 async function init() {
-    try {
-        logger.info("WIPE DATABASE:")
-        await wipeDatabase()
+  try {
+    logger.info("WIPE DATABASE:")
+    await wipeDatabase()
 
-        logger.info("INIT DATABASE:")
-        await initDatabase()
-    } catch (err) {
-        logger.error(err)
-    }
+    logger.info("INIT DATABASE:")
+    await initDatabase()
+  } catch (err) {
+    logger.error(err)
+  }
 }
 
 module.exports = {
-    init
+  init
 }
