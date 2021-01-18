@@ -116,6 +116,4 @@ async function seed() {
   logger.info('Seed similarity report successfully')
 }
 
-module.exports = {
-  seed
-}
+seed().then(()=>console.log('Seed database successfully. Please wait for a few minute then refresh your all tables. After that you can terminate this program manually.'))

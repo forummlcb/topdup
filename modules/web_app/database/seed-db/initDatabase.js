@@ -16,18 +16,18 @@ const client = new Client(
 client.connect()
 
 async function wipeDatabase() {
-    try {
-        await client.query('DROP SCHEMA IF EXISTS public CASCADE')
-        logger.info('Drop schema public successfully')
-        await client.query('CREATE SCHEMA IF NOT EXISTS public')
-        logger.info('Create schema public successfully')
-        await client.query('GRANT ALL ON SCHEMA public TO admin')
-        logger.info('Grant schema public successfully')
-        await client.query('GRANT ALL ON SCHEMA public TO public')
-        logger.info('Grant schema public successfully')
-    } catch (err) {
-        logger.error(err)
-    }
+  try {
+    await client.query('DROP SCHEMA IF EXISTS public CASCADE')
+    logger.info('Drop schema public successfully')
+    await client.query('CREATE SCHEMA IF NOT EXISTS public')
+    logger.info('Create schema public successfully')
+    await client.query('GRANT ALL ON SCHEMA public TO admin')
+    logger.info('Grant schema public successfully')
+    await client.query('GRANT ALL ON SCHEMA public TO public')
+    logger.info('Grant schema public successfully')
+  } catch (err) {
+    logger.error(err)
+  }
 }
 
 async function initDatabase() {
@@ -125,6 +125,6 @@ async function init() {
   }
 }
 
-module.exports = {
-  init
-}
+init().then(() => {
+  console.log("Init database successfully. Please terminate it manually.")
+})

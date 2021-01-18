@@ -1,0 +1,21 @@
+{
+  "name": "seed-db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.5",
+    "faker": "^5.1.0",
+    "pg": "^8.5.1",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "init-database": "node initDatabase.js",
+    "seed-database": "node seedDatabase.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

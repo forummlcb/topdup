@@ -9,22 +9,17 @@
     "clean": "rimraf  dist",
     "start": "npm run clean && npm run build && node ./dist/src/bin/www",
     "start-watch": "nodemon --exec babel-node --presets es2015 ./src/app.js",
-    "dev": "nodemon ./src/bin/www",
-    "init-database": "node ./src/initDatabase/main.js"
+    "dev": "nodemon ./src/bin/www"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.1",
-    "cheerio": "^1.0.0-rc.5",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "faker": "^5.1.0",
     "morgan": "^1.10.0",
-    "pg": "^8.5.1",
-    "winston": "^3.3.3"
+    "pg": "^8.5.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
