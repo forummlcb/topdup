@@ -67,7 +67,7 @@ async function seedArticle() {
 
   try {
     titles.forEach(title => {
-      const article = [title, new Date('2015-03-25'), null, faker.internet.domainName(), faker.name.findName()]
+      const article = [title, new Date(), null, faker.internet.domainName(), faker.name.findName()]
       const query = {
         text: 'insert into article (title, created_date, last_updated_date, domain, author) values ($1, $2, $3, $4, $5)',
         values: article
@@ -92,13 +92,13 @@ async function seedSimilarityReport() {
       if (i === j) {
         continue
       }
-      similarityReports.push([articles[i].id, articles[j].id])
+      similarityReports.push([articles[i].id, articles[j].id, parseFloat(Math.random().toFixed(3)), new Date(+(new Date()) - Math.floor(Math.random()*10000000000))])
     }
   }
 
   similarityReports.forEach(similarityReport => {
     const query = {
-      text: 'insert into similarity_report (source_article_id, target_article_id) values ($1, $2)',
+      text: 'insert into similarity_report (source_article_id, target_article_id, sim_score, updated_date) values ($1, $2, $3, $4)',
       values: similarityReport
     }
 

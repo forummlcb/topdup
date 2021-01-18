@@ -2,10 +2,10 @@ const {Client} = require('pg')
 const logger = require('winston')
 
 const configDatabase = {
-  user: 'admin',
+  user: "admin",
   host: 'localhost',
-  database: 'topdup_db',
-  password: 'admin',
+  password: "admin",
+  database:'topdup_db',
   port: '5432'
 }
 
@@ -100,7 +100,7 @@ function createSimilarityReportTable() {
         (
             source_article_id integer not null,
             target_article_id integer not null,
-            sim_score integer,
+            sim_score numeric,
             updated_date date,
             revelant_degree varchar(255),
             primary key(source_article_id, target_article_id),
