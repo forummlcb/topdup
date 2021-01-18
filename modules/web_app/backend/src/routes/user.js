@@ -1,24 +1,23 @@
 import express from "express";
-import userCtrl from "../../controllers/users/user";
+import userCtrl from "../controllers/user";
 const router = express.Router();
 
-router.get("/users",
+router.get("/",
     // middlewares
-    userCtrl.getUsers
-);
-router.get("/users/:id",
+    userCtrl.getUsers);
+router.get("/:id",
     // middlewares
     userCtrl.getUserById
 );
-router.post("/users",
+router.post("/",
     // middlewares
     userCtrl.createUser
 );
-router.put("/users/:id",
+router.put("/:id",
     // middlewares
     userCtrl.updateUser
 );
-router.delete("/users/:id",
+router.delete("/:id",
     // middlewares
     userCtrl.deleteUser
 );

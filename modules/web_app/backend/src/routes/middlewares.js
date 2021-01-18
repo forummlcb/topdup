@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { schema } from "../vadilations/schema";
 import Joi from "joi";
 import Device from "../models/device"
+
 export const isVerifiedToken = async (req, res, next) => {
   if (req.get("Authorization") === undefined) {
     res.json({
