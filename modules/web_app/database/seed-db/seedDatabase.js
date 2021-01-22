@@ -2,6 +2,7 @@ const {Client} = require('pg')
 const logger = require('winston')
 const faker = require('faker')
 const {getCrawlData} = require('./crawlData')
+const { random } = require('faker')
 
 const configDatabase = {
   user: 'admin',
@@ -80,6 +81,68 @@ async function seedArticle() {
   }
 }
 
+async function getVotesData(limit_pairs=2000, limit_rows=1000) {
+  const userIdQuery = `SELECT id FROM public."user";`
+  let userIdx = []
+  try {
+    res = await client.query(userIdQuery)
+    res.rows.forEach((row) => {userIdx.push(row['id'])})
+  } catch (err) {
+    console.log(err);
+  }
+
+  // Take all pairs of article, and randomize number of votes.
+  const query = {
+    text: `SELECT A1.id as id1, A2.id as id2
+            FROM public."article" A1
+            JOIN public."article" A2 
+            ON A1.id != A2.id
+            LIMIT $1`,
+    values: [limit_pairs]
+  }
+
+  let randomVotes = []
+  try {
+    res = await client.query(query)
+    console.log("Get " + res.rows.length + " pairs of articles, generated " + limit_rows + " number of voting instances.")
+    for (i = 0; i < limit_rows; i++){
+
+      // random number of row in the retunred result
+      const row_id = Math.floor(Math.random() * Math.floor(limit_pairs - 1));
+      row = res.rows[row_id]
+
+      // Random integer (vote for which article)
+      const r = Math.random() < 0.5;
+      
+      // Get user id
+      const uid = Math.floor(Math.random() * Math.floor(userIdx.length - 1));
+      randomVotes.push([row['id1'], row['id2'], r ? row['id1'] : row['id2'], userIdx[uid]])
+    }
+  } catch (err) {
+    console.log(err);
+  }
+  return randomVotes
+}
+
+async function seedVote() {
+  const votes = await getVotesData(8000,400)
+
+  try {
+    votes.forEach(vote => {
+      const data = [vote[2], new Date(), vote[0], vote[1], vote[3]]
+      const query = {
+        text: 'insert into public."vote" (value, created_date, article_a_id, article_b_id, user_id) values ($1, $2, $3, $4, $5)',
+        values: data
+      }
+
+        client.query(query)
+      }).catch((err) => {logger.error(err)})
+  } catch (err) {
+    logger.error(err)
+  }
+}
+
+
 async function seedSimilarityReport() {
   let articles = []
   articles = await client.query('select * from article')
@@ -112,6 +175,8 @@ async function seed() {
   logger.info('Seed user successfully')
   await seedArticle()
   logger.info('Seed article successfully')
+  await seedVote()
+  logger.info('Seed vote successfully')
   await seedSimilarityReport()
   logger.info('Seed similarity report successfully')
 }
