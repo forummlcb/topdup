@@ -3,3 +3,12 @@ You can run postgres docker container by running this command:
 
 To init database, you can run: `npm run init-database`
 Check number of rows in your table similarity_report in database, when it greater than 30000 then you need to go back to the terminall and `Ctrl+c` to terminate the program manually.  
+
+To access the database command line in the docker container:
+```
+# First get inside the container.
+docker exec -it db bin/bash
+
+# Next, get inside the posgresql database cli.
+psql -h localhost -p 5432 -d topdup_db -U admin --password admin
+```
