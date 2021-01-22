@@ -13,7 +13,8 @@
   "devDependencies": {},
   "scripts": {
     "init-database": "node initDatabase.js",
-    "seed-database": "node seedDatabase.js"
+    "seed-database": "node seedDatabase.js",
+    "test-query": "node testQuery.js"
   },
   "keywords": [],
   "author": "",
