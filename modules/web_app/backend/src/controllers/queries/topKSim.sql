@@ -1,5 +1,7 @@
 /**
 @file topKSim.sql
+@params: $1: a limit number
+@return: every field of the top k similarity row
 
 Given an integer k, return a list of k pairs of articles that 
 have the highest similarity score.
