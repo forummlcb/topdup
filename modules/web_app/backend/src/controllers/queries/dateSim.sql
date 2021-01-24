@@ -9,5 +9,5 @@ that date (with blocks if necessary).
 */
 
 SELECT * 
-FROM article
+FROM public."article"
 WHERE created_date::date = '$1'

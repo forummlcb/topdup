@@ -8,5 +8,5 @@ with the vote count (positive and negative) from each unique user
 (with blocks if necessary).
 */
 SELECT *
-FROM vote
-WHERE article_a_id = $1 OR article_b_id = $1
+FROM public."vote"
+WHERE voted_article_id = $1

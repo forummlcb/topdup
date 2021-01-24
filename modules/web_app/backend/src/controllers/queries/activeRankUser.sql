@@ -13,7 +13,7 @@ SELECT V1.user_id, V1.cnt
 FROM
 (
 	SELECT user_id, COUNT(user_id) AS cnt
-	FROM vote V
+	FROM public."vote" V
 	GROUP BY user_id
 ) AS V1
 JOIN
@@ -21,7 +21,7 @@ JOIN
 	SELECT DISTINCT cnt FROM
 	(
 		SELECT user_id, COUNT(user_id) AS cnt
-		FROM vote
+		FROM public."vote"
 		GROUP BY user_id
 	) AS tmp
 	ORDER BY cnt DESC

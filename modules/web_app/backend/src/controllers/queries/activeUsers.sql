@@ -9,7 +9,7 @@ Given an integer k, return k top users that voted the most.
 */
 
 SELECT user_id, COUNT(user_id) AS cnt
-FROM vote
+FROM public."vote"
 GROUP BY user_id
 ORDER BY COUNT(user_id) DESC 
 LIMIT $1

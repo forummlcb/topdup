@@ -8,5 +8,5 @@ that title (with blocks if necessary).
 */
 
 SELECT * 
-FROM article A
-WHERE A.title = '$1'
+FROM public."article" A
+WHERE A.title LIKE '$1'
