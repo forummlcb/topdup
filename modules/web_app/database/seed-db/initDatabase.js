@@ -81,12 +81,12 @@ function createVoteTable() {
   const query = `
         create table if not exists vote
         (
-            id          serial primary key,
-            value       integer not null,
-            created_date date not null,
-            article_A_id   integer not null,
-            article_B_id   integer not null,
-            user_id      integer not null,
+            id                serial primary key,
+            voted_article_id  integer not null,
+            created_date      date not null,
+            article_A_id      integer not null,
+            article_B_id      integer not null,
+            user_id           integer not null,
             constraint fk_user foreign key (user_id) references public.user(id),
             constraint fk_article1 foreign key (article_A_id) references article(id),
             constraint fk_article2 foreign key (article_B_id) references article(id)
