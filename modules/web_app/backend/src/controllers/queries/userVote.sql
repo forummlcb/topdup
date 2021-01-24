@@ -7,5 +7,5 @@ Given an user id, return all the article pairs that this user has
 voted (with blocks if necessary).
 */
 SELECT *
-FROM public."vote"
+FROM vote
 WHERE user_id = $1

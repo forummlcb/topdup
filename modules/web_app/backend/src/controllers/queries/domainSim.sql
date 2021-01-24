@@ -8,5 +8,5 @@ that domain (with blocks if necessary).
 */
 
 SELECT * 
-FROM public."article" A
+FROM article A
 WHERE A.domain LIKE '$1'

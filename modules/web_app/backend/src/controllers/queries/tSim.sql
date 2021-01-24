@@ -9,5 +9,5 @@ have the similarity score greater than t (with blocks if necessary).
 Average query runtime: 83ms.
 */
 SELECT *
-FROM public."similarity_report"
+FROM similarity_report
 WHERE sim_score >= $1

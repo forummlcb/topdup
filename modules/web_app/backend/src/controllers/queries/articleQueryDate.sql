@@ -11,7 +11,7 @@
 Given parameters, return a list of query articles.
 */
 SELECT * 
-FROM public."article" A
+FROM article A
 WHERE LOWER(A.title) LIKE LOWER('%$1%')
     AND LOWER(A.domain) LIKE LOWER('%$2%')
     AND LOWER(A.author) LIKE LOWER('%$3%')

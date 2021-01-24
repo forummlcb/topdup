@@ -6,4 +6,4 @@
 Get all articles, every field (with blocks if necessary).
 */
 SELECT *
-FROM public."article"
+FROM article

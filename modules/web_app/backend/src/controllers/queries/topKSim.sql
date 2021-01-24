@@ -10,6 +10,6 @@ Average query runtime: 50ms (seek + latency +
     overhead) + k * 0.03ms (linear indexing)
 */
 SELECT *
-FROM public."similarity_report"
+FROM similarity_report
 ORDER BY sim_score DESC
 LIMIT $1

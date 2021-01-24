@@ -8,6 +8,6 @@
 Given 2 article id, return the vote count of that pairs.
 */
 SELECT COUNT(*) as cnt
-FROM public."vote"
+FROM vote
 WHERE (article_a_id = $1 AND article_b_id = $2)
     OR (article_b_id = $1 AND article_a_id = $2)
