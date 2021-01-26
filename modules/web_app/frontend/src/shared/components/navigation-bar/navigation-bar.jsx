@@ -36,7 +36,7 @@ const NavigationBar = ({ isLoggedIn }) => {
 					<Nav className="mr-auto" activeKey={location.pathname}>
 						<Nav.Link href="/sign-in">Home</Nav.Link>
 						<Nav.Link href="/dupfinder">DupFinder</Nav.Link>
-						<Nav.Link href="/dupviewer">DupViewer</Nav.Link>
+						<Nav.Link href="/similarity-report">Similarity Reports</Nav.Link>
 						<Nav.Link href="/dupregister">DupRegister</Nav.Link>
 					</Nav>
 					<Nav>{rightNavItems}</Nav>
