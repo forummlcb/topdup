@@ -3,12 +3,13 @@ const logger = require('winston')
 const faker = require('faker')
 const {getCrawlData} = require('./crawlData')
 const { random } = require('faker')
+const utils = require('./utils')
 
 const configDatabase = {
   user: 'admin',
-  host: 'localhost',
+  host: '3.1.100.54',
   database: 'topdup_db',
-  password: 'admin',
+  password: 'uyL7WgydqKNkNMWe',
   port: '5432'
 }
 
@@ -131,7 +132,7 @@ async function seedVote() {
     votes.forEach(vote => {
       const data = [vote[2], new Date(), vote[0], vote[1], vote[3]]
       const query = {
-        text: 'insert into public."vote" (value, created_date, article_a_id, article_b_id, user_id) values ($1, $2, $3, $4, $5)',
+        text: 'insert into public."vote" (voted_article_id, created_date, article_a_id, article_b_id, user_id) values ($1, $2, $3, $4, $5)',
         values: data
       }
 
@@ -155,7 +156,8 @@ async function seedSimilarityReport() {
       if (i === j) {
         continue
       }
-      similarityReports.push([articles[i].id, articles[j].id, parseFloat(Math.random().toFixed(3)), new Date(+(new Date()) - Math.floor(Math.random()*10000000000))])
+      const simScore = utils.textCosineSimilarity(articles[i].title, articles[j].title)
+      similarityReports.push([articles[i].id, articles[j].id, simScore, new Date(+(new Date()) - Math.floor(Math.random()*10000000000))])
     }
   }
 

@@ -2,9 +2,9 @@ const {Client} = require('pg')
 const logger = require('winston')
 
 const configDatabase = {
-  user: "admin",
-  host: 'localhost',
-  password: "admin",
+  user: 'admin',
+  host: '3.1.100.54',
+  password: 'uyL7WgydqKNkNMWe',
   database:'topdup_db',
   port: '5432'
 }
@@ -100,14 +100,14 @@ function createSimilarityReportTable() {
   const query = `
         create table if not exists similarity_report
         (
-            source_article_id integer not null,
-            target_article_id integer not null,
+            article_a_id integer not null,
+            article_b_id integer not null,
             sim_score numeric,
             updated_date date,
             revelant_degree varchar(255),
-            primary key(source_article_id, target_article_id),
-            constraint fk_article_source foreign key (source_article_id) references article(id),
-            constraint fk_article_target foreign key (target_article_id) references article(id)
+            primary key(article_a_id, article_b_id),
+            constraint fk_article_a foreign key (article_a_id) references article(id),
+            constraint fk_article_b foreign key (article_b_id) references article(id)
         )
     `
 
