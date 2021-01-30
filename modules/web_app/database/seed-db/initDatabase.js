@@ -111,7 +111,7 @@ function createSimilarityReportTable() {
         )
     `
 
-  client.query(query)
+  client.query(query, (err, res) => client.end())
 }
 
 
@@ -127,6 +127,4 @@ async function init() {
   }
 }
 
-init().then(() => {
-  console.log("Init database successfully. Please terminate it manually.")
-})
+init().then(() => console.log('Init database successfully.'))

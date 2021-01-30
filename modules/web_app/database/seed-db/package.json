@@ -14,6 +14,7 @@
   "scripts": {
     "init-database": "node initDatabase.js",
     "seed-database": "node seedDatabase.js",
+    "init-seed-database": "npm run init-database && npm run seed-database",
     "test-query": "node testQuery.js"
   },
   "keywords": [],

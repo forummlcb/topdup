@@ -131,7 +131,7 @@ async function seedVote() {
     votes.forEach(vote => {
       const data = [vote[2], new Date(), vote[0], vote[1], vote[3]]
       const query = {
-        text: 'insert into public."vote" (value, created_date, article_a_id, article_b_id, user_id) values ($1, $2, $3, $4, $5)',
+        text: 'insert into public."vote" (voted_article_id, created_date, article_a_id, article_b_id, user_id) values ($1, $2, $3, $4, $5)',
         values: data
       }
 
@@ -159,14 +159,18 @@ async function seedSimilarityReport() {
     }
   }
 
-  similarityReports.forEach(similarityReport => {
+  for (const similarityReport of similarityReports) {
     const query = {
       text: 'insert into similarity_report (source_article_id, target_article_id, sim_score, updated_date) values ($1, $2, $3, $4)',
       values: similarityReport
     }
 
-    client.query(query)
-  })
+    await client.query(query)
+
+    console.log('Please wait. Seeding record for similarity report table...')
+  }
+
+  await client.end()
 }
 
 async function seed() {
@@ -181,4 +185,4 @@ async function seed() {
   logger.info('Seed similarity report successfully')
 }
 
-seed().then(()=>console.log('Seed database successfully. Please wait for a few minute then refresh your all tables. After that you can terminate this program manually.'))
+seed().then(()=>console.log('Seed database successfully.'))

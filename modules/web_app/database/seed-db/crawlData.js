@@ -17,8 +17,7 @@ const source = {
   'https://viblo.asia/newest': ['h3.word-break a'],
   'https://viblo.asia/newest?page=2': ['h3.word-break a'],
   'https://viblo.asia/newest?page=3': ['h3.word-break a'],
-  'https://viblo.asia/newest?page=5': ['h3.word-break a'],
-  'https://viblo.asia/newest?page=6': ['h3.word-break a'],
+  'https://viblo.asia/newest?page=4': ['h3.word-break a'],
 }
 
 async function getArticleTitleFrom(url, selectors) {
