@@ -1,9 +1,10 @@
 import { CODE, ID } from "../constants/index";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
-import { secretKey, fbUrl, GgUrl } from "../configs/index"
+import { secretKey, fbUrl, GgUrl , hostName} from "../configs/index"
 import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
+import emailService from "./utils/nodemailer"
 const Pool = require("pg").Pool;
 const pool = new Pool({
     user: 'admin',
@@ -21,6 +22,15 @@ const generatorToken = (userId, baseToken) => {
         secretKey
     );
 };
+
+const confirmEmail = async (req,res)=>{
+    try {
+    const {userId , code} = req.param;
+    console.log(userId, code )  
+    } catch (error) {
+        throw error
+    }
+}
 
 const register = async (req, res) => {
     try {
@@ -43,7 +53,16 @@ const register = async (req, res) => {
             INSERT INTO public."user" (firstName, lastName, email, password)
             VALUES (${firstName}, ${lastName},${email}, ${hashPassword})
           `;
-            const result = pool.query(queryNewUser)
+            const result =  await pool.query(queryNewUser)
+            const secretCode = uuidv4()
+            const data = {
+                from: `sender@email.com`,
+                to: email,
+                subject: "Your Activation Link for xxx APP",
+                text: `Please use the following link within the next 10 minutes to activate your account on xxx APP: ${hostName}/api/auth/verification/verify-account/${result.id}/${secretCode}`,
+                html: `<p>Please use the following link within the next 10 minutes to activate your account on xxx APP: <strong><a href="${hostName}/api/auth/verification/verify-account/${user._id}/${secretCode}" target="_blank">Email bestätigen</a></strong></p>`,
+            };
+            await emailService.sendMail(data);
             if (result) {
                 res.json(
                     {
@@ -71,17 +90,13 @@ const register = async (req, res) => {
 
 const loginNormal = async (req, res) => {
     try {
-        const { email, password } = req.body;
-
-        // get user by userName/email
-    // query    let user  = 
+    const { email, password } = req.body;
     const query = `
     SELECT * 
     FROM public."user" 
     WHERE email = ${email}
     `;
      let user = await pool.query(query)
-        //
         if(user){
             const compare = bcrypt.compareSync(password, user.password)
             if (compare) {
@@ -208,7 +223,7 @@ const loginFaceBook = async (req, res) => {
 
 const loginGoogle = async (req, res) => {
     try {
-        const { ggToken, ggId, deviceName } = req.body;
+        const { ggToken, ggId } = req.body;
         const param = `userinfo?access_token=`;
         const response = await axios.get(
             `${GgUrl}/${param}${ggToken}`
@@ -285,6 +300,7 @@ const loginGoogle = async (req, res) => {
 }
 
 export default {
+    confirmEmail,
     register,
     loginNormal,
     logout,
