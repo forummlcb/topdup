@@ -1,56 +1,55 @@
 import { CODE, ID } from "../constants";
-import { secretKey, endPointImage } from "../config";
+import { secretKey, endPointImage } from "../configs";
 import jwt from "jsonwebtoken";
-import { schema } from "../vadilations/schema";
+import { schema } from "../validations/schema";
 import Joi from "joi";
-import Device from "../models/device"
 
-export const isVerifiedToken = async (req, res, next) => {
-  if (req.get("Authorization") === undefined) {
-    res.json({
-      code: CODE.INVALID_TOKEN,
-      message: "Thiếu dữ liệu Authorization và Access Token"
-    });
-    return;
-  }
-  const accessToken = req.get("Authorization");
-  if (accessToken) {
-    jwt.verify(accessToken, secretKey, async (err, decoded) => {
-      if (err) {
-        res.json({
-          code: CODE.INVALID_TOKEN,
-          message: "Không thể xác thực token",
-          error: err
-        });
-      } else {
-        const check = await Device.findOne(
-          {
-            $and: [
-              { user: decoded.id },
-              { baseToken: decoded.baseToken }
-            ]
-          }
-        )
-        if (check) {
-          next()
-        }
-        else {
-          res.json({
-            code: CODE.INVALID_TOKEN,
-            message: 'Người dùng không tồn tại trong hệ thống!'
-          });
-        }
+// export const isVerifiedToken = async (req, res, next) => {
+//   if (req.get("Authorization") === undefined) {
+//     res.json({
+//       code: CODE.INVALID_TOKEN,
+//       message: "Thiếu dữ liệu Authorization và Access Token"
+//     });
+//     return;
+//   }
+//   const accessToken = req.get("Authorization");
+//   if (accessToken) {
+//     jwt.verify(accessToken, secretKey, async (err, decoded) => {
+//       if (err) {
+//         res.json({
+//           code: CODE.INVALID_TOKEN,
+//           message: "Không thể xác thực token",
+//           error: err
+//         });
+//       } else {
+//         const check = await Device.findOne(
+//           {
+//             $and: [
+//               { user: decoded.id },
+//               { baseToken: decoded.baseToken }
+//             ]
+//           }
+//         )
+//         if (check) {
+//           next()
+//         }
+//         else {
+//           res.json({
+//             code: CODE.INVALID_TOKEN,
+//             message: 'Người dùng không tồn tại trong hệ thống!'
+//           });
+//         }
 
-      }
-    });
+//       }
+//     });
 
-  } else {
-    res.json({
-      code: CODE.INVALID_TOKEN,
-      message: "Access token không được để rỗng!"
-    });
-  }
-};
+//   } else {
+//     res.json({
+//       code: CODE.INVALID_TOKEN,
+//       message: "Access token không được để rỗng!"
+//     });
+//   }
+// };
 
 const fieldValidation = (input, template) => {
   for (let item of template) {

@@ -22,7 +22,7 @@ router.post(
     (req, res, next) => {
         requiredField(req, res, ["fbToken","fbId"], [], [], next)
     },
-    authController.loginFaceBook
+    authController.loginByFaceBook
 )
 
 router.post(
@@ -30,12 +30,12 @@ router.post(
     (req, res, next) => {
         requiredField(req, res, ["ggToken","ggId"], [], [], next)
     },
-    authController.loginGoogle
+    authController.loginByGoogle
 )
 
 
 router.post(
-    "auth/user",
+    "/user",
     (req, res, next) => {
         requiredField(req, res, ["email","password","firstName","lastName"], [], [], next)
     },
@@ -43,7 +43,7 @@ router.post(
 )
 
 router.post(
-    "auth/reset-password",
+    "/reset-password",
 )
 
 export default router
