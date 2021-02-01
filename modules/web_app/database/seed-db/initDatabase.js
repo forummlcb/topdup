@@ -49,15 +49,18 @@ function createUserTable() {
   const query = `
         create table if not exists public."user"
         (
-            id        serial     not null primary key,
+            id        uuid     not null primary key,
             firstname varchar(50) not null,
             lastname  varchar(50),
             email     varchar(50) not null,
-            login     varchar(50) not null,
-            password  varchar(50) not null
+            login     varchar(50),
+            password  varchar(50),
+            is_verified boolean not null, 
+            secret_code varchar(50),
+            thumbnail varchar(200) not null,
+            timestamp timestamp default current_timestamp
         )
     `
-
   client.query(query)
 }
 
@@ -65,7 +68,7 @@ function createArticleTable() {
   const query = `
         create table if not exists article
         (
-            id              serial      not null primary key,
+            id              uuid      not null primary key,
             title           varchar(255) not null,
             created_date     date         not null,
             last_updated_date date,
@@ -81,7 +84,7 @@ function createVoteTable() {
   const query = `
         create table if not exists vote
         (
-            id                serial primary key,
+            id                uuid primary key,
             voted_article_id  integer not null,
             created_date      date not null,
             article_A_id      integer not null,

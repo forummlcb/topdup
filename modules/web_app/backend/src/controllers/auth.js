@@ -25,8 +25,26 @@ const generatorToken = (userId, baseToken) => {
 
 const confirmEmail = async (req,res)=>{
     try {
-    const {userId , code} = req.param;
-    console.log(userId, code )  
+    const {userId , secret_code} = req.params;
+    const queryIsExist = `
+    SELECT * 
+    FROM public."user" 
+    WHERE id = '${userId}' AND secret_code = '${secret_code}'
+    `;
+    let isExist = await pool.query(queryIsExist);
+    if (isExist.rows.length!=0) {
+    const queryUpdate = `
+    UPDATE public."user" 
+    SET is_verified = '${true}'
+    WHERE id = '${userId}'
+    `
+    await pool.query(queryUpdate)
+     res.json({
+        code: CODE.SUCCESS,
+        message: "Xác thực thành công!"
+
+    })
+    }
     } catch (error) {
         throw error
     }
@@ -49,20 +67,21 @@ const register = async (req, res) => {
         }
         else {
             const hashPassword = bcrypt.hashSync(password, 8);  
-            const queryNewUser = `
-            INSERT INTO public."user" (firstName, lastName, email, password,login)
-            VALUES ('${firstName}',' ${lastName}','${email}', '${hashPassword}', 'true')
-            RETURNING id,email,thumbnail;
+            const secretCode = Math.ceil(Math.random()*10000)
+            const queryAddNewUser = `
+            INSERT INTO public."user" (firstName, lastName, email, password,login, thumbnail, is_verified , secret_code)
+            VALUES ('${firstName}',' ${lastName}','${email}', '${hashPassword}', 'false', 'xxx.yyy', 'false' , '${secretCode}')
+            RETURNING *;
           `;
-
-            const result =  await pool.query(queryNewUser)
-            const secretCode = uuidv4()
+            const result =  await pool.query(queryAddNewUser)
             var mailOptions = {
                 from: 'xxx@gmail.com',
                 to: result.rows[0].email,
                 subject: 'Sending Email using Node.js',
-                       text: `Please use the following link within the next 10 minutes to activate your account on xxx APP: ${hostName}/api/auth/verification/verify-account/${result.rows[0].id}/${secretCode}`,
-                html: `<p>Please use the following link within the next 10 minutes to activate your account on xxx APP: <strong><a href="${hostName}/api/auth/verification/verify-account/${result.rows[0].id}/${secretCode}" target="_blank">Email bestätigen</a></strong></p>`,
+                text: `Please use the following link within the next 10 minutes to activate your account on xxx APP: ${hostName}/api/v1/auth/verification/verify-account/${result.rows[0].id}/${secretCode}`,
+                html: `<p>Please use the following link within the next 10 minutes to activate your account on xxx APP: 
+                ${hostName}/api/v1/auth/verification/verify-account/${result.rows[0].id}/${secretCode}
+                <strong><a href="${hostName}/api/v1/auth/verification/verify-account/${result.rows[0].id}/${secretCode}" target="_blank">Email Topdup.xyz</a></strong></p>`,
               };
             await transporter.sendMail(mailOptions)
             if (result) {
@@ -71,8 +90,8 @@ const register = async (req, res) => {
                         code: CODE.SUCCESS,
                         data: {
                             id: result.rows[0].id,
-                            name: result.rows[0].email,
-                            verify: false
+                            name: `${result.rows[0].firstname} ${result.rows[0].lastname}`,
+                            verify: result.rows[0].is_verified
                         }
                     }
                 )
@@ -98,18 +117,19 @@ const loginNormal = async (req, res) => {
     FROM public."user" 
     WHERE email = '${email}'
     `;
-     let user = await pool.query(query)
-        if(user){
-            const compare = bcrypt.compareSync(password, user.password)
+     let result = await pool.query(query)
+        if(result.rows.length !=0){
+            const compare = bcrypt.compareSync(password, result.rows[0].password)
             if (compare) {
-                const accessToken = generatorToken(user._id, uuidv4())
+                const accessToken = generatorToken(result.rows[0].id, uuidv4())
                 res.json({
                     code: CODE.SUCCESS,
                     data: {
                         user: {
-                            id: user.id,
-                            name: user.name,
-                            thumbnail: user.thumbnail
+                            id: result.rows[0].id,
+                            name: `${result.rows[0].firstname} ${result.rows[0].lastname}`,
+                            thumbnail: result.rows[0].thumbnail,
+                            is_verified : result.rows[0].is_verified
                         },
                         accessToken: accessToken
                     },
@@ -153,7 +173,7 @@ const logout = async (req, res) => {
 const loginByFaceBook = async (req, res) => {
     try {
         const { fbToken, fbId } = req.body;
-        const param = `me?fields=id,name,email,picture{height,cache_key,is_silhouette,url,width},gender`
+        const param = `me?fields=id,last_name,first_name,name,email,picture{height,cache_key,is_silhouette,url,width},gender`
         const response = await axios.get(
             `${externalAuthUrl.fb}/${param}&access_token=${fbToken}`
         )
@@ -170,7 +190,7 @@ const loginByFaceBook = async (req, res) => {
                 UPDATE public."user" 
                 SET email = '${fbInfo.email}', thumbnail = '${fbInfo.picture.data.url}'
                 WHERE id = '${isExist.rows[0].id}'
-                RETURNING id,email,thumbnail;
+                RETURNING *;
                 `
                const result =  await pool.query(queryUpdate)
                 const accessToken = generatorToken(result.rows[0].id, uuidv4())
@@ -179,8 +199,9 @@ const loginByFaceBook = async (req, res) => {
                     data: {
                         user: {
                             id: result.rows[0].id,
-                            name: result.rows[0].email,
-                            thumbnail: result.rows[0].thumbnail
+                            name: `${result.rows[0].firstname} ${result.rows[0].lastname}`,
+                            thumbnail: result.rows[0].thumbnail,
+                            is_verified : result.rows[0].is_verified
                         },
                         accessToken: accessToken
                     },
@@ -190,9 +211,9 @@ const loginByFaceBook = async (req, res) => {
             }
             else {
             const queryNewUser = `
-            INSERT INTO public."user" (firstName, lastName, thumbnail, email,login ,password)
-            VALUES ('testfb','testfb', '${fbInfo.picture.data.url}','${fbInfo.email}','true','testpassword')
-            RETURNING id,email,thumbnail;
+            INSERT INTO public."user" (firstName, lastName, thumbnail, email,login,  is_verified)
+            VALUES ('${fbInfo.first_name}','${fbInfo.last_name}', '${fbInfo.picture.data.url}','${fbInfo.email}','true','true')
+            RETURNING *;
             `;
             const result = await  pool.query(queryNewUser)
                 if(result){
@@ -202,8 +223,8 @@ const loginByFaceBook = async (req, res) => {
                     data: {
                         user: {
                             id: result.rows[0].id,
-                            name: result.rows[0].email,
-                            verify: false
+                            name: `${result.rows[0].firstname} ${result.rows[0].lastname}`,
+                            is_verified : result.rows[0].is_verified
                         },
                         accessToken: accessToken
                     },
@@ -232,13 +253,7 @@ const loginByGoogle = async (req, res) => {
             `${externalAuthUrl.gg}/${param}${ggToken}`
         )
         const ggInfo = response.data;
-
         if (response.status === 200 && ggInfo.sub === ggId) {
-                // name: ggInfo.name,
-                // thumbnail: ggInfo.picture,
-                // email: ggInfo.email,
-                // verify: ggInfo.email_verified,
-                // sociation: "google"
             let queryIsExist = `
             SELECT *
                FROM public."user"
@@ -250,7 +265,7 @@ const loginByGoogle = async (req, res) => {
                 UPDATE public."user" 
                 SET  email = '${ggInfo.email}', thumnail = '${ggInfo.picture}'
                 WHERE id = '${isExist.id}'
-                RETURNING id,email,thumbnail;
+                RETURNING *;
               `;
                const result =  await pool.query(queryUpdate)
                 const accessToken = generatorToken(result.rows[0].id, uuidv4())
@@ -260,7 +275,8 @@ const loginByGoogle = async (req, res) => {
                         user: {
                             id: result.rows[0].id,
                             name: result.rows[0].email,
-                            thumbnail: result.rows[0].thumbnail
+                            thumbnail: result.rows[0].thumbnail,
+                            is_verified : result.rows[0].is_verified
                         },
                         accessToken: accessToken
                     },
@@ -270,9 +286,9 @@ const loginByGoogle = async (req, res) => {
             }
             else {
                 const queryNewUser = `
-                INSERT INTO public."user" (firstName, lastName,, thumbnail, email,login ,password)
-                VALUES ('testgg','testgg', ${ggInfo.name}, ${ggInfo.picture},${ggInfo.email},'true','testpassword')
-                RETURNING id,email,thumbnail;
+                INSERT INTO public."user" (firstName, lastName, thumbnail, email,login ,is_verified)
+                VALUES ( '${ggInfo.family_name}','${ggInfo.given_name}', '${ggInfo.name}', '${ggInfo.picture}','${ggInfo.email}','true','${ggInfo.verified_email}')
+                RETURNING *;
                 `;
                 const result = await  pool.query(queryNewUser)
                if(result){
@@ -281,9 +297,10 @@ const loginByGoogle = async (req, res) => {
                     code: CODE.SUCCESS,
                     data: {
                         user: {
-                            id: result.id,
-                            name: result.name,
-                            thumbnail: result.thumbnail
+                            id: result.rows[0].id,
+                            name: result.rows[0].email,
+                            thumbnail: result.rows[0].thumbnail,
+                            is_verified : result.rows[0].is_verified
                         },
                         accessToken: accessToken
                     },

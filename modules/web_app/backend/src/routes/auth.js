@@ -5,7 +5,7 @@ const router = express.Router();
 
 
 router.get(
-    "/verification/verify-account/:userId/:code",
+    "/verification/verify-account/:userId/:secret_code",
     authController.confirmEmail
 )
 
