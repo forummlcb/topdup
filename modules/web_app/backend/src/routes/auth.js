@@ -57,4 +57,4 @@ router.get(
     authController.genSecretCode
 )
 
-export default routers
+export default router
