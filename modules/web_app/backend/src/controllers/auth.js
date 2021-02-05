@@ -322,12 +322,12 @@ const loginByGoogle = async (req, res) => {
 }
 const restPassword = (req,res) =>{
     try {
-        const {email , password , secretCode} = req.body;
+        const {email , password , secret_code} = req.body;
         const hashPassword = bcrypt.hashSync(password, 8);  
          const queryUpdate = `
                 UPDATE public."user" 
                 SET password = '${hashPassword}'
-                WHERE email = '${email}' AND secret_code = '${secretCode}'
+                WHERE email = '${email}' AND secret_code = '${secret_code}'
                 RETURNING *;
                 `
                const result =  await pool.query(queryUpdate)
@@ -363,7 +363,7 @@ const genSecretCode = (req,res)=>{
             from: 'xxx@gmail.com',
             to: result.rows[0].email,
             subject: 'Mã số bí mật',
-            text: `Please use the following link within the next 10 minutes to activate your account on xxx APP: ${secretCode}`,
+            text: `Please use the following link within the next 10 minutes to activate your account on xxx APP: ${result.rows[0].secret_code}`,
           };
         await transporter.sendMail(mailOptions)
         res.json({

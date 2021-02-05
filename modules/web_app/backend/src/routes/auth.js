@@ -45,7 +45,7 @@ router.post(
 router.post(
     "/reset-password",
     (req,res,next) =>{
-        requiredField(req,res,["password","email","secretCode"],[],[],next)
+        requiredField(req,res,["password","email","secret_code"],[],[],next)
     },
     authController.restPassword
 )
