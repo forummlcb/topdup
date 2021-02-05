@@ -44,6 +44,17 @@ router.post(
 
 router.post(
     "/reset-password",
+    (req,res,next) =>{
+        requiredField(req,res,["password","email","secretCode"],[],[],next)
+    },
+    authController.restPassword
+)
+router.get(
+    "/secret_code",
+    (req,res,next) =>{
+        requiredField(req,res,[],[],["email"],next)
+    },
+    authController.genSecretCode
 )
 
-export default router
+export default routers

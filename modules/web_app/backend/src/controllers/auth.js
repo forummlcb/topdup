@@ -320,6 +320,62 @@ const loginByGoogle = async (req, res) => {
         throw error
     }
 }
+const restPassword = (req,res) =>{
+    try {
+        const {email , password , secretCode} = req.body;
+        const hashPassword = bcrypt.hashSync(password, 8);  
+         const queryUpdate = `
+                UPDATE public."user" 
+                SET password = '${hashPassword}'
+                WHERE email = '${email}' AND secret_code = '${secretCode}'
+                RETURNING *;
+                `
+               const result =  await pool.query(queryUpdate)
+               if(result.rows.length!=0){
+                res.json({
+                    code: CODE.SUCCESS,
+                    message: "Đổi mật khẩu thành công!"
+    
+                })
+               }
+               else{
+                res.json({
+                    code: CODE.ERROR,
+                    message: "Đổi mật khẩu không thành công!"
+    
+                })
+               }
+    } catch (error) {
+        throw error
+    }
+}
+const genSecretCode = (req,res)=>{
+    try {
+        const {email} =req.query;
+        let queryIsExist = `
+        SELECT *
+        FROM public."user"
+        WHERE email =  '${email}'
+        RETURNING *;
+        `;
+        const result =  await pool.query(queryIsExist);
+        var mailOptions = {
+            from: 'xxx@gmail.com',
+            to: result.rows[0].email,
+            subject: 'Mã số bí mật',
+            text: `Please use the following link within the next 10 minutes to activate your account on xxx APP: ${secretCode}`,
+          };
+        await transporter.sendMail(mailOptions)
+        res.json({
+            code: CODE.SUCCESS,
+            message: "Gửi email thành công!"
+
+        })
+    } catch (error) {
+        
+    }
+}
+
 
 export default {
     confirmEmail,
@@ -327,6 +383,8 @@ export default {
     loginNormal,
     logout,
     loginByFaceBook,
-    loginByGoogle
+    loginByGoogle,
+    restPassword,
+    genSecretCode
 }
 
