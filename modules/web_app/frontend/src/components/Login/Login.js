@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 
 import "./Login.css";
 import { getToken } from "./Login.service";
+import FacebookLogin from 'react-facebook-login';
+import {TiSocialFacebookCircular} from 'react-icons/ti';
 
 export default function Login({ setToken }) {
   const [username, setUsername] = useState();
@@ -57,6 +59,13 @@ export default function Login({ setToken }) {
       <button type="submit" className="btn btn-primary btn-block">
         Submit
       </button>
+        <FacebookLogin
+            appId="800436117349613"
+            autoLoad={true}
+            fields="name,email,picture"
+            cssClass={"btn btn-primary btn-block mt-2"}
+            icon={<TiSocialFacebookCircular />}
+        />
       <p className="forgot-password text-right">
         Forgot <a href="#">password?</a>
       </p>
