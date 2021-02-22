@@ -81,3 +81,9 @@ body, html, .App, #root, .auth-wrapper {
 .mt-2 {
   margin-top: 2em;
 }
+
+.page-content {
+  margin-top: 100px;
+  margin-left: 200px;
+  margin-right: 200px;
+}

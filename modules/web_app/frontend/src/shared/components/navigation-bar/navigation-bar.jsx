@@ -38,6 +38,7 @@ const NavigationBar = ({ isLoggedIn }) => {
 						<Nav.Link href="/dupfinder">DupFinder</Nav.Link>
 						<Nav.Link href="/dupviewer">DupViewer</Nav.Link>
 						<Nav.Link href="/dupregister">DupRegister</Nav.Link>
+						<Nav.Link href="/similarity-reports">Similarity Reports</Nav.Link>
 					</Nav>
 					<Nav>{rightNavItems}</Nav>
 				</Navbar.Collapse>

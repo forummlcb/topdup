@@ -1,0 +1,37 @@
+.ag-theme-alpine .ag-cell {
+  border: 1px solid transparent;
+  line-height: 30px !important;
+  padding-left: 17px;
+  padding-right: 17px;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.ag-theme-alpine .ag-ltr .ag-cell {
+  border-right: 0.5px solid;
+}
+
+.ag-theme-alpine .ag-header-cell {
+  border-right: 0.5px solid;
+}
+
+.ag-theme-alpine .ag-header-group-cell {
+  border-right: 0.5px solid;
+}
+
+.centered {
+  text-align: center;
+}
+
+.ag-header-group-cell-label, .ag-header-cell-label {
+  justify-content: center;
+}
+
+.simscore--primary {
+  background-color: #1A4480 !important;
+  color: white !important;
+}
+
+.simscore--secondary {
+  background-color: #73B3E7 !important;
+  color: white !important;
+}
