@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 import nltk
 from more_itertools.more import windowed
 
-from modules.data_wranglers.plugins.vncorenlp import VnCoreNLPSingleton
+from data_wranglers.plugins.vncorenlp import VnCoreNLPSingleton
 
 from .base import BasePreProcessor
 from .cleaning import normalize_text
