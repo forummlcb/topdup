@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2 import Error
 from psycopg2.extras import RealDictCursor
+import logging
 
 
 dbserver = '100.65.24.20'
@@ -33,6 +34,7 @@ def executesqls(sqls):
         cursor = conn.cursor()
         for sql in sqls:
             cursor.execute(sql)
+            logging.debug(sql)
         conn.commit()
     except Exception as e:
         print(e, sql)

@@ -1,6 +1,9 @@
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
 from uuid import uuid4
-from modules.data_wranglers import datalayer
-from modules.data_wranglers.preprocessor.vi_preprocessor import ViPreProcessor
+from data_wranglers import datalayer
+from data_wranglers.preprocessor.vi_preprocessor import ViPreProcessor
 
 def data_prep(data_dict):
     '''
@@ -21,7 +24,6 @@ def data_prep(data_dict):
     return content, meta
 
 def main():
-
     # get data from table topdup_articles
     processor = ViPreProcessor()
     articles = datalayer.getdata('SELECT * FROM topdup_articles')
@@ -74,6 +76,7 @@ def main():
         sqlcmd = "INSERT INTO meta(id,name,value,document_id) "\
                 "VALUES('" + metaid + "','language','" + language + "','" + documentid + "')"
         sqls.append(sqlcmd)
+       
 
         
     # archive data which has been processed
