@@ -11,18 +11,30 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600,700,800');
 
 * {
   box-sizing: border-box;
 }
 
-h1,h2,h3,h4,h5,h6,label,span {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+span {
   font-weight: 500;
   font-family: 'Fira Sans', sans-serif;
 }
 
-body, html, .App, #root, .auth-wrapper {
+body,
+html,
+.App,
+#root,
+.auth-wrapper {
   width: 100%;
   height: 100%;
 }
@@ -86,4 +98,27 @@ body, html, .App, #root, .auth-wrapper {
   margin-top: 100px;
   margin-left: 200px;
   margin-right: 200px;
+}
+
+.layout-grid {
+  display: flex;
+  width: 100%;
+}
+
+.layout-cell {
+  margin-right: 3px;
+}
+
+.layout-right {
+  justify-content: flex-end;
+}
+
+.margin-horizontal--xxs {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.margin-horizontal--xs {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }

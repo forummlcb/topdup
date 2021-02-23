@@ -7,6 +7,7 @@ import Login from "../Login/Login";
 import useToken from "./useToken";
 import NavigationBar from "../../shared/components/navigation-bar/navigation-bar";
 import SimilarityReport from "../Similarity-Report/Similarity-Report";
+import 'font-awesome/css/font-awesome.min.css';
 
 function App() {
   const { token, setToken } = useToken();
@@ -29,6 +30,11 @@ function App() {
             <Route
               exact
               path="/similarity-reports"
+              component={SimilarityReport}
+            />
+			<Route
+              exact
+              path="/similarity-reports/:id"
               component={SimilarityReport}
             />
           </Switch>
