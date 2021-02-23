@@ -89,6 +89,14 @@ def main():
             "USING 	archive_topdup_articles b " \
             "WHERE	A.article_id = b.article_id"
     sqls.append(sqlcmd)
+
+    # remove character ' due to text error
+    sqlcmd = "update document set index='document' where index = '''document'''"
+    sqls.append(sqlcmd)
+    sqlcmd = "update document set datasource='topdup_articles' where index = '''topdup_articles'''"
+    sqls.append(sqlcmd)
+    sqlcmd = "update document set text = replace(text,'''','') where left(text,1) = ''''"
+    sqls.append(sqlcmd)
         
     # execute & commit
     datalayer.executesqls(sqls)
