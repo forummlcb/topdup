@@ -40,9 +40,10 @@
 .sim-reports-container {
   width: 100%;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
 }
+
 
 .sim-report-row {
   min-width: 1200px;
@@ -65,29 +66,73 @@
   border-bottom: 2px solid rgba(223, 223, 223, 0.6);
 }
 
-.sr-title {
+.sim-header-row {
+  min-width: 1200px;
+  max-width: 1000px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+  padding-left: 30px;
+  padding-right: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 24px;
+  letter-spacing: 0.03em;
+  color: #000000;
+}
+
+.sr-title-container {
   margin-right: 5px;
+  max-width: 45%;
   flex-grow: 1 !important;
+}
+
+.sr-header-title {
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.sr-title {
+  padding-right: 10px;
+  display: flex;
+  height: 30px;
+  align-items: center;
+}
+
+.sr-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0.03em;
+  color: #000000;
 }
 
 .sr-vote-container {
   display: flex;
+  margin-left: 10px;
   margin-right: 5px;
+  width: 200px;
 }
 
 .sr-vote-item {
   display: flex;
-  justify-content: center;
   align-items: center;
+  opacity: 0.5;
 }
 
-.sr-vote-check-container {
-  width: 60px;
-}
-
-.sr-vote-error,
-.sr-vote-not-related {
-  margin-left: 10px;
+.sr-vote-item.selected {
+  opacity: 1 !important;
 }
 
 .sr-vote-icon-container {
@@ -106,4 +151,110 @@
   display: flex;
   align-items: center;
   margin: 0px 5px;
+}
+
+.selected-page {
+  background-color: grey;
+  color: white;
+}
+
+.sr-list-container {
+  min-height: 500px;
+  margin-bottom: 20px;
+}
+
+.sr-vote-btn {
+  font-size: 18px;
+  padding: 1px 3px;
+  border-style: hidden;
+  text-align: right;
+  width: 80px;
+}
+
+.sr-vote-error-btn,
+.sr-vote-irrelevant-btn {
+  margin-left: 5px;
+  width: 50px;
+  font-size: 18px;
+  padding: 1px 3px;
+  border-style: hidden;
+  text-align: center;
+}
+
+.sologan-container {
+  padding: 50px 0px;
+}
+
+.sologan-heading {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 40px;
+  line-height: 48px;
+  text-align: center;
+  letter-spacing: 0.03em;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.sologan-description {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: 22px;
+  /* identical to box height */
+  text-align: center;
+  letter-spacing: 0.03em;
+  color: #000000;
+}
+
+.sr-list-with-header {
+  border-radius: 25px;
+  background-color: white;
+  border: 1px solid gray;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.sologan-container {
+  margin-top: 20px;
+}
+
+.sologan-bottom {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 30px;
+  line-height: 150%;
+  text-align: center;
+  color: #000000;
+  margin-bottom: 20px;
+}
+
+.btn-volunteer {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 15px;
+  /* identical to box height */
+  color: #000000;
+  border-radius: 3px;
+  padding: 5px;
+  border: 1px solid gray;
+}
+
+.btn-register-bottom {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 15px;
+  /* identical to box height */
+  color: #FFFFFF;
+  background-color: black;
+  border-radius: 3px;
+  padding: 5px;
+  border: 1px solid gray;
 }

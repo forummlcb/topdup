@@ -4,297 +4,111 @@ import { getSimilarityRecords } from "./Similarity-Report.service";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import "./Similarity-Report.css";
-import BtnCellRenderer from "../../shared/components/btn-cell-renderer/btn-cell-renderer";
-import { IconContext } from "react-icons";
-import { FaCheck, FaTimes, FaHashtag } from "react-icons/fa";
+import { SimilarityReportGrid } from "./Similarity-Report-Grid";
+import { SimilarityReportList } from "./Similarity-Report-List";
+import Pagination from "./Pagination";
+import HeaderRow from "./Header-Row";
 
-export class SimilarityReport extends Component {
+class SimilarityReport extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      columnDefs: [
-        {
-          headerName: "Source article",
-          children: [
-            {
-              headerName: "Domain",
-              field: "domainA",
-              width: 120,
-              suppressSizeToFit: true
-            },
-            {
-              headerName: "Author",
-              field: "authorA",
-              width: 120,
-              suppressSizeToFit: true
-            },
-            {
-              headerName: "Title",
-              field: "articleA",
-              width: 250,
-              cellStyle: { "text-align": "right" }
-            },
-            {
-              field: "Vote",
-              cellRenderer: "btnCellRenderer",
-              cellStyle: {
-                display: "flex",
-                "align-items": "center",
-                "justify-content": "center"
-              },
-              width: 80,
-              suppressSizeToFit: true,
-              cellRendererParams: params => {
-                return {
-                  label: `Vote (${params.data["sourceArticleNbVote"]})`,
-                  onClick: () => {
-                    params.data["sourceArticleNbVote"] =
-                      params.data["sourceArticleNbVote"] + 1;
-                    params.api.refreshCells({
-                      rowNodes: [params.node],
-                      force: true
-                    });
-                  }
-                };
-              }
-            }
-          ].map(item => ({
-            ...item,
-            cellStyle: params => ({
-              ...item.cellStyle,
-              opacity:
-                params.data["sourceArticleNbVote"] <
-                params.data["targetArticleNbVote"]
-                  ? 0.4
-                  : 1
-            })
-          }))
-        },
-        {
-          headerName: "Sim Score",
-          field: "simScore",
-          cellStyle: { "text-align": "center" },
-          width: 80,
-          suppressSizeToFit: true
-        },
-        {
-          headerName: "Target article",
-          children: [
-            {
-              field: "Vote",
-              cellRenderer: "btnCellRenderer",
-              cellStyle: {
-                display: "flex",
-                "align-items": "center",
-                "justify-content": "center"
-              },
-              width: 80,
-              suppressSizeToFit: true,
-              cellRendererParams: params => {
-                return {
-                  label: `Vote (${params.data["targetArticleNbVote"]})`,
-                  onClick: () => {
-                    params.data["targetArticleNbVote"] =
-                      params.data["targetArticleNbVote"] + 1;
-                    params.api.refreshCells({
-                      rowNodes: [params.node],
-                      force: true
-                    });
-                  }
-                };
-              }
-            },
-            { headerName: "Title", field: "articleB", width: 250 },
-            {
-              headerName: "Author",
-              field: "authorB",
-              width: 120,
-              suppressSizeToFit: true
-            },
-            {
-              headerName: "Domain",
-              field: "domainB",
-              width: 120,
-              suppressSizeToFit: true
-            }
-          ].map(item => ({
-            ...item,
-            cellStyle: params => ({
-              ...item.cellStyle,
-              opacity:
-                params.data["sourceArticleNbVote"] <
-                params.data["targetArticleNbVote"]
-                  ? 1
-                  : 0.4
-            })
-          }))
-        }
-      ],
-      defaultColDef: {
-        width: 170,
-        sortable: true,
-        floatingFilter: true,
-        filter: "agTextColumnFilter",
-        filterParams: { newRowsAction: "keep" },
-        floatingFilterComponentParams: {
-          suppressFilterButton: true
-        }
-      },
-      rowClassRules: {
-        "simscore--primary": params =>
-          (params.data && params.data["sim_score"]) > 0.98,
-        "simscore--secondary": params => {
-          const simScore = params.data && params.data["sim_score"];
-          if (!simScore) return false;
-          return simScore <= 0.95 && simScore > 0.8;
-        }
-      },
-      frameworkComponents: { btnCellRenderer: BtnCellRenderer },
-      getRowHeight: () => 30,
-      onModelUpdated: params => params.api.sizeColumnsToFit(),
-      rowData: [],
-      statusBar: {
-        statusPanels: [
-          { statusPanel: "agTotalAndFilteredRowCountComponent", align: "left" },
-          { statusPanel: "agSelectedRowCountComponent" },
-          { statusPanel: "agAggregationComponent" }
-        ]
-      },
+      simReports: [],
+      reportsPerPage: 8,
+      loading: false,
+      currentPage: 1,
       currentMode: "list"
     };
-
-    console.log(this.props.match.params.id)
-    this.getData();
   }
 
+  componentDidMount = () => {
+    this.getData();
+  };
+
   getData = () => {
+    this.setState({ loading: true });
     getSimilarityRecords().then(results => {
-      this.setState({ rowData: results });
+      this.setState({ loading: false });
+      this.setState({ simReports: results });
     });
   };
 
   render() {
-    const gridView = (
-      <div
-        id="myGrid"
-        style={{
-          height: "100%",
-          width: "100%"
-        }}
-        className="ag-theme-alpine"
-      >
-        <AgGridReact
-          modules={this.state.modules}
-          columnDefs={this.state.columnDefs}
-          defaultColDef={this.state.defaultColDef}
-          getRowHeight={this.state.getRowHeight}
-          onGridReady={this.onGridReady}
-          onModelUpdated={this.state.onModelUpdated}
-          frameworkComponents={this.state.frameworkComponents}
-          rowData={this.state.rowData}
-          statusBar={this.state.statusBar}
-          rowClassRules={this.state.rowClassRules}
-          headerHeight={30}
-        />
-      </div>
-    );
-
-    const iconRenderer = (IconComponent, color) => {
-      return (
-        <IconContext.Provider
-          value={{ color: color, className: "global-class-name" }}
-        >
-          <div>
-            <IconComponent />
-          </div>
-        </IconContext.Provider>
-      );
-    };
-
-    const simReportRenderer = simReport => (
-      <div class="sim-report-row">
-        <div class="sr-title">
-          <div class="row other">{simReport["articleA"]}</div>
-          <div class="row other">{simReport["articleB"]}</div>
-        </div>
-        <div class="sr-vote-container">
-          <div class="sr-vote-check-container">
-            <div class="row sr-vote-item">
-              <span class="sr-vote-icon-container">
-                {iconRenderer(FaCheck, "#3571FF")}
-              </span>
-              &nbsp;60
-            </div>
-            <div class="row sr-vote-item">
-              {iconRenderer(FaCheck, "#3571FF")}&nbsp;52
-            </div>
-          </div>
-          <div class="sr-vote-item sr-vote-error">
-            {iconRenderer(FaTimes, "#EF5A5A")}
-          </div>
-          <div class="sr-vote-item sr-vote-not-related">
-            {iconRenderer(FaHashtag, "#F69E0C")}
-          </div>
-        </div>
-        <div class="sr-domain-date">
-          <div class="col-sm-6">
-            <div class="row other">{simReport["domainA"]}</div>
-            <div class="row other">{simReport["domainB"]}</div>
-          </div>
-          <div class="col-sm-6">
-            <div class="row other">{(new Date(simReport["createdDateA"])).toLocaleDateString()}</div>
-            <div class="row other">{(new Date(simReport["createdDateB"])).toLocaleDateString()}</div>
-          </div>
-        </div>
-        <div class="sr-compare">
-          <button className="btn btn-outline-secondary">So sánh</button>
-        </div>
-      </div>
-    );
-
-    const listView = (
-      <div class="sim-reports-container">
-        {this.state.rowData.slice(100).map(item => simReportRenderer(item))}
-      </div>
-    );
-
+    const { simReports, currentMode, reportsPerPage, loading, currentPage } = this.state;
     const modeOptions = [
       {
         mode: "grid",
         modeLabel: "Grid",
         iconClassName: "fa fa-table",
+        className: "btn btn-sm layout-cell " + (currentMode === "grid" ? "btn-primary" : "btn-outline-secondary"),
         onClick: () => this.setState({ currentMode: "grid" })
       },
       {
         mode: "list",
         modeLabel: "List",
         iconClassName: "fa fa-bars",
+        className: "btn btn-sm layout-cell " + (currentMode === "list" ? "btn-primary" : "btn-outline-secondary"),
         onClick: () => this.setState({ currentMode: "list" })
       }
     ];
 
+    const indexOfLastReport = reportsPerPage * currentPage;
+    const indexOfFirstReport = reportsPerPage * (currentPage - 1);
+    const currentSimReports = simReports.slice(indexOfFirstReport, indexOfLastReport);
+    const paginate = pageNum => this.setState({ currentPage: pageNum });
+    const nextPage = () => this.setState({ currentPage: currentPage + 1 });
+    const prevPage = () => this.setState({ currentPage: currentPage - 1 });
+
+    const gridView = <SimilarityReportGrid simReports={simReports} />;
+    const listView = (
+      <div className="sim-reports-container">
+        <div className="sr-list-with-header">
+          <HeaderRow />
+          <SimilarityReportList simReports={currentSimReports} loading={loading} />
+        </div>
+        <Pagination
+          reportsPerPage={reportsPerPage}
+          totalReports={simReports.length}
+          paginate={paginate}
+          prevPage={prevPage}
+          nextPage={nextPage}
+          currentPage={currentPage}
+        />
+      </div>
+    );
+
     return (
-      <div style={{ width: "100%", height: "700px" }}>
-        <div class="layout-grid layout-right margin-horizontal--xs">
-          {modeOptions.map((option, index) => {
+      <div>
+        <div className="sologan-container">
+          <div className="sologan-heading">Bảo vệ nội dung công sức của bạn</div>
+          <div className="sologan-description">Nhận thông báo khi nội dung của bạn bị sao chép.</div>
+        </div>
+        <div style={{ width: "100%", height: "900px" }}>
+          {/* <div className="layout-grid layout-right margin-horizontal--xs">
+          {modeOptions.map(option => {
             return (
-              <button
-                type="button"
-                className={
-                  "btn btn-sm layout-cell " +
-                  (this.state.currentMode === option.mode
-                    ? "btn-primary"
-                    : "btn-outline-secondary")
-                }
-                onClick={option.onClick}
-              >
+              <button type="button" className={option.className} onClick={option.onClick}>
                 <i className={option.iconClassName}></i> {option.modeLabel}
               </button>
             );
           })}
+        </div> */}
+          {this.state.currentMode === "grid" ? gridView : listView}
         </div>
-        {this.state.currentMode === "grid" ? gridView : listView}
+        <div className="sologan-bottom-container">
+          <div className="sologan-bottom">
+            Bạn muốn trở thành tình nguyện viên của topDup? <br /> Hoặc đăng ký nhận thông báo khi website bị sao chép.
+          </div>
+          <div className="sologan-bottom">
+            <button type="button" className="btn btn-volunteer">
+              Nộp Đơn TNV
+            </button>
+            <button type="button" className="btn btn-register-bottom">
+              Đăng Ký WEBSITE
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

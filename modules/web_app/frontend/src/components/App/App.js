@@ -16,7 +16,7 @@ function App() {
     <BrowserRouter>
       <div className="App">
         <NavigationBar isLoggedIn={token ? true : false} />
-        <div class="page-content">
+        <div className="page-content">
           <Switch>
             <Route
               exact

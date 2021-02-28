@@ -6,3 +6,34 @@
 	-webkit-box-shadow: 10px 10px 16px -6px rgba(0, 0, 0, 0.3);
 	-moz-box-shadow: 10px 10px 16px -6px rgba(0, 0, 0, 0.3);
 }
+
+.topdup-brand {
+	position: absolute;
+	width: 92px;
+	height: 38px;
+	display: flex;
+	align-items: center;
+	font-family: Prompt;
+	font-style: normal;
+	font-weight: 800;
+	font-size: 25px;
+	line-height: 38px;
+	color: #383838;
+}
+
+.topdup-nav-items {
+	font-family: Inter;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 19px;
+	color: #383838;
+	display: flex;
+	align-items: center;
+}
+
+.nav-link {
+	color: #383838 !important;
+	display: block;
+	padding: .5rem 1rem;
+}
