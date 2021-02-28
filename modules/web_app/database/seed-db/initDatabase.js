@@ -3,10 +3,10 @@ const logger = require('winston')
 
 const configDatabase = {
   user: "admin",
-  host: 'localhost',
-  password: "admin",
-  database:'topdup_db',
-  port: '5432'
+  host: "3.1.100.54",
+  database: "topdup_db",
+  password: "uyL7WgydqKNkNMWe",
+  port: "5432"
 }
 
 const client = new Client(
@@ -49,7 +49,7 @@ function createUserTable() {
   const query = `
         create table if not exists public."user"
         (
-            id        uuid     not null primary key,
+            id        SERIAL PRIMARY KEY,
             firstname varchar(50) not null,
             lastname  varchar(50),
             email     varchar(50) not null,
@@ -57,7 +57,7 @@ function createUserTable() {
             password  varchar(50),
             is_verified boolean not null, 
             secret_code varchar(50),
-            thumbnail varchar(200) not null,
+            thumbnail varchar(200),
             timestamp timestamp default current_timestamp
         )
     `
@@ -68,7 +68,7 @@ function createArticleTable() {
   const query = `
         create table if not exists article
         (
-            id              uuid      not null primary key,
+            id              SERIAL PRIMARY KEY,
             title           varchar(255) not null,
             created_date     date         not null,
             last_updated_date date,
@@ -84,15 +84,15 @@ function createVoteTable() {
   const query = `
         create table if not exists vote
         (
-            id                uuid primary key,
-            voted_article_id  integer not null,
+            id                SERIAL PRIMARY KEY,
+            voted_option      integer not null,
             created_date      date not null,
-            article_A_id      integer not null,
-            article_B_id      integer not null,
+            article_a_id      integer not null,
+            article_b_id      integer not null,
             user_id           integer not null,
             constraint fk_user foreign key (user_id) references public.user(id),
-            constraint fk_article1 foreign key (article_A_id) references article(id),
-            constraint fk_article2 foreign key (article_B_id) references article(id)
+            constraint fk_article1 foreign key (article_a_id) references article(id),
+            constraint fk_article2 foreign key (article_b_id) references article(id)
         )
     `
 
@@ -103,14 +103,14 @@ function createSimilarityReportTable() {
   const query = `
         create table if not exists similarity_report
         (
-            source_article_id integer not null,
-            target_article_id integer not null,
+            id              SERIAL PRIMARY KEY,
+            article_a_id integer not null,
+            article_b_id integer not null,
             sim_score numeric,
             updated_date date,
             revelant_degree varchar(255),
-            primary key(source_article_id, target_article_id),
-            constraint fk_article_source foreign key (source_article_id) references article(id),
-            constraint fk_article_target foreign key (target_article_id) references article(id)
+            constraint fk_article_source foreign key (article_a_id) references article(id),
+            constraint fk_article_target foreign key (article_b_id) references article(id)
         )
     `
 

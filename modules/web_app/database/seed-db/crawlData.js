@@ -9,15 +9,7 @@ const source = {
   'https://tinhte.vn/bphone/': ['a h3.title', 'h3.title a'],
   'https://topdev.vn/blog/category/lap-trinh/ai-machine-learning/': ['h3.entry-title a'],
   'https://topdev.vn/blog/category/lap-trinh/frontend/': ['h3.entry-title a'],
-  'https://topdev.vn/blog/category/lap-trinh/backend/': ['h3.entry-title a'],
-  'https://topdev.vn/blog/category/lap-trinh/mobile/': ['h3.entry-title a'],
-  'https://topdev.vn/blog/category/lap-trinh/product/': ['h3.entry-title a'],
-  'https://topdev.vn/blog/category/lap-trinh/devops/': ['h3.entry-title a'],
-  'https://topdev.vn/blog/category/lap-trinh/fullstack/': ['h3.entry-title a'],
-  'https://viblo.asia/newest': ['h3.word-break a'],
-  'https://viblo.asia/newest?page=2': ['h3.word-break a'],
-  'https://viblo.asia/newest?page=3': ['h3.word-break a'],
-  'https://viblo.asia/newest?page=4': ['h3.word-break a'],
+  'https://topdev.vn/blog/category/lap-trinh/backend/': ['h3.entry-title a']
 }
 
 async function getArticleTitleFrom(url, selectors) {
