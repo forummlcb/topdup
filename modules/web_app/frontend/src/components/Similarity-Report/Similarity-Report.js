@@ -1,17 +1,16 @@
-import { AgGridReact } from "ag-grid-react";
-import React, { Component } from "react";
-import { getSimilarityRecords } from "./Similarity-Report.service";
-import "ag-grid-community/dist/styles/ag-grid.css";
-import "ag-grid-community/dist/styles/ag-theme-alpine.css";
-import "./Similarity-Report.css";
-import { SimilarityReportGrid } from "./Similarity-Report-Grid";
-import { SimilarityReportList } from "./Similarity-Report-List";
-import Pagination from "./Pagination";
-import HeaderRow from "./Header-Row";
+import "ag-grid-community/dist/styles/ag-grid.css"
+import "ag-grid-community/dist/styles/ag-theme-alpine.css"
+import React, { Component } from "react"
+import HeaderRow from "./Header-Row"
+import Pagination from "./Pagination"
+import { SimilarityReportGrid } from "./Similarity-Report-Grid"
+import { SimilarityReportList } from "./Similarity-Report-List"
+import "./Similarity-Report.css"
+import { getSimilarityRecords } from "./Similarity-Report.service"
 
 class SimilarityReport extends Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.state = {
       simReports: [],
@@ -19,23 +18,23 @@ class SimilarityReport extends Component {
       loading: false,
       currentPage: 1,
       currentMode: "list"
-    };
+    }
   }
 
   componentDidMount = () => {
-    this.getData();
+    this.getData()
   };
 
   getData = () => {
-    this.setState({ loading: true });
+    this.setState({ loading: true })
     getSimilarityRecords().then(results => {
-      this.setState({ loading: false });
-      this.setState({ simReports: results });
-    });
+      this.setState({ loading: false })
+      this.setState({ simReports: results })
+    })
   };
 
   render() {
-    const { simReports, currentMode, reportsPerPage, loading, currentPage } = this.state;
+    const { simReports, currentMode, reportsPerPage, loading, currentPage } = this.state
     const modeOptions = [
       {
         mode: "grid",
@@ -51,16 +50,16 @@ class SimilarityReport extends Component {
         className: "btn btn-sm layout-cell " + (currentMode === "list" ? "btn-primary" : "btn-outline-secondary"),
         onClick: () => this.setState({ currentMode: "list" })
       }
-    ];
+    ]
 
-    const indexOfLastReport = reportsPerPage * currentPage;
-    const indexOfFirstReport = reportsPerPage * (currentPage - 1);
-    const currentSimReports = simReports.slice(indexOfFirstReport, indexOfLastReport);
-    const paginate = pageNum => this.setState({ currentPage: pageNum });
-    const nextPage = () => this.setState({ currentPage: currentPage + 1 });
-    const prevPage = () => this.setState({ currentPage: currentPage - 1 });
+    const indexOfLastReport = reportsPerPage * currentPage
+    const indexOfFirstReport = reportsPerPage * (currentPage - 1)
+    const currentSimReports = simReports.slice(indexOfFirstReport, indexOfLastReport)
+    const paginate = pageNum => this.setState({ currentPage: pageNum })
+    const nextPage = () => this.setState({ currentPage: currentPage + 1 })
+    const prevPage = () => this.setState({ currentPage: currentPage - 1 })
 
-    const gridView = <SimilarityReportGrid simReports={simReports} />;
+    const gridView = <SimilarityReportGrid simReports={simReports} />
     const listView = (
       <div className="sim-reports-container">
         <div className="sr-list-with-header">
@@ -76,7 +75,7 @@ class SimilarityReport extends Component {
           currentPage={currentPage}
         />
       </div>
-    );
+    )
 
     return (
       <div>
@@ -101,7 +100,7 @@ class SimilarityReport extends Component {
             Bạn muốn trở thành tình nguyện viên của topDup? <br /> Hoặc đăng ký nhận thông báo khi website bị sao chép.
           </div>
           <div className="sologan-bottom">
-            <button type="button" className="btn btn-volunteer">
+            <button type="button" className="btn btn-volunteer layout-cell">
               Nộp Đơn TNV
             </button>
             <button type="button" className="btn btn-register-bottom">
@@ -110,8 +109,8 @@ class SimilarityReport extends Component {
           </div>
         </div>
       </div>
-    );
+    )
   }
 }
 
-export default SimilarityReport;
+export default SimilarityReport

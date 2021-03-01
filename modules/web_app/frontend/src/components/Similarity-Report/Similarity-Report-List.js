@@ -1,30 +1,30 @@
-import React, { Component } from "react";
-import { IconContext } from "react-icons";
-import { FaCheck, FaTimes, FaHashtag } from "react-icons/fa";
+import React, { Component } from "react"
+import { IconContext } from "react-icons"
+import { FaCheck, FaHashtag, FaTimes } from "react-icons/fa"
 
 export class SimilarityReportList extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       simReports: props.simReports,
       loading: props.loading
-    };
+    }
   }
 
   static getDerivedStateFromProps(props, current_state) {
     return {
       simReports: props.simReports,
       loading: props.loading
-    };
+    }
   }
 
   render() {
     if (this.state.loading) {
       return (
-        <div className="sr-list-container" style={{ display: "flex", alignItems: "center" }}>
+        <div className="sr-list-container centered-container">
           <h2>Loading...</h2>
         </div>
-      );
+      )
     }
 
     const iconRenderer = (IconComponent, color) => {
@@ -32,30 +32,30 @@ export class SimilarityReportList extends Component {
         <IconContext.Provider value={{ color: color, className: "global-class-name" }}>
           <IconComponent />
         </IconContext.Provider>
-      );
-    };
+      )
+    }
 
     const applyVote = (simReport, votedOption) => {
-      const currentReports = this.state.simReports;
-      const toUpdateReport = currentReports.find(item => item.id === simReport.id);
+      const currentReports = this.state.simReports
+      const toUpdateReport = currentReports.find(item => item.id === simReport.id)
       if (toUpdateReport) {
-        const currentVoteOption = toUpdateReport.votedOption;
-        if (currentVoteOption === votedOption) return;
+        const currentVoteOption = toUpdateReport.votedOption
+        if (currentVoteOption === votedOption) return
 
-        if (votedOption === 1) toUpdateReport.articleANbVotes += 1;
-        if (votedOption === 2) toUpdateReport.articleBNbVotes += 1;
+        if (votedOption === 1) toUpdateReport.articleANbVotes += 1
+        if (votedOption === 2) toUpdateReport.articleBNbVotes += 1
 
-        if (currentVoteOption === 1) toUpdateReport.articleANbVotes += -1;
-        if (currentVoteOption === 2) toUpdateReport.articleBNbVotes += -1;
+        if (currentVoteOption === 1) toUpdateReport.articleANbVotes += -1
+        if (currentVoteOption === 2) toUpdateReport.articleBNbVotes += -1
 
-        toUpdateReport.votedOption = votedOption;
-        this.setState({ simReports: [...currentReports] });
+        toUpdateReport.votedOption = votedOption
+        this.setState({ simReports: [...currentReports] })
       }
-    };
+    }
 
     const simReportRowRenderer = simReport => {
-      const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "");
-      console.log(simReport["votedOption"]);
+      const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
+      console.log(simReport["votedOption"])
       return (
         <div className="sim-report-row">
           <div className="sr-title-container">
@@ -70,12 +70,12 @@ export class SimilarityReportList extends Component {
             <div className="sr-vote-check-container">
               <div className={voteItemClassName(1)}>
                 <button className="btn btn-outline-secondary btn-sm sr-vote-btn" onClick={() => applyVote(simReport, 1)}>
-                {simReport["articleANbVotes"] || "999+"}&nbsp;{iconRenderer(FaCheck, "#3571FF")}
+                  {simReport["articleANbVotes"] || "999+"}&nbsp;{iconRenderer(FaCheck, "#3571FF")}
                 </button>
               </div>
               <div className={voteItemClassName(2)}>
                 <button className="btn btn-outline-secondary btn-sm sr-vote-btn" onClick={() => applyVote(simReport, 2)}>
-                {simReport["articleBNbVotes"] || 100}&nbsp;{iconRenderer(FaCheck, "#3571FF")}
+                  {simReport["articleBNbVotes"] || 100}&nbsp;{iconRenderer(FaCheck, "#3571FF")}
                 </button>
               </div>
             </div>
@@ -100,9 +100,9 @@ export class SimilarityReportList extends Component {
             <button className="btn btn-outline-secondary">So sánh</button>
           </div>
         </div>
-      );
-    };
+      )
+    }
 
-    return <div className="sr-list-container">{this.state.simReports.map(item => simReportRowRenderer(item))}</div>;
+    return <div className="sr-list-container">{this.state.simReports.map(item => simReportRowRenderer(item))}</div>
   }
 }
