@@ -87,6 +87,8 @@ span {
   margin-top: 70px;
   margin-left: 200px;
   margin-right: 200px;
+  padding-top: 50px;
+  padding-bottom: 50px;
 }
 
 .layout-grid {

@@ -121,7 +121,7 @@
   display: flex;
   margin-left: 10px;
   margin-right: 5px;
-  width: 200px;
+  width: 180px;
 }
 
 .sr-vote-item {
@@ -257,4 +257,23 @@
   border-radius: 5px;
   padding: 7px;
   border: 1px solid gray;
+}
+
+.pagination-btn {
+  background-color: transparent;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  padding: 2px;
+  width: 35px;
+  height: 35px;
+}
+
+.pagination-btn:hover {
+  background-color: grey;
+}
+
+.pagination-btn.selected {
+  background-color: black;
+  color: white;
 }
