@@ -9,9 +9,11 @@ import Preferences from "../Preferences/Preferences"
 import SimilarityReport from "../Similarity-Report/Similarity-Report"
 import "./App.css"
 import useToken from "./useToken"
+import useUserData from './useUserData'
 
 function App() {
   const { token, setToken } = useToken()
+  const { userData, setUserData } = useUserData()
 
   return (
     <BrowserRouter>
@@ -23,14 +25,16 @@ function App() {
               exact
               path="/"
               component={() => {
-                return !token ? <Login setToken={setToken} /> : <Dashboard />
+                return !token ? <Login setToken={setToken} setUserData={setUserData} /> : <Dashboard />
               }}
             />
+            <Route exact path="/sign-in" component={() => <Login setToken={setToken} setUserData={setUserData} />} />
             <Route exact path="/dashboard" component={Dashboard} />
             <Route exact path="/preferences" component={Preferences} />
             <Route
               exact
               path="/similarity-reports"
+              userData={userData}
               component={SimilarityReport}
             />
             <Route

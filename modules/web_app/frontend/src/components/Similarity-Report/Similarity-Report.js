@@ -6,13 +6,15 @@ import Pagination from "./Pagination"
 import { SimilarityReportGrid } from "./Similarity-Report-Grid"
 import { SimilarityReportList } from "./Similarity-Report-List"
 import "./Similarity-Report.css"
-import { getSimilarityRecords } from "./Similarity-Report.service"
+import SimReportsService from "./Similarity-Report.service"
 
 class SimilarityReport extends Component {
   constructor(props) {
     super(props)
+    this.simReportsService = new SimReportsService()
 
     this.state = {
+      userData: props.userData,
       simReports: [],
       reportsPerPage: 8,
       loading: false,
@@ -26,11 +28,17 @@ class SimilarityReport extends Component {
   };
 
   getData = () => {
-    this.setState({ loading: true })
-    getSimilarityRecords().then(results => {
-      this.setState({ loading: false })
-      this.setState({ simReports: results })
-    })
+    const userDataStr = sessionStorage.getItem("userData")
+    const userData = JSON.parse(userDataStr)
+    const userId = userData && userData.id
+    if (userId) {
+      this.setState({ loading: true })
+      this.simReportsService.getSimilarityRecords()
+        .then(results => {
+          this.setState({ loading: false })
+          this.setState({ simReports: results })
+        })
+    }
   };
 
   render() {

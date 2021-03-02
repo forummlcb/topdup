@@ -1,24 +1,39 @@
-import React, { useState, useRef } from "react";
-import PropTypes from "prop-types";
+import PropTypes from "prop-types"
+import React, { useRef, useState } from "react"
+import FacebookLoginWithButton from 'react-facebook-login'
+import "./Login.css"
+import AuthService from "./Login.service"
 
-import "./Login.css";
-import { getToken } from "./Login.service";
-import FacebookLogin from "react-facebook-login";
-import { TiSocialFacebookCircular } from "react-icons/ti";
 
-export default function Login({ setToken }) {
-  const [username, setUsername] = useState();
-  const [password, setPassword] = useState();
-  const mounted = useRef(true);
+export default function Login({ setToken, setUserData }) {
+  const [username, setUsername] = useState()
+  const [password, setPassword] = useState()
+
+  const mounted = useRef(true)
+  const authService = new AuthService()
+
+  const loginResponseHandler = (result) => {
+    const httpCode = result.code
+    if (httpCode !== 200) throw (result.message)
+    const token = result.data.accessToken
+    if (mounted.current) {
+      setToken(token)
+      setUserData(result.data.user)
+    }
+  }
 
   const handleSubmit = async e => {
-    e.preventDefault();
-    getToken({ username, password }).then(tokenObj => {
-      if (mounted.current) {
-        setToken(tokenObj);
-      }
-    });
-  };
+    e.preventDefault()
+    authService.getToken({ username, password })
+      .then(result => loginResponseHandler(result))
+  }
+
+  const fbLoginClicked = () => { }
+  const fbLoginCallback = (fbRespose) => {
+    authService.loginByFacebook(fbRespose).then(
+      result => loginResponseHandler(result)
+    )
+  }
 
   return (
     <div className="auth-wrapper">
@@ -61,22 +76,23 @@ export default function Login({ setToken }) {
           <button type="submit" className="btn btn-primary btn-block">
             Submit
           </button>
-          <FacebookLogin
+          <FacebookLoginWithButton
             appId="800436117349613"
-            autoLoad={true}
+            autoLoad
             fields="name,email,picture"
+            onClick={fbLoginClicked}
             cssClass={"btn btn-primary btn-block mt-2"}
-            icon={<TiSocialFacebookCircular />}
-          />
+            callback={fbLoginCallback}
+            icon="fa-facebook" />
           <p className="forgot-password text-right">
             Forgot <a href="#">password?</a>
           </p>
         </form>
       </div>
     </div>
-  );
+  )
 }
 
 Login.propTypes = {
   setToken: PropTypes.func.isRequired
-};
+}
