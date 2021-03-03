@@ -1,2 +1,2 @@
-**/.terraform*
-
+scripts/wireguard/**.conf
+**/*.terraform
