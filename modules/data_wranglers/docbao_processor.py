@@ -5,23 +5,6 @@ from uuid import uuid4
 from data_wranglers import datalayer
 from data_wranglers.preprocessor.vi_preprocessor import ViPreProcessor
 
-def data_prep(data_dict):
-        '''
-        To transform data provided by DocBao to fit with the schema at FAISSDocumentStore
-        '''
-
-        content = list()
-        for c in data_dict['content']:
-                if (c['type'] == 'text') & (len(c['content'].split(' ')) > 10):
-                        content.append(c['content'])
-                content = ' '.join(content)
-
-        meta = dict()
-        for k in data_dict.keys():
-                if k != 'content':
-                        meta[k] = data_dict[k]
-
-        return content, meta
 
 def main():
         # get data from table topdup_articles
