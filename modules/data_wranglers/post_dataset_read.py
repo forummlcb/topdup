@@ -7,8 +7,7 @@ import os
 from tqdm.auto import tqdm
 from pathlib import Path
 import jsonpickle
-from data_wranglers import datalayer
-from data_wranglers import data_prep
+from data_wranglers import datalayer,data_prep
 
 
 
