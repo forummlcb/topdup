@@ -11,7 +11,7 @@ class Document:
         id: Optional[str] = None,
         score: Optional[float] = None,
         meta: Dict[str, Any] = None,
-        embedding: Optional[np.array] = None,
+        embedding: Optional[np.array] = None,  # type: ignore
     ):
         """
         Object used to represent documents / passages in a standardized way within modules.ml.
