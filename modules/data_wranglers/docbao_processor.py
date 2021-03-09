@@ -11,6 +11,10 @@ def main():
         processor = ViPreProcessor()
         articles = datalayer.getdata('SELECT * FROM topdup_articles')
         sqls = []
+
+        #-----------------------------------------------------------
+        #               LOOP ALL ARTICLES & CLEAN CONTENTS BASED ON ViProfessor
+        #-----------------------------------------------------------
         for article in articles:
                 # insert document record
                 documentid          = str(uuid4())
@@ -61,7 +65,9 @@ def main():
                 sqls.append(sqlcmd)
        
 
-        
+        #-----------------------------------------------------------
+        #               CLEAN DATA INSIDE POSTGRES
+        #-----------------------------------------------------------
         # archive data which has been processed
         sqlcmd = "INSERT INTO archive_topdup_articles " \
                 " SELECT a.* FROM topdup_articles a INNER JOIN document b "\
