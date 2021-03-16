@@ -13,7 +13,8 @@ def main():
         sqls = []
 
         #-----------------------------------------------------------
-        #               LOOP ALL ARTICLES & CLEAN CONTENTS BASED ON ViProfessor
+        #               LOOP ALL ARTICLES & CLEAN CONTENTS 
+        #                       BASED ON ViProfessor
         #-----------------------------------------------------------
         for article in articles:
                 # insert document record

@@ -42,10 +42,13 @@ def executesql(sql):
 
 def executesqls(sqls):
     try:
+        iTotal = len(sqls)
+        iCount = 0
         cursor = conn.cursor()
         for sql in sqls:
+            iCount +=1
+            print('Record %s of %s' %(iCount,iTotal))
             cursor.execute(sql)
-            logging.debug(sql)
         conn.commit()
     except Exception as e:
         print(e, sql)
