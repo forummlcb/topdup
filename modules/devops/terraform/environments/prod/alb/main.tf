@@ -4,7 +4,6 @@ module "prod_webapp_alb" {
   name = "topdup-prod-alb"
 
   load_balancer_type = "application"
-
   vpc_id             = data.terraform_remote_state.prod_vpc.outputs.prod_vpc_id
   subnets            = local.public_subnets_per_az
   security_groups    = [module.prod_alb_secgroup.this_security_group_id]
@@ -13,14 +12,14 @@ module "prod_webapp_alb" {
     {
       name_prefix          = "h1"
       backend_protocol     = "HTTP"
-      backend_port         = 80
+      backend_port         = 5000
       target_type          = "instance"
       deregistration_delay = 10
       health_check = {
         enabled             = true
         interval            = 30
         path                = "/"
-        port                = "80"
+        port                = "5000"
         healthy_threshold   = 3
         unhealthy_threshold = 3
         timeout             = 6
@@ -30,15 +29,28 @@ module "prod_webapp_alb" {
       tags = {
         InstanceTargetGroupTag = "webapp-target"
       }
-    },
+    }
   ]
-
 
   http_tcp_listeners = [
     {
-      port               = 80
+      port        = 80
+      protocol    = "HTTP"
+      action_type = "redirect"
+      redirect = {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+  ]
+
+  https_listeners = [
+    {
+      port               = 5000
       protocol           = "HTTP"
       target_group_index = 0
+      certificate_arn    = "arn:aws:iam::221423461835:server-certificate/CSC"
     }
   ]
 
@@ -56,7 +68,7 @@ module "prod_alb_secgroup" {
   vpc_id      = data.terraform_remote_state.prod_vpc.outputs.prod_vpc_id
 
   ingress_cidr_blocks = ["0.0.0.0/0"]
-  ingress_rules       = ["all-icmp", "http-80-tcp"]
+  ingress_rules       = ["all-icmp", "http-80-tcp", "https-443-tcp"]
   egress_rules        = ["all-all"]
 }
 

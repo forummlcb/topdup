@@ -1,2 +1,3 @@
 scripts/wireguard/**.conf
 **/*.terraform
+**/.terraform.lock.hcl

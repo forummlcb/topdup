@@ -1,12 +1,8 @@
 module "topdup_ecr" { 
   source    = "../../../modules//terraform-aws-ecr"
-  namespace = "infra"
-  names     = [
-    "ml",
-    "webapp",
-    "crawler",
-    "data-wrangling"
-  ]
+  namespace = "topdup"
+  stage     = "prod"
+  name      = "ml"
   tags  = {
     Terraform   = "true"
     Owner       = "devops"
