@@ -6,7 +6,7 @@ module "prod_backend_asg" {
   image_id        = "ami-0cf553756f68b72c9"
   instance_type   = "t3a.medium"
   security_groups = [module.prod_backend_secgroup.this_security_group_id]
-  /* load_balancers  = [data.terraform_remote_state.prod_alb.outputs.prod_elb_id] */
+  target_group_arns  = data.terraform_remote_state.prod_alb.outputs.target_group_arns
 
   ebs_block_device = [
     {

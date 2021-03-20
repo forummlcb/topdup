@@ -1,8 +1,8 @@
 module "prod_webapp_alb" {
   source  = "../../../modules//terraform-aws-alb"
+  create_lb = true
 
   name = "topdup-prod-alb"
-
   load_balancer_type = "application"
   vpc_id             = data.terraform_remote_state.prod_vpc.outputs.prod_vpc_id
   subnets            = local.public_subnets_per_az
@@ -10,11 +10,16 @@ module "prod_webapp_alb" {
 
   target_groups = [
     {
-      name_prefix          = "h1"
+      name_prefix          = "asg"
       backend_protocol     = "HTTP"
       backend_port         = 5000
       target_type          = "instance"
       deregistration_delay = 10
+      stickiness           = {
+        enabled = true
+        cookie_duration = 60 
+        type = "lb_cookie"
+      }
       health_check = {
         enabled             = true
         interval            = 30
@@ -47,8 +52,8 @@ module "prod_webapp_alb" {
 
   https_listeners = [
     {
-      port               = 5000
-      protocol           = "HTTP"
+      port               = 443
+      protocol           = "HTTPS"
       target_group_index = 0
       certificate_arn    = "arn:aws:iam::221423461835:server-certificate/CSC"
     }
