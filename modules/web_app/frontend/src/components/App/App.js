@@ -9,7 +9,6 @@ import { AuthContext } from '../auth/auth-context'
 import Dashboard from '../dashboard'
 import DupCompare from '../dup-compare/dup-compare'
 import DupReport from '../dup-report/dup-report'
-import ErrorPage from "../error/index";
 import Footer from '../footer/footer'
 import NavigationBar from '../navigation-bar/navigation-bar'
 import Preferences from '../preferences'
@@ -58,7 +57,6 @@ function App() {
               <Route exact path="/dup-report/:id" component={DupReport} />
               <Route exact path="/dup-compare" component={() => <DupCompare />} />
               <Route exact path="/dup-finder" component={() => <DupCompare />} />
-              <Route path='*' exact={true} component={ErrorPage} />
             </Switch>
           </div>
           <ToastContainer />
