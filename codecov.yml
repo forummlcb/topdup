@@ -1,0 +1,14 @@
+codecov:
+  disable_default_path_fixes: false
+
+
+coverage:
+  status:
+    project:
+      default:
+        target: 68% # will be increased gradually until it reaches 90%
+        threshold: 0.5%
+    patch:
+      default:
+        target: 85%
+        threshold: 0.5%

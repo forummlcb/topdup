@@ -44,7 +44,19 @@ jobs:
     - name: Check type annotations with mypy
       run: |
         mypy ./modules/**/*.py
+
     - name: Test with pytest
       run: |
-        pip install pytest
-        python3 -m pytest -s
+        python3 -m pytest -s --durations=0 --cov=./ --cov-report=xml modules/ml/tests/
+
+    - name: "Upload coverage to Codecov"
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
+        files: ./coverage.xml
+        directory: ./coverage/reports/
+        flags: pytest
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        path_to_write_report: ./coverage/codecov_report.txt
+        verbose: true
