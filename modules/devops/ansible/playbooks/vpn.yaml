@@ -1,0 +1,36 @@
+---
+- hosts: util
+  gather_facts: true
+  remote_user: root
+  become: yes
+  vars:
+    nat_interface: "wg0"
+    wireguard_networks:
+      - wg0
+    wireguard_postup:
+      - iptables -I INPUT 1 -i {{ nat_interface }} -j ACCEPT
+      - iptables -t nat -I POSTROUTING 1 -s 10.0.1.0/24 -o ens5 -j MASQUERADE
+      - iptables -I FORWARD 1 -i ens5 -o wg0 -j ACCEPT
+      - iptables -I FORWARD 1 -i wgo -o ens5 -j ACCEPT
+      - iptables -I INPUT 1 -i ens5 -p udp --dport 51820
+    wireguard_postdown:
+      - iptables -D INPUT -i wg0 -j ACCEPT
+      - iptables -D FORWARD -i ens5 -o wg0 -j ACCEPT
+      - iptables -D FORWARD -i wgo -o ens5 -j ACCEPT
+      - iptables -D INPUT -i ens5 -p udp -m udp --dport 51820
+      - iptables -t nat -I POSTROUTING -s 10.0.1.0/24 -o ens5 -j MASQUERADE
+
+    wireguard_wg0_interface:
+      address: 10.0.1.0/24
+      private_key: 12345
+      listen_port: 12345
+
+    wireguard_wg0_peers:
+      peer-0-0:
+        public_key: 0-12345-pub
+        allowed_ips: 10.0.1.10/24
+      peer-0-1:
+        public_key: 0-23456-pub
+        allowed_ips: 10.0.1.11/24
+  roles:
+    - adamruzicka.wireguard

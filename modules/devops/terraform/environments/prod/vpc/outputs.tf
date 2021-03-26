@@ -13,3 +13,7 @@ output "prod_vpc_public_subnets" {
 output "prod_vpc_cidr_block" {
   value = module.prod_vpc.vpc_cidr_block
 }
+
+output "prod_vpc_azs" {
+  value = module.prod_vpc.azs
+}
