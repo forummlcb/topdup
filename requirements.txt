@@ -12,6 +12,7 @@ coverage==5.3.1
 # for unit test
 pytest==6.2.2
 pytest-mock==3.5.1
+pytest-cov==2.11.1
 
 # for running test
 sqlalchemy-utils==0.36.8
