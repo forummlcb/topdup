@@ -1,57 +1,27 @@
 module "prod_backend_asg" {
-  source = "../../../modules/terraform-aws-autoscaling"
-  name = "prod-bakend-asg"
-  lc_name = "prod-backend"
+  source = "../../../modules/terraform-aws-ec2-autoscale-group"
+ 
+  namespace   = "topdup"
+  environment = "production"
+  name        = "backend"
 
-  image_id        = "ami-0cf553756f68b72c9"
-  instance_type   = "t3a.medium"
-  security_groups = [module.prod_backend_secgroup.this_security_group_id]
-  target_group_arns  = data.terraform_remote_state.prod_alb.outputs.target_group_arns
+  image_id                    = "ami-0b399f28a2b437224"
+  instance_type               = "t3a.medium"
+  security_group_ids          = [module.prod_backend_secgroup.this_security_group_id]
+  subnet_ids                  = data.terraform_remote_state.prod_vpc.outputs.prod_vpc_private_subnets
+  health_check_type           = "EC2"
+  min_size                    = 2
+  max_size                    = 4
+  wait_for_capacity_timeout   = "5m"
+  associate_public_ip_address = false
+  target_group_arns           = data.terraform_remote_state.prod_alb.outputs.target_group_arns
+  launch_template_version     = "$Latest"
+  user_data_base64           = base64encode(local.userdata)
 
-  ebs_block_device = [
-    {
-      device_name           = "/dev/xvdz"
-      volume_type           = "gp2"
-      volume_size           = "50"
-      delete_on_termination = true
-    },
-  ]
-
-  root_block_device = [
-    {
-      volume_size = "50"
-      volume_type = "gp2"
-    },
-  ]
-
-  # Auto scaling group
-  asg_name                  = "prod-backend-asg"
-  vpc_zone_identifier       = data.terraform_remote_state.prod_vpc.outputs.prod_vpc_private_subnets
-  health_check_type         = "EC2"
-  min_size                  = 2
-  max_size                  = 4
-  desired_capacity          = 2
-  wait_for_capacity_timeout = 0
-
-  tags = [
-    {
-      key                 = "AppFunc"
-      value               = "Backend"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Environment"
-      value               = "topdup-prod"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Terraform"
-      value               = "true"
-      propagate_at_launch = true
-    },
-  ]
+  tags = {
+    Terraform = true
+  }
 }
-
 module "prod_backend_secgroup" {
   source  = "../../../modules/terraform-aws-security-group"
 
@@ -71,4 +41,13 @@ module "prod_backend_secgroup" {
     }
   ]
   egress_rules        = ["all-all"]
+}
+
+locals {
+  userdata = <<-USERDATA
+    #!/bin/bash
+    nvm use 10
+    sudo env PATH=$PATH:/home/ubuntu/.nvm/versions/node/v10.24.0/bin /home/ubuntu/.nvm/versions/node/v10.24.0/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+    sudo systemctl start pm2-ubuntu
+  USERDATA
 }

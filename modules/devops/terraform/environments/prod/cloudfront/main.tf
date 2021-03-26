@@ -1,9 +1,9 @@
 module "prod_cloudfront" {
-  source = "terraform-aws-modules/cloudfront/aws"
+  source = "../../../terraform-aws-modules/cloudfront/aws"
 
-  aliases = ["cdn.example.com"]
+  aliases = ["topdop.org"]
 
-  comment             = "My awesome CloudFront"
+  comment             = "Topdup webapp"
   enabled             = true
   is_ipv6_enabled     = true
   price_class         = "PriceClass_All"

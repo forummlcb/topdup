@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket = "infra-remotestates"
-    key    = "prod/ecr"
+    key    = "prod/cloudfront"
     region = "ap-southeast-1"
   }
 }

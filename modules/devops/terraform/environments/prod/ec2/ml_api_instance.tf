@@ -5,6 +5,7 @@ module "prod_ml_api" {
   instance_count         = 1
   ami                    = "ami-06fb5332e8e3e577a"
   instance_type          = "t3a.medium"
+  iam_instance_profile       = "topdup-ml-api"
   key_name               = "topdup-prod"
   user_data              = local.user_data
   root_block_device = [
@@ -43,5 +44,14 @@ module "prod_ml_api_secgroup" {
 
   ingress_cidr_blocks = [data.terraform_remote_state.prod_vpc.outputs.prod_vpc_cidr_block]
   ingress_rules       = ["ssh-tcp", "all-icmp"]
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 8000
+      to_port     = 8000
+      protocol    = "tcp"
+      description = "Allow Wireguard VPN"
+      cidr_blocks = data.terraform_remote_state.prod_vpc.outputs.prod_vpc_cidr_block
+    }
+  ]
   egress_rules        = ["all-all"]
 }

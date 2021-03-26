@@ -22,7 +22,7 @@ module "prod_webapp_alb" {
       }
       health_check = {
         enabled             = true
-        interval            = 30
+        interval            = 10
         path                = "/"
         port                = "5000"
         healthy_threshold   = 3
@@ -55,7 +55,7 @@ module "prod_webapp_alb" {
       port               = 443
       protocol           = "HTTPS"
       target_group_index = 0
-      certificate_arn    = "arn:aws:iam::221423461835:server-certificate/CSC"
+      certificate_arn    = "arn:aws:acm:ap-southeast-1:221423461835:certificate/a55d2e79-d2bf-43ab-babd-8956872a7d1f"
     }
   ]
 
