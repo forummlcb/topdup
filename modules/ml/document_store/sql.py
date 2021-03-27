@@ -175,8 +175,8 @@ class SQLDocumentStore(BaseDocumentStore):
             )
 
             document_id_AB.append(
-                sorted([row.document_id, document_id_B.first().value])
-            )
+                sorted([row.document_id, document_id_B.first().value]) + [row.value]
+            )  # row.value = `sim_score`
 
         document_id_AB.sort()
         document_id_AB = list(
@@ -189,9 +189,15 @@ class SQLDocumentStore(BaseDocumentStore):
             meta_A.update({"document_id": document_id[0]})
             meta_B.update({"document_id": document_id[1]})
             for row in meta.filter(MetaORM.document_id == document_id[0]).all():
-                meta_A.update({row.name: row.value})
+                if row.name == "sim_score":
+                    meta_A.update({row.name: document_id[2]})
+                else:
+                    meta_A.update({row.name: row.value})
             for row in meta.filter(MetaORM.document_id == document_id[1]).all():
-                meta_B.update({row.name: row.value})
+                if row.name == "sim_score":
+                    meta_B.update({row.name: document_id[2]})
+                else:
+                    meta_B.update({row.name: row.value})
 
             domain_A = meta_parser("domain", meta_A).lower()
             domain_B = meta_parser("domain", meta_B).lower()
