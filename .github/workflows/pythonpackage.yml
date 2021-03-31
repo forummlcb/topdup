@@ -43,7 +43,7 @@ jobs:
 
     - name: Check type annotations with mypy
       run: |
-        mypy ./modules/**/*.py
+        mypy ./modules/ml*/*.py
 
     - name: Test with pytest
       run: |
