@@ -4,10 +4,10 @@ from psycopg2.extras import RealDictCursor
 import logging
 import os
 
-for key in os.environ.keys():
-    if key == "TOPDUP_POSTGRES_HOST":
-        print(key)
 
+#-----------------------------------------------------------
+#           POSTGRES DATABASE CONFIGURATION
+#-----------------------------------------------------------
 
 DB_HOST     = os.environ.get('TOPDUP_POSTGRES_HOST')
 DB_NAME     = os.environ.get('TOPDUP_POSTGRES_DATABASE')
@@ -25,6 +25,11 @@ conn = psycopg2.connect(host=DB_HOST,
 
 conn.autocommit = True
 
+
+#-----------------------------------------------------------
+#           DATABASE COMMAND EXECUTION
+#-----------------------------------------------------------
+
 def getdata(sql):
     cursor = conn.cursor()
     cursor.execute(sql)
@@ -37,10 +42,13 @@ def executesql(sql):
 
 def executesqls(sqls):
     try:
+        iTotal = len(sqls)
+        iCount = 0
         cursor = conn.cursor()
         for sql in sqls:
+            iCount +=1
+            print('Record %s of %s' %(iCount,iTotal))
             cursor.execute(sql)
-            logging.debug(sql)
         conn.commit()
     except Exception as e:
         print(e, sql)
