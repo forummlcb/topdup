@@ -1,5 +1,5 @@
 [flake8]
 ignore = E203, W503 # https://black.readthedocs.io/en/stable/the_black_code_style.html#slices
 max-line-length = 88
-exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,.venv,src,venv,modules/legacies/,ml
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,.venv,src,venv,modules/legacies/,ml,modules/data_wranglers/
 import-order-style=google
