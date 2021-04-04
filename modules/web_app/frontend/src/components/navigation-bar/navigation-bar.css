@@ -8,9 +8,7 @@
 }
 
 .topdup-brand {
-  position: absolute;
   width: 92px;
-  height: 38px;
   display: flex;
   align-items: center;
   font-style: normal;

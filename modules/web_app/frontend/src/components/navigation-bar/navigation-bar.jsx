@@ -18,7 +18,8 @@ const NavigationBar = (props) => {
           <Navbar.Brand className="topdup-brand" href="/">
             TopDup
           </Navbar.Brand>
-          <Navbar.Collapse id="basic-navbar-nav">
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="mr-auto" activeKey={location.pathname}></Nav>
             <Nav className="topdup-nav-items">
               <Nav.Link href="/about">Giới thiệu</Nav.Link>
