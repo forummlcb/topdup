@@ -154,3 +154,6 @@ tags
 *.db
 *.pkl
 *.bin*
+
+# DB
+database.ini
