@@ -13,8 +13,6 @@ from modules.ml.retriever.retriever import Retriever
 from modules.ml.utils import meta_parser
 from modules.ml.vectorizer.tf_idf import TfidfDocVectorizer
 
-# TODO: config remote logging
-
 LOCAL_DB_URI = os.getenv("LOCAL_DB_URI", "sqlite:///local.db")
 POSTGRES_URI = os.getenv(
     "POSTGRES_URI", "postgresql+psycopg2://user:pwd@host/topdup_articles"
@@ -28,6 +26,7 @@ INDEX = "document"
 LOCAL_IDX_PATH = os.getenv("LOCAL_IDX_PATH", "local_index.bin")
 REMOTE_IDX_PATH = os.getenv("REMOTE_IDX_PATH", "remote_index.bin")
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -38,6 +37,13 @@ def get_connection(uri: str, vector_dim: int):
     except Exception as e:
         logger.error(e)
         return None
+
+
+def chunks(lst, n):
+    """Yield successive n-sized chunks from list
+    """
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
 
 
 def update_local_db(local_doc_store, remote_doc_store):
@@ -85,7 +91,7 @@ def update_local_db(local_doc_store, remote_doc_store):
     logger.info(f"Retrieved {len(docs)} at {datetime.now()}")
 
     local_doc_store.write_documents(docs)
-    logger.info("Stored documents to local db")
+    logger.info(f"Stored {len(docs)} docs to local db")
 
     local_retriever = Retriever(
         document_store=local_doc_store,
@@ -121,20 +127,35 @@ def update_local_db(local_doc_store, remote_doc_store):
     docs = [doc.text for doc in docs]
     local_results = local_retriever.batch_retrieve(docs)
     if remote_reindex:
-        remote_result = local_results.copy()
+        remote_results = local_results.copy()
     else:
-        remote_result = remote_retriever.batch_retrieve(docs)
-    for _id, l, r in tqdm(
-        zip(new_ids, local_results, remote_result), total=len(new_ids)
-    ):
-        local_sim = l.get("similarity_score", 0)
-        remote_sim = r.get("similarity_score", 0)
-        if (local_sim > HARD_SIM_THRESHOLD) & (remote_sim > HARD_SIM_THRESHOLD):
-            if local_sim >= remote_sim:
-                sim_data = {"sim_score": local_sim, "similar_to": l["retrieve_result"]}
-            else:
-                sim_data = {"sim_score": remote_sim, "similar_to": r["retrieve_result"]}
-            remote_doc_store.update_document_meta(_id, sim_data)
+        remote_results = remote_retriever.batch_retrieve(docs)
+
+    # Split payloads to chunks to reduce pressure on the database
+    new_ids_chunks = list(chunks(new_ids, 1000))
+    local_results_chunks = list(chunks(local_results, 1000))
+    remote_results_chunks = list(chunks(remote_results, 1000))
+    id_meta = dict()
+    for i in tqdm(range(len(new_ids_chunks)), desc="Updating meta.....  "):
+        for _id, l, r in zip(
+            new_ids_chunks[i], local_results_chunks[i], remote_results_chunks[i]
+        ):
+            local_sim = l.get("similarity_score", 0)
+            remote_sim = r.get("similarity_score", 0)
+            if (local_sim > HARD_SIM_THRESHOLD) & (remote_sim > HARD_SIM_THRESHOLD):
+                if local_sim >= remote_sim:
+                    sim_data = {
+                        "sim_score": local_sim,
+                        "similar_to": l["retrieve_result"],
+                    }
+                else:
+                    sim_data = {
+                        "sim_score": remote_sim,
+                        "similar_to": r["retrieve_result"],
+                    }
+                id_meta.update({_id: sim_data})
+
+        remote_doc_store.update_documents_meta(id_meta=id_meta)
     logger.info("Similarity scores updated into metadata")
 
 

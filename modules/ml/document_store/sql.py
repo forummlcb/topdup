@@ -6,16 +6,7 @@ from uuid import uuid4
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import (
-    Column,
-    DateTime,
-    ForeignKey,
-    String,
-    Text,
-    create_engine,
-    engine,
-    func,
-)
+from sqlalchemy import Column, DateTime, ForeignKey, String, Text, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import case, null
