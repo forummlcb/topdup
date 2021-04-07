@@ -4,7 +4,18 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Text, create_engine, func
+import numpy as np
+import pandas as pd
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    String,
+    Text,
+    create_engine,
+    engine,
+    func,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import case, null
@@ -14,6 +25,7 @@ from modules.ml.document_store.base import BaseDocumentStore
 from modules.ml.schema import Document
 from modules.ml.utils import meta_parser
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -398,6 +410,62 @@ class SQLDocumentStore(BaseDocumentStore):
 
         for m in meta_orms:
             self.session.add(m)
+        self.session.commit()
+
+    def update_documents_meta(self, id_meta: Dict[str, Dict[str, str]]):
+        """Updates the metadata dictionary of multiple documents
+        """
+        # Query the current metadata of documents
+        document_ids = list(set(id_meta.keys()))
+        names = list(set(sum([list(v.keys()) for v in id_meta.values()], [])))
+        current_meta = pd.read_sql(
+            sql="""
+        SELECT DISTINCT document_id, name, value FROM meta
+        WHERE document_id IN ({})""".format(
+                ", ".join(["'{}'".format(id) for id in document_ids])
+            ),
+            con=self.engine,
+        )
+
+        # Remove the current metadata from table
+        with self.engine.connect() as conn:
+            conn.execute(
+                """
+        DELETE FROM meta
+        WHERE document_id IN ({0})
+        AND name IN ({1})""".format(
+                    ", ".join(["'{}'".format(id) for id in document_ids]),
+                    ", ".join(["'{}'".format(name) for name in names]),
+                )
+            )
+
+        # Upsert the metadata on DataFrame `current_meta`
+        ## Build id_meta to DataFrame
+        id_meta_df = list()
+        for item in id_meta.items():
+            for i in item[1].items():
+                id_meta_df.append([item[0], i[0], i[1]])
+
+        id_meta_df = pd.DataFrame(id_meta_df, columns=current_meta.columns)
+        ## Bulk upsert
+        df = pd.merge(
+            current_meta,
+            id_meta_df,
+            how="outer",
+            on=["document_id", "name"],
+            suffixes=("_current", "_update"),
+        )
+        df = df[df["value_update"].notna()]
+
+        meta_orms = [
+            MetaORM(
+                name=row["name"],
+                value=row["value_update"],
+                document_id=row["document_id"],
+            )
+            for _, row in df.iterrows()
+        ]
+        self.session.bulk_save_objects(meta_orms)
         self.session.commit()
 
     def get_document_count(
