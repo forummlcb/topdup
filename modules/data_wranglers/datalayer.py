@@ -1,14 +1,8 @@
-import logging
 import os
-
-
-
 
 import psycopg2
 from psycopg2 import Error
 from psycopg2.extras import RealDictCursor
-
-
 
 # -----------------------------------------------------------
 #           POSTGRES DATABASE CONFIGURATION
