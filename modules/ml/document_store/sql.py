@@ -12,6 +12,7 @@ from sqlalchemy.sql import case, null
 from sqlalchemy.sql.sqltypes import Float
 from tqdm.auto import tqdm
 
+from modules.ml.constants import META_MAPPING
 from modules.ml.document_store.base import BaseDocumentStore
 from modules.ml.schema import Document
 from modules.ml.utils import meta_parser
@@ -173,7 +174,7 @@ class SQLDocumentStore(BaseDocumentStore):
 
         meta_df = pd.read_sql(
             sql=f"""
-        SELECT m1.document_id_a
+        SELECT DISTINCT m1.document_id_a
             ,m2.document_id_b
             ,m1.sim_score
         FROM (
@@ -188,7 +189,25 @@ class SQLDocumentStore(BaseDocumentStore):
                 ,value AS document_id_b
             FROM meta
             WHERE name = 'similar_to'
-            ) AS m2 ON m1.document_id_a = m2.document_id_a""",
+            ) AS m2 ON m1.document_id_a = m2.document_id_a
+        INNER JOIN (
+            SELECT DISTINCT document_id
+                ,lower(value) AS "domain"
+            FROM meta
+            WHERE LOWER("name") IN ({", ".join(["'{}'".format(x) for x in META_MAPPING["domain"]])})
+            ) AS m3 ON m1.document_id_a = m3.document_id
+        INNER JOIN (
+            SELECT DISTINCT document_id
+                ,LOWER(value) AS "domain"
+            FROM meta
+            WHERE LOWER("name") IN ({", ".join(["'{}'".format(x) for x in META_MAPPING["domain"]])})
+            ) AS m4 ON m2.document_id_b = m4.document_id
+        --filter rules defined by PO
+        WHERE (
+                m3.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])})
+                OR m4.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])})
+                )
+            AND m3.domain != m4.domain""",
             con=self.engine,
         )
 
@@ -206,6 +225,7 @@ class SQLDocumentStore(BaseDocumentStore):
         for document_id in tqdm(document_id_AB):
             meta_A = dict()
             meta_B = dict()
+
             meta_A.update({"document_id": document_id[0]})
             meta_B.update({"document_id": document_id[1]})
             for row in meta.filter(MetaORM.document_id == document_id[0]).all():
@@ -219,12 +239,7 @@ class SQLDocumentStore(BaseDocumentStore):
                 else:
                     meta_B.update({row.name: row.value})
 
-            domain_A = meta_parser("domain", meta_A).lower()
-            domain_B = meta_parser("domain", meta_B).lower()
-            domain_A = "domain" if domain_A in WHITELIST else domain_A
-            domain_B = "domain" if domain_B in WHITELIST else domain_B
-            if domain_A != domain_B:  # rule defined by the PO
-                documents.append((meta_A, meta_B))
+            documents.append((meta_A, meta_B))
 
         return documents
 
