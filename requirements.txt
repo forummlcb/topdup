@@ -1,33 +1,28 @@
 # this requirements is about packages for development purposes
-# code styling
 black==20.8b1
-flake8==3.7.9
-mypy==0.761
-qcore==0.5.1
-isort==5.7.0
-pre-commit==2.11.1
-tox==3.21.2
 coverage==5.3.1
-
-# for unit test
-pytest==6.2.2
-pytest-mock==3.5.1
-pytest-cov==2.11.1
-
-# for running test
-sqlalchemy-utils==0.36.8
-more-itertools==8.6.0
-jsonpickle==1.5.1
-nltk==3.5
-vncorenlp==1.0.3
-pandas==1.2.3
-scikit-learn==0.24.1
-tika==1.24
-schedule==1.0.0
 faiss-cpu==1.6.3; sys_platform != 'win32' and sys_platform != 'cygwin'
-psycopg2-binary==2.8.6; sys_platform != 'win32' and sys_platform != 'cygwin'
-uvloop==0.15.2; sys_platform != 'win32' and sys_platform != 'cygwin'
-httptools==0.1.1
-spacy==3.0.3
 fastapi==0.63.0
+flake8==3.7.9
+httptools==0.1.1
+isort==5.7.0
+jsonpickle==1.5.1
+more-itertools==8.6.0
+mypy==0.761
+nltk==3.5
+pandas==1.2.3
+pre-commit==2.11.1
+psycopg2-binary==2.8.6; sys_platform != 'win32' and sys_platform != 'cygwin'
+pytest-cov==2.11.1
+pytest-mock==3.5.1
+pytest==6.2.2
 python-multipart==0.0.5
+qcore==0.5.1
+schedule==1.0.0
+scikit-learn==0.24.1
+spacy==3.0.3
+sqlalchemy-utils==0.36.8
+tika==1.24
+tox==3.21.2
+uvloop==0.15.2; sys_platform != 'win32' and sys_platform != 'cygwin'
+vncorenlp==1.0.3
