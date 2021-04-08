@@ -4,13 +4,13 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
-import numpy as np
 import pandas as pd
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import case, null
 from sqlalchemy.sql.sqltypes import Float
+from tqdm.auto import tqdm
 
 from modules.ml.document_store.base import BaseDocumentStore
 from modules.ml.schema import Document
@@ -171,28 +171,39 @@ class SQLDocumentStore(BaseDocumentStore):
                 MetaORM.updated > from_time, MetaORM.updated <= to_time
             )
 
+        meta_df = pd.read_sql(
+            sql=f"""
+        SELECT m1.document_id_a
+            ,m2.document_id_b
+            ,m1.sim_score
+        FROM (
+            SELECT DISTINCT document_id AS document_id_a
+                ,value AS sim_score
+            FROM meta
+            WHERE name = 'sim_score'
+                AND cast(value AS DECIMAL) > {threshold}
+            ) AS m1
+        INNER JOIN (
+            SELECT DISTINCT document_id AS document_id_a
+                ,value AS document_id_b
+            FROM meta
+            WHERE name = 'similar_to'
+            ) AS m2 ON m1.document_id_a = m2.document_id_a""",
+            con=self.engine,
+        )
+
         documents = list()
         document_id_AB = list()
-        document_id_A = meta.filter(
-            MetaORM.name == "sim_score",
-            MetaORM.value.cast(Float) >= threshold,
-            MetaORM.value.cast(Float) < 1,
-        )
-        for row in document_id_A.all():
-            document_id_B = meta.filter(
-                MetaORM.document_id == row.document_id, MetaORM.name == "similar_to"
-            )
-
+        for _, row in meta_df.iterrows():
             document_id_AB.append(
-                sorted([row.document_id, document_id_B.first().value]) + [row.value]
-            )  # row.value = `sim_score`
+                sorted([row["document_id_a"], row["document_id_b"]])
+                + [row["sim_score"]]
+            )
+        # Remove duplicate A-->B and B-->A are identical
+        document_id_AB_set = set(tuple(x) for x in document_id_AB)
+        document_id_AB = [list(x) for x in document_id_AB_set]
 
-        document_id_AB.sort()
-        document_id_AB = list(
-            document_id_AB for document_id_AB, _ in itertools.groupby(document_id_AB)
-        )
-
-        for document_id in document_id_AB:
+        for document_id in tqdm(document_id_AB):
             meta_A = dict()
             meta_B = dict()
             meta_A.update({"document_id": document_id[0]})
@@ -430,7 +441,7 @@ class SQLDocumentStore(BaseDocumentStore):
                 )
             )
 
-        # Upsert the metadata on DataFrame `current_meta`
+        # Insert the metadata on DataFrame `current_meta`
         ## Build id_meta to DataFrame
         id_meta_df = list()
         for item in id_meta.items():
@@ -438,7 +449,7 @@ class SQLDocumentStore(BaseDocumentStore):
                 id_meta_df.append([item[0], i[0], i[1]])
 
         id_meta_df = pd.DataFrame(id_meta_df, columns=current_meta.columns)
-        ## Bulk upsert
+        ## Bulk insert
         df = pd.merge(
             current_meta,
             id_meta_df,
@@ -448,16 +459,16 @@ class SQLDocumentStore(BaseDocumentStore):
         )
         df = df[df["value_update"].notna()]
 
-        meta_orms = [
-            MetaORM(
-                name=row["name"],
-                value=row["value_update"],
-                document_id=row["document_id"],
+        insert = list()
+        for _, row in df.iterrows():
+            insert.append(
+                {
+                    "name": row["name"],
+                    "value": row["value_update"],
+                    "document_id": row["document_id"],
+                }
             )
-            for _, row in df.iterrows()
-        ]
-        self.session.bulk_save_objects(meta_orms)
-        self.session.commit()
+        self.engine.execute(MetaORM.__table__.insert().values(insert))
 
     def get_document_count(
         self,

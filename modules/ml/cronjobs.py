@@ -195,7 +195,7 @@ def consolidate_sim_docs(remote_doc_store):
         return
 
     data = list()
-    for doc in docs:
+    for doc in tqdm(docs, desc="Consolidating.....  "):
         try:
             data.append(
                 [
@@ -241,8 +241,8 @@ def consolidate_sim_docs(remote_doc_store):
     )
 
     try:
-        existing_sim_id = pd.read_sql_query(
-            "SELECT DISTINCT sim_id FROM similar_docs", con=remote_doc_store.engine
+        existing_sim_id = pd.read_sql(
+            sql="SELECT DISTINCT sim_id FROM similar_docs", con=remote_doc_store.engine
         )["sim_id"].values.tolist()
     except ProgrammingError:
         existing_sim_id = list()
