@@ -123,7 +123,7 @@ def compare_(text_A: str, text_B: str):
 )
 def compare(entry: CompareEntry, response: Response):
     if entry.pairs[0].mode == "url":
-        text_A = pd.read_sql_query(
+        text_A = pd.read_sql(
             URL_QUERY.format(entry.pairs[0].content, EDIT_DISTANCE_THRESHOLD),
             con=remote_doc_store.engine,
         )
@@ -139,7 +139,7 @@ def compare(entry: CompareEntry, response: Response):
         return {"message": "Invalid input mode, either url or text"}
 
     if entry.pairs[1].mode == "url":
-        text_B = pd.read_sql_query(
+        text_B = pd.read_sql(
             URL_QUERY.format(entry.pairs[1].content, EDIT_DISTANCE_THRESHOLD),
             con=remote_doc_store.engine,
         )
