@@ -158,3 +158,4 @@ tags
 # DB
 database.ini
 vuhuutiep.conf
+modules/dashboards/scheduler.py
