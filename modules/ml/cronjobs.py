@@ -20,11 +20,11 @@ POSTGRES_URI = os.getenv(
 CAND_DIM = 768
 RTRV_DIM = 1024
 HARD_SIM_THRESHOLD = 0.5
-CAND_PATH = os.getenv("CAND_PATH", "cand.bin")
-RTRV_PATH = os.getenv("RTRV_PATH", "rtrv.bin")
+CAND_PATH = os.getenv("CAND_PATH", "vectorizer_cand.bin")
+RTRV_PATH = os.getenv("RTRV_PATH", "vectorizer_rtrv.bin")
 INDEX = "document"
-LOCAL_IDX_PATH = os.getenv("LOCAL_IDX_PATH", "local_index.bin")
-REMOTE_IDX_PATH = os.getenv("REMOTE_IDX_PATH", "remote_index.bin")
+LOCAL_IDX_PATH = os.getenv("LOCAL_IDX_PATH", "faiss_index_local.bin")
+REMOTE_IDX_PATH = os.getenv("REMOTE_IDX_PATH", "faiss_index_remote.bin")
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -86,6 +86,7 @@ def update_local_db(local_doc_store, remote_doc_store):
 
     # Filter existing ids in local out of recent updated ids from remote db
     new_ids = sorted([_id for _id in new_ids if _id not in local_ids])
+    new_ids = new_ids[:200]  # debug
 
     docs = remote_doc_store.get_documents_by_id(new_ids, index=INDEX)
     logger.info(f"Retrieved {len(docs)} at {datetime.now()}")
@@ -140,18 +141,19 @@ def update_local_db(local_doc_store, remote_doc_store):
         for _id, l, r in zip(
             new_ids_chunks[i], local_results_chunks[i], remote_results_chunks[i]
         ):
-            local_sim = l.get("similarity_score", 0)
-            remote_sim = r.get("similarity_score", 0)
+            rank = "_".join(list(l.keys())[-1].split("_")[-2:])
+            local_sim = l.get(f"sim_score_{rank}", 0)
+            remote_sim = r.get(f"sim_score_{rank}", 0)
             if (local_sim > HARD_SIM_THRESHOLD) & (remote_sim > HARD_SIM_THRESHOLD):
                 if local_sim >= remote_sim:
                     sim_data = {
-                        "sim_score": local_sim,
-                        "similar_to": l["retrieve_result"],
+                        f"sim_score_{rank}": local_sim,
+                        f"similar_to_{rank}": l[f"sim_document_id_{rank}"],
                     }
                 else:
                     sim_data = {
-                        "sim_score": remote_sim,
-                        "similar_to": r["retrieve_result"],
+                        f"sim_score_{rank}": remote_sim,
+                        f"similar_to_{rank}": r[f"sim_document_id{rank}"],
                     }
                 id_meta.update({_id: sim_data})
 

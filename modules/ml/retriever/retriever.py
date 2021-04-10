@@ -155,10 +155,10 @@ class Retriever:
             self.document_store.update_embeddings(self.candidate_vectorizer)
             if save_path:
                 self.document_store.save(file_path=save_path)
-        # else:
-        #     self.document_store = FAISSDocumentStore.load(
-        #         faiss_file_path=save_path, sql_url=sql_url
-        #     )
+        else:
+            self.document_store = FAISSDocumentStore.load(
+                faiss_file_path=save_path, sql_url=sql_url
+            )
 
     def get_candidates(
         self, query_docs: List[str], top_k: int = 10, index: str = None, filters=None
@@ -187,7 +187,9 @@ class Retriever:
 
         return query_embs, score_matrix, vector_id_matrix
 
-    def _calc_scores_for_candidates(self, query_doc, candidate_ids):
+    def _calc_scores_for_candidates(
+        self, query_doc, candidate_ids, top_k_results: int = 10
+    ):
         """Caculates scores for each candidate in 2nd phase
 
         Args:
@@ -214,15 +216,17 @@ class Retriever:
         scores = candidate_embs.dot(query_emb.T)
         idx_scores = [(idx, score) for idx, score in enumerate(scores)]
 
-        # 0 location is the query_doc itself, so pick the next one
-        highest_score = sorted(idx_scores, key=(lambda tup: tup[1]), reverse=True)[1]
+        # 0 location is the query_doc itself, so pick the next ones
+        highest_scores = sorted(idx_scores, key=(lambda tup: tup[1]), reverse=True)[
+            1 : top_k_results + 1
+        ]
 
-        return candidate_docs_id[highest_score[0]], highest_score[1]
+        return [[candidate_docs_id[score[0]], score[1]] for score in highest_scores]
 
     def batch_retrieve(
         self,
         query_docs: List[str],
-        top_k_candidates: int = 10,
+        top_k_results: int = 10,
         process_query_docs: bool = False,
         index: str = None,
         filters=None,
@@ -231,7 +235,7 @@ class Retriever:
 
         Args:
             query_docs ([type]): [description]
-            top_k_candidates (int, optional): [description]. Defaults to 10.
+            top_k_results (int, optional): [description]. Defaults to 10.
             process_query_docs (bool, optional): [description]. Defaults to False.
             index ([type], optional): [description]. Defaults to None.
             filters ([type], optional): [description]. Defaults to None.
@@ -252,8 +256,11 @@ class Retriever:
             ]
 
         _, _, candidate_id_matrix = self.get_candidates(
-            query_docs=query_docs, top_k=top_k_candidates, index=index, filters=filters
-        )
+            query_docs=query_docs,
+            top_k=10 * top_k_results,
+            index=index,
+            filters=filters,
+        )  # create large candidates search space 10*top_k_results
 
         retrieve_results = []
 
@@ -264,16 +271,23 @@ class Retriever:
                 if candidate_id >= 0
             ]
 
-            retrieve_result, score = self._calc_scores_for_candidates(
-                query_doc=query_doc, candidate_ids=candidate_ids
+            reranked_candidates = self._calc_scores_for_candidates(
+                query_doc=query_doc,
+                candidate_ids=candidate_ids,
+                top_k_results=top_k_results,
             )
 
-            retrieve_results.append(
-                {
-                    "query_doc": query_doc,
-                    "retrieve_result": retrieve_result,
-                    "similarity_score": round(score[0], 5),
-                }
-            )
+            for rank, reranked_candidate in enumerate(reranked_candidates):
+                retrieve_results.append(
+                    {
+                        "query_doc": query_doc,
+                        f"sim_document_id_rank_{str(rank).zfill(2)}": reranked_candidate[
+                            0
+                        ],
+                        f"sim_score_rank_{str(rank).zfill(2)}": round(
+                            reranked_candidate[1][0], 5
+                        ),
+                    }
+                )
 
         return retrieve_results
