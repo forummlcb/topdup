@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 from urllib.parse import urlparse
 
 import altair as alt
@@ -69,12 +70,15 @@ def process_sim_score_table(engine):
 
 def run(db_url):
     engine = Engine(db_url)
-    df_posts_per_domain = process_posts_per_domain(engine)
     graph_posts_per_day = process_posts_per_day(engine)
+    post_per_day_caption = (
+        "Number of posts updated per day" f"(updated {str(datetime.now())})"
+    )
+    df_posts_per_domain = process_posts_per_domain(engine)
     df_domain_sim, graph_domain_sim_score = process_sim_score_table(engine)
     report = dp.Report(
+        dp.Plot(graph_posts_per_day, caption=post_per_day_caption),
         dp.DataTable(df_posts_per_domain, caption="Number of posts per domain"),
-        dp.Plot(graph_posts_per_day, caption="Number of posts updated per day"),
         dp.DataTable(df_domain_sim, caption="Simplified similar_docs table"),
         dp.Plot(graph_domain_sim_score, caption="Similarity score histogram (>= 0.5)"),
     )
