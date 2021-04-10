@@ -118,7 +118,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-env_kd/
+topdup_env/
 
 # Spyder project settings
 .spyderproject

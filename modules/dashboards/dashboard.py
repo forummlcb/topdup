@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 import altair as alt
@@ -68,11 +68,17 @@ def process_sim_score_table(engine):
     return (df_sim, graph)
 
 
+def get_current_time_in_vietname() -> str:
+    timezone_offset = +7.0  # Hanoi time (UTC+07:00)
+    tzinfo = timezone(timedelta(hours=timezone_offset))
+    return datetime.now(tzinfo).strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
 def run(db_url):
     engine = Engine(db_url)
     graph_posts_per_day = process_posts_per_day(engine)
     post_per_day_caption = (
-        "Number of posts updated per day" f"(updated {str(datetime.now())})"
+        f"Number of posts updated per day (updated {get_current_time_in_vietname()})"
     )
     df_posts_per_domain = process_posts_per_domain(engine)
     df_domain_sim, graph_domain_sim_score = process_sim_score_table(engine)
@@ -82,7 +88,11 @@ def run(db_url):
         dp.DataTable(df_domain_sim, caption="Simplified similar_docs table"),
         dp.Plot(graph_domain_sim_score, caption="Similarity score histogram (>= 0.5)"),
     )
-    report.publish(name="TopDup monitoring table", open=True)
+    report.publish(name="TopDup monitoring table", open=False)
+    print(
+        "View report at "
+        "https://datapane.com/u/tiepvupsu/reports/topdup-monitoring-table/"
+    )
 
 
 if __name__ == "__main__":
