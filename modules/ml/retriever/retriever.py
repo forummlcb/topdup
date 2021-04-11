@@ -89,7 +89,7 @@ class Retriever:
         else:
             self.training_documents = training_documents
 
-        self.spare_documnet_embedding = self.candidate_vectorizer.fit_transform(
+        self.sparse_documnet_embedding = self.candidate_vectorizer.fit_transform(
             self.training_documents
         )
 
@@ -133,7 +133,7 @@ class Retriever:
         else:
             self.training_documents = training_documents
 
-        self.spare_documnet_embedding = self.retriever_vectorizer.fit_transform(
+        self.sparse_documnet_embedding = self.retriever_vectorizer.fit_transform(
             self.training_documents
         )
 

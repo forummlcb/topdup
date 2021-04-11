@@ -86,7 +86,6 @@ def update_local_db(local_doc_store, remote_doc_store):
 
     # Filter existing ids in local out of recent updated ids from remote db
     new_ids = sorted([_id for _id in new_ids if _id not in local_ids])
-    new_ids = new_ids[:200]  # debug
 
     docs = remote_doc_store.get_documents_by_id(new_ids, index=INDEX)
     logger.info(f"Retrieved {len(docs)} at {datetime.now()}")
@@ -126,10 +125,12 @@ def update_local_db(local_doc_store, remote_doc_store):
     logger.info("Embeddings updated")
 
     docs = [doc.text for doc in docs]
-    local_results = local_retriever.batch_retrieve(docs)
+
     if remote_reindex:
+        local_results = local_retriever.batch_retrieve(docs)
         remote_results = local_results.copy()
     else:
+        local_results = local_retriever.batch_retrieve(docs)
         remote_results = remote_retriever.batch_retrieve(docs)
 
     # Split payloads to chunks to reduce pressure on the database

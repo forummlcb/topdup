@@ -147,7 +147,6 @@ class SQLDocumentStore(BaseDocumentStore):
             for row in query.all():
                 documents.append(self._convert_sql_row_to_document(row))
 
-        # sorted_documents = sorted(documents, key=lambda doc: vector_ids.index(doc.meta["vector_id"]))  # type: ignore
         sorted_documents = sorted(
             documents, key=lambda doc: vector_ids.index(doc.vector_id)
         )
@@ -180,16 +179,19 @@ class SQLDocumentStore(BaseDocumentStore):
         FROM (
             SELECT DISTINCT document_id AS document_id_a
                 ,value AS sim_score
+                ,RIGHT(name, 2) AS rank
             FROM meta
-            WHERE name = 'sim_score'
+            WHERE name LIKE 'sim_score%%'
                 AND cast(value AS DECIMAL) > {threshold}
             ) AS m1
         INNER JOIN (
             SELECT DISTINCT document_id AS document_id_a
                 ,value AS document_id_b
+                ,RIGHT(name, 2) AS rank
             FROM meta
-            WHERE name = 'similar_to'
+            WHERE name LIKE 'similar_to%%'
             ) AS m2 ON m1.document_id_a = m2.document_id_a
+            AND m1.rank = m2.rank
         INNER JOIN (
             SELECT DISTINCT document_id
                 ,lower(value) AS "domain"
@@ -203,11 +205,9 @@ class SQLDocumentStore(BaseDocumentStore):
             WHERE LOWER("name") IN ({", ".join(["'{}'".format(x) for x in META_MAPPING["domain"]])})
             ) AS m4 ON m2.document_id_b = m4.document_id
         --filter rules defined by PO
-        WHERE (
-                m3.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])})
-                OR m4.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])})
-                )
-            AND m3.domain != m4.domain""",
+        WHERE (m3.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])})
+            OR m4.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])}))
+        AND m3.domain != m4.domain""",
             con=self.engine,
         )
 
@@ -229,15 +229,13 @@ class SQLDocumentStore(BaseDocumentStore):
             meta_A.update({"document_id": document_id[0]})
             meta_B.update({"document_id": document_id[1]})
             for row in meta.filter(MetaORM.document_id == document_id[0]).all():
-                if row.name == "sim_score":
-                    meta_A.update({row.name: document_id[2]})
-                else:
+                if "sim" not in row.name:
                     meta_A.update({row.name: row.value})
             for row in meta.filter(MetaORM.document_id == document_id[1]).all():
-                if row.name == "sim_score":
-                    meta_B.update({row.name: document_id[2]})
-                else:
+                if "sim" not in row.name:
                     meta_B.update({row.name: row.value})
+            meta_A.update({"sim_score": document_id[2]})
+            meta_B.update({"sim_score": document_id[2]})
 
             documents.append((meta_A, meta_B))
 
