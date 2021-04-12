@@ -19,7 +19,7 @@ POSTGRES_URI = os.getenv(
 )
 CAND_DIM = 768
 RTRV_DIM = 1024
-HARD_SIM_THRESHOLD = 0.5
+HARD_SIM_THRESHOLD = 0.8
 CAND_PATH = os.getenv("CAND_PATH", "vectorizer_cand.bin")
 RTRV_PATH = os.getenv("RTRV_PATH", "vectorizer_rtrv.bin")
 INDEX = "document"
@@ -124,8 +124,6 @@ def update_local_db(local_doc_store, remote_doc_store):
     )
     logger.info("Embeddings updated")
 
-    docs = [doc.text for doc in docs]
-
     if remote_reindex:
         local_results = local_retriever.batch_retrieve(docs)
         remote_results = local_results.copy()
@@ -134,29 +132,28 @@ def update_local_db(local_doc_store, remote_doc_store):
         remote_results = remote_retriever.batch_retrieve(docs)
 
     # Split payloads to chunks to reduce pressure on the database
-    new_ids_chunks = list(chunks(new_ids, 1000))
     local_results_chunks = list(chunks(local_results, 1000))
     remote_results_chunks = list(chunks(remote_results, 1000))
-    id_meta = dict()
-    for i in tqdm(range(len(new_ids_chunks)), desc="Updating meta.....  "):
-        for _id, l, r in zip(
-            new_ids_chunks[i], local_results_chunks[i], remote_results_chunks[i]
-        ):
+    id_meta = list()
+    for i in tqdm(range(len(local_results_chunks)), desc="Updating meta.....  "):
+        for l, r in zip(local_results_chunks[i], remote_results_chunks[i]):
             rank = "_".join(list(l.keys())[-1].split("_")[-2:])
             local_sim = l.get(f"sim_score_{rank}", 0)
             remote_sim = r.get(f"sim_score_{rank}", 0)
-            if (local_sim > HARD_SIM_THRESHOLD) & (remote_sim > HARD_SIM_THRESHOLD):
+            if (local_sim > HARD_SIM_THRESHOLD) or (remote_sim > HARD_SIM_THRESHOLD):
                 if local_sim >= remote_sim:
                     sim_data = {
+                        "document_id": l["document_id"],
                         f"sim_score_{rank}": local_sim,
                         f"similar_to_{rank}": l[f"sim_document_id_{rank}"],
                     }
                 else:
                     sim_data = {
+                        "document_id": r["document_id"],
                         f"sim_score_{rank}": remote_sim,
-                        f"similar_to_{rank}": r[f"sim_document_id{rank}"],
+                        f"similar_to_{rank}": r[f"sim_document_id_{rank}"],
                     }
-                id_meta.update({_id: sim_data})
+                id_meta.append(sim_data)
 
         remote_doc_store.update_documents_meta(id_meta=id_meta)
     logger.info("Similarity scores updated into metadata")

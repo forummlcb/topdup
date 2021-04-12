@@ -427,12 +427,13 @@ class SQLDocumentStore(BaseDocumentStore):
             self.session.add(m)
         self.session.commit()
 
-    def update_documents_meta(self, id_meta: Dict[str, Dict[str, str]]):
+    def update_documents_meta(self, id_meta: List[Dict[str, str]]):
         """Updates the metadata dictionary of multiple documents
         """
         # Query the current metadata of documents
-        document_ids = list(set(id_meta.keys()))
-        names = list(set(sum([list(v.keys()) for v in id_meta.values()], [])))
+        document_ids = list(set([im["document_id"] for im in id_meta]))
+        names = list(set(sum([list(im.keys()) for im in id_meta], [])))
+        names.remove("document_id")
         current_meta = pd.read_sql(
             sql="""
         SELECT DISTINCT document_id, name, value FROM meta
@@ -457,9 +458,10 @@ class SQLDocumentStore(BaseDocumentStore):
         # Insert the metadata on DataFrame `current_meta`
         ## Build id_meta to DataFrame
         id_meta_df = list()
-        for item in id_meta.items():
-            for i in item[1].items():
-                id_meta_df.append([item[0], i[0], i[1]])
+        for im in id_meta:
+            for k in im.keys():
+                if k != "document_id":
+                    id_meta_df.append([im["document_id"], k, im[k]])
 
         id_meta_df = pd.DataFrame(id_meta_df, columns=current_meta.columns)
         ## Bulk insert
