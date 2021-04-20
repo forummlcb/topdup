@@ -179,6 +179,7 @@ class SQLDocumentStore(BaseDocumentStore):
         FROM (
             SELECT DISTINCT document_id AS document_id_a
                 ,value AS sim_score
+                ,updated
                 ,RIGHT(name, 2) AS rank
             FROM meta
             WHERE name LIKE 'sim_score%%'
@@ -207,7 +208,8 @@ class SQLDocumentStore(BaseDocumentStore):
         --filter rules defined by PO
         WHERE (m3.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])})
             OR m4.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])}))
-        AND m3.domain != m4.domain""",
+        AND m3.domain != m4.domain
+        AND m1.updated > '{from_time.strftime("%Y-%m-%d %H:%M:%S")}'""",
             con=self.engine,
         )
 
