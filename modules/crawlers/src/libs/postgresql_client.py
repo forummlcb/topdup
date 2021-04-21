@@ -38,8 +38,8 @@ class Postgres_Article(sqlalchemy_base):
 
 class PostgresClient():
     def __init__(self):
-        db_string = f"postgres://{POSTGRES_USERNAME}:\
-            {POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+        db_string = f'postgres://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}' \
+            f'@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
         db = create_engine(db_string)
         Session = sessionmaker(db)
         self._session = Session()
