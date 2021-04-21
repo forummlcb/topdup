@@ -3,7 +3,7 @@
 from libs.data import ArticleManager
 from libs.config import ConfigManager
 from libs.browser_crawler import BrowserWrapper
-# from libs.postgresql_client import PostgresClient
+from libs.postgresql_client import PostgresClient
 from libs.utils import get_utc_now_date
 from libs.utils import print_exception, get_max_crawler_can_be_run
 from libs.utils import open_utf8_file_to_write, get_date_string
