@@ -43,11 +43,6 @@ class Docbao_Crawler():
         # Load data from file
         self._config_manager.load_data(crawl_newspaper=self._crawl_newspaper)
 
-    def save_data_to_file(self):
-        print("Save data to file")
-        self._data_manager.save_data()
-        self._config_manager.save_data(self._crawl_newspaper)
-
     def crawler_process(
             self, process_name, lock,
             timeout_flag, browser_list, crawl_queue,
