@@ -285,3 +285,121 @@
   background-color: black;
   color: white;
 }
+
+
+@media only screen and (max-width: 768px) {
+  
+  
+  .sim-header-row {
+    max-width: 650px;
+    min-width: 600px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+    padding-left: 30px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 24px;
+    letter-spacing: 0.03em;
+    color: #000000;
+  }
+  .sim-report-row {
+    max-width: 650px;
+    min-width: 500px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-right: -15px;
+    margin-left: -15px;
+    padding-left: 30px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    letter-spacing: 0.03em;
+    color: #000000;
+    border-bottom: 2px solid rgba(223, 223, 223, 0.6);
+  }
+  .sr-title-container {
+    margin-right: 5px;
+    max-width: 156px !important;
+    flex-grow: 2 !important;
+    margin-right: 0px !important;
+    font-size:12px !important;
+  }
+  
+  .sim-header-row.sr-title-container {
+    margin-right: 5px;
+    max-width: 156px;
+    flex-direction: column;
+    
+  }
+  .sr-title-container.input-group.input-group-sm.mb-3{
+    width: 156px !important;
+   
+  }
+
+  .header-domain{
+    max-width: 158px  !important;
+    flex-grow: 1 !important;
+    font-size:12px !important;
+}
+.header-domain > *{
+  margin-left: 89px !important;
+  width: 60px  !important;
+}
+
+  .header-date{
+    max-width: 150px !important;
+    flex-grow: 1 !important;
+    font-size:12px !important;
+  }
+
+
+  .sr-title{
+    width: 156px;
+    height: 12px;
+
+    margin: 15px;
+    
+  }
+  .btn.btn-outline-secondary.btn-sm.sr-vote-btn{
+    width: 40px;
+  }
+  .btn.btn-outline-secondary.btn-sm.sr-vote-error-btn{
+    width: 13px;
+    height: 12px;
+  }
+  .btn.btn-outline-secondary.btn-sm.sr-vote-irrelevant-btn{
+    width: 12px;
+    height: 9px;
+  }
+  .sr-vote-container {
+    display: flex;
+    margin-left: 10px;
+    margin-right: 5px;
+    width: 50px;
+  }
+ 
+  
+  .sr-domain-date {
+    display: flex;
+    margin-left: 24px;
+    margin-right: 20px;
+    flex: 0 0 25%;
+    max-width: 160px
+  }
+  
+}
+
+
+@media only screen and (max-width: 480px) {
+  .sr-header-title.margin-bottom--xxs {
+    background-color: rgb(255, 0, 0);
+    color :rgba(255, 0, 0, 0.6)
+  }
+}

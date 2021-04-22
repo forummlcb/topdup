@@ -8,7 +8,6 @@
 }
 
 .topdup-brand {
-  position: absolute;
   width: 92px;
   height: 38px;
   display: flex;
@@ -34,4 +33,23 @@
   color: #383838 !important;
   display: block;
   padding: 0.5rem 1rem;
+}
+
+@media only screen and (max-width: 768px) {
+  .topdup-nav-items {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #383838;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+   justify-content:flex-end;
+   padding-right: 20px;
+  
+  }
+  .topdup-nav-items > *{
+    padding:5px;
+  }
 }

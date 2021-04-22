@@ -47,7 +47,7 @@ function App() {
           <NavigationBar setUserData={setUserData} userData={userData} isLoggedIn={token ? true : false} />
           <div className="page-content">
             <Switch>
-              <Redirect exact from="/" to="/dup-report" />
+              <Route exact path="/" component={DupReport} />
               <Route exact path="/about" component={About} />
               <Route exact path="/contact" component={Address} />
               <Route exact path="/privacy-policy" component={PrivacyPolicy} />

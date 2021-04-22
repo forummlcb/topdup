@@ -32,12 +32,16 @@ export default function Authentication(props) {
 
   const notLoggedInItems = (
     <>
-      <Nav.Link href="#" onClick={() => setLoginModalShow(true)}>
-        <button className="btn btn-sm login-btn">Đăng nhập</button>
-      </Nav.Link>
-      <Nav.Link href="#" onClick={() => setSignupModalShow(true)}>
-        <button className="btn btn-sm login-btn">Đăng ký</button>
-      </Nav.Link>
+      <div>
+        <Nav.Link href="#" onClick={() => setLoginModalShow(true)}>
+          <button className="btn btn-sm login-btn">Đăng nhập</button>
+        </Nav.Link>
+      </div>
+      <div>
+        <Nav.Link href="#" onClick={() => setSignupModalShow(true)}>
+          <button className="btn btn-sm login-btn">Đăng ký</button>
+        </Nav.Link>
+      </div>
     </>
   )
 

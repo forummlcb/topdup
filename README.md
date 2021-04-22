@@ -1,6 +1,7 @@
 [![Python package](https://github.com/tiepvupsu/tabml/actions/workflows/python-package.yml/badge.svg)](https://github.com/tiepvupsu/tabml/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/forummlcb/topdup/branch/master/graph/badge.svg?token=L2YB9WMBXH)](https://codecov.io/gh/forummlcb/topdup)
 
+
 # Giới thiệu về TopDup
 TopDup là dự án cộng đồng được khởi xướng bởi [Forum Machine Learning Cơ bản](https://www.facebook.com/groups/machinelearningcoban) nhằm hỗ trợ các website, blog công nghệ bảo vệ bản quyền bài viết và chống sao chép.
 
