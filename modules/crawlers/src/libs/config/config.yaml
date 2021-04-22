@@ -67,7 +67,7 @@ crawling_list:
 - Cafebiz:
     id_type: href
     browser_profile: ''
-    web_url: http://cafebiz.vn
+    web_url: https://cafebiz.vn
     timezone: Asia/Ho_Chi_Minh
     remove_date_tag_html: false
     remove_content_html: true
@@ -200,7 +200,7 @@ crawling_list:
 - vuilaptrinh.com:
     id_type: href
     browser_profile: ''
-    web_url: http://vuilaptrinh.com/
+    web_url: https://vuilaptrinh.com/
     timezone: Asia/Ho_Chi_Minh
     remove_date_tag_html: false
     remove_content_html: true
@@ -467,7 +467,7 @@ crawling_list:
 - genk:
     id_type: href
     browser_profile: ''
-    web_url: http://genk.vn
+    web_url: https://genk.vn
     timezone: Asia/Ho_Chi_Minh
     remove_date_tag_html: false
     remove_content_html: true
