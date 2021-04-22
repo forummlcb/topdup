@@ -13,4 +13,4 @@ RUN pip3 install -r requirements.txt
 
 WORKDIR /home/src
 
-CMD ["python3", "crawl.py"]
+CMD ["python3", "-u", "crawl.py"]
