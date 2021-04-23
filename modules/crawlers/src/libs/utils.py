@@ -5,46 +5,20 @@ from datetime import datetime
 import os
 from libs.browser_crawler import BrowserCrawler
 import time
-import psutil
 import pytz
 from selenium import webdriver
 from lxml import etree
-import sys
-import traceback
 import html
 import unicodedata
 import requests
+from loguru import logger
 _firefox_browser = None
-
-# UTILITY FUNCTION
-
-
-def try_download(image_url):
-    """Try to download image_url to check if image_url is ok"""
-    """
-        Output:
-            - True: ok
-            - False: not ok
-            - None: error (not ok)
-    """
-    try:
-        result = requests.get(url=image_url, timeout=0.5)
-        return result.status_code == 200
-    except Exception as ex:
-        print(ex)
-        return None
 
 
 def remove_accents(s):
     s = re.sub('\u0110', 'D', s)
     s = re.sub('\u0111', 'd', s)
     return str(unicodedata.normalize('NFKD', s).encode('ASCII', 'ignore'))
-
-
-def print_exception():
-    # Print error message in try..exception
-    exec_info = sys.exc_info()
-    traceback.print_exception(*exec_info)
 
 
 def trim_topic(topic, max_length=10):
@@ -153,7 +127,6 @@ def parse_date_from_string(tagstring, webconfig):
         flags = re.UNICODE
         filter = re.compile(date_re, flags=flags)
 
-        # for tagstring in foundtag.contents:
         searchobj = filter.search(str(tagstring))
 
         if searchobj:
@@ -164,22 +137,21 @@ def parse_date_from_string(tagstring, webconfig):
                 secondcom = searchstr.find(',', firstcom + 1)
                 searchstr = searchstr[:firstcom] + searchstr[secondcom:]
 
-            try:  # sometime datetime is not in right pattern
+            try:
                 result = datetime.strptime(
-                    searchstr, date_pattern)  # extract naive time
-                result = timezone.localize(result).astimezone(
-                    pytz.utc)  # localize and convert to UTC time
+                    searchstr, date_pattern)
+                result = timezone.localize(result).astimezone(pytz.utc)
                 return result
             except Exception as ex:
-                print(ex)
-                print(
-                    "Warning: published date %s is not in %s pattern" %
-                    (searchobj.group(1), date_pattern))
+                logger.exception(ex)
+                logger.error(
+                    "Warning: published date {} is not in {} pattern",
+                    searchobj.group(1), date_pattern)
         else:
             pass
 
     if parsable:
-        print("Date found but can't parse exactly. Use current time instead")
+        logger.info("Date found but can't parse exactly. Use current time instead")
         return get_utc_now_date()
     else:
         return False
@@ -204,10 +176,10 @@ def check_contain_filter(topic, contain_filter):
     for and_terms in search_string.split(';'):
         or_term_satisfy = False
         for or_term in and_terms.split(','):
-            if or_term.strip() in content_string:  # current or_term is in search_string
+            if or_term.strip() in content_string:
                 or_term_satisfy = True
                 break
-        if not or_term_satisfy:  # some and_term doesn't in search_string
+        if not or_term_satisfy:
             and_terms_satisfy = False
             break
 
@@ -215,16 +187,6 @@ def check_contain_filter(topic, contain_filter):
         return True
     else:
         return False
-
-
-def get_max_crawler_can_be_run():
-    # get max crawler that system can support (base on free ram)
-    ram_for_each_crawler = 350000000
-    safe_margin = 0.5  # free 45% for safe
-    mem = psutil.virtual_memory()
-    swap_free = psutil.swap_memory().free
-    mem_free = (mem.free + swap_free) * safe_margin
-    return int(mem_free / ram_for_each_crawler)
 
 
 def is_another_session_running():
@@ -235,8 +197,7 @@ def finish_session():
     try:
         os.remove("docbao.lock")
     except Exception as ex:
-        print(ex)
-        print_exception()
+        logger.exception(ex)
 
 
 def new_session():
@@ -255,7 +216,7 @@ def open_utf8_file_to_read(filename):
     try:
         return codecs.open(filename, "r", "utf-8")
     except Exception as ex:
-        print(ex)
+        logger.exception(ex)
         return None
 
 
@@ -263,7 +224,7 @@ def open_utf8_file_to_write(filename):
     try:
         return codecs.open(filename, "w+", "utf-8")
     except Exception as ex:
-        print(ex)
+        logger.exception(ex)
         return None
 
 
@@ -271,7 +232,7 @@ def open_binary_file_to_write(filename):
     try:
         return open(filename, "wb+")
     except Exception as ex:
-        print(ex)
+        logger.exception(ex)
         return None
 
 
@@ -279,7 +240,7 @@ def open_binary_file_to_read(filename):
     try:
         return open(filename, "rb")
     except Exception as ex:
-        print(ex)
+        logger.exception(ex)
         return None
 
 
@@ -318,39 +279,37 @@ def read_url_source(url, webconfig, _firefox_browser=None):
             try:
                 response = requests.get(url, headers=hdr, timeout=30)
             except Exception as ex:
-                print(ex)
-                print_exception()
-                print("Request timeout")
+                logger.exception(ex)
+                logger.exception("Request timeout")
             result = response.status_code == 200
             if response.encoding == 'ISO-8859-1':
                 html_source = response.content.decode('utf-8')
             else:
                 html_source = response.text
         else:
-            print("use browser to open %s" % url)
+            logger.info("use browser to open %{}", url)
             if _firefox_browser.get_browser() is not None:
                 browser = _firefox_browser.get_browser()
             else:
-                print("create new instance of firefox browser")
+                logger.info("create new instance of firefox browser")
 
                 browser = BrowserCrawler(
                     display_browser=_display_browser,
                     fast_load=_fast_load,
                     profile_name=profile_name)
                 _firefox_browser.set_browser(browser, profile_name)
-                print(_firefox_browser)
+                logger.info(_firefox_browser)
 
-            print("load page: %s" % url)
+            logger.info("load page: {}", url)
             result = browser.load_page(url, prevent_auto_redirect, timeout, 5)
-            print("browser load page result %s" % str(result))
+            logger.info("browser load page result {}", str(result))
             if result is True:
                 try:
                     time.sleep(3)
                     html_source = browser.get_page_html()
                 except Exception as ex:
-                    print(ex)
-                    print_exception()
-                    print("get page html error")
+                    logger.exception(ex)
+                    logger.exception("get page html error")
                     result = False
 
         if result is True:
@@ -358,9 +317,8 @@ def read_url_source(url, webconfig, _firefox_browser=None):
         else:
             return None
     except Exception as ex:
-        print(ex)
-        print_exception()
-        print("can't open " + url)
+        logger.exception(ex)
+        logger.exception("Can't open " + url)
         return None
 
 
@@ -368,11 +326,9 @@ def quit_browser():
     global _firefox_browser
 
     if _firefox_browser is not None:
-        print("found an running instance of firefox. close it")
-        print(_firefox_browser)
+        logger.info("found an running instance of firefox. close it")
+        logger.info(_firefox_browser)
         _firefox_browser.quit()
-
-# URL utilities
 
 
 def get_fullurl(weburl, articleurl):
@@ -384,9 +340,6 @@ def get_fullurl(weburl, articleurl):
             return weburl + articleurl.replace('//', '/')
         else:
             return weburl + articleurl
-
-
-# firefox functions
 
 
 def get_firefox_profile(profile_name):
@@ -401,14 +354,12 @@ def get_firefox_profile(profile_name):
     if os.path.isdir(profile_path):
         return webdriver.FirefoxProfile(profile_path)
     else:
-        print("profile %s doesn't exist yet")
-        print("i will create profile path at %s" % profile_path)
-        print("then you need to create %s profile with setup_browser.py")
-        print("you default profile in this session")
+        logger.info("profile %s doesn't exist yet")
+        logger.info("i will create profile path at {}", profile_path)
+        logger.info("then you need to create profile with setup_browser.py")
+        logger.info("you default profile in this session")
         os.mkdir(profile_path)
         return None
-
-# html function
 
 
 def remove_html_advanced(html_string, ignore_xpath, seperator='\n'):
@@ -416,14 +367,13 @@ def remove_html_advanced(html_string, ignore_xpath, seperator='\n'):
     try:
         for xpath in ignore_xpath:
             ignore_elements = html_etree.xpath(xpath)
-            ignore_elements.reverse()  # reverse to remove bottom element to top
+            ignore_elements.reverse()
             for element in ignore_elements:
                 parent = element.getparent()
                 if parent is not None:
                     parent.remove(element)
     except Exception as ex:
-        print(ex)
-        print_exception()
+        logger.exception(ex)
 
     html_clean_string = get_tagstring_from_etree(html_etree)
     return remove_html(html_clean_string, seperator)
@@ -434,15 +384,10 @@ def remove_html(html_string, seperator='\n'):
 
 
 def get_tagstring_from_etree(html_tree):
-    # tagstring = str(etree.tostring(html_tree, encoding='utf-8'), encoding='utf-8')
     if type(html_tree) is etree._ElementUnicodeResult:
         tagstring = str(html_tree)
     else:
         tagstring = etree.tostring(html_tree, encoding='unicode')
-    # tagstring = str(etree.tostring(html_tree, encoding='utf-8'))
-    # turn multispace to one space. Important for date recogination
-    # print(tagstring)
-    # replace &nbsp; with normal space. Note: the first space is &nbsp, not space
     tagstring.replace(u'\xa0', ' ')
     tagstring = ' '.join([x.strip()
                          for x in tagstring.split(' ') if x not in ['', ' ', u'\xa0']])
