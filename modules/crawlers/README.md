@@ -17,3 +17,5 @@ If you run local, you must change the value of `DOCBAO_POSTGRES_HOST` in `.env` 
 `docker-compose build`
 
 `docker-compose up`
+
+`docker-compose stop`

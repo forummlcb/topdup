@@ -7,21 +7,40 @@
 # File: crawl.py
 ################################################
 
+import time
+import schedule
+import functools
 from libs.utils import new_session, print_exception, finish_session
 from libs.utils import is_another_session_running
 from libs.docbao_crawler import Docbao_Crawler
 
+def print_elapsed_time(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_timestamp = time.time()
+        print('LOG: running crawler "%s"' % func.__name__)
+        result = func(*args, **kwargs)
+        print('LOG: "%s" crawler completed in %d seconds' % (func.__name__, time.time() - start_timestamp))
+        return result
 
-if not is_another_session_running():
-    new_session()
-    try:
-        crawler = Docbao_Crawler(crawl_newspaper=True, export_to_postgres=True)
-        crawler.load_data_from_file()
-        crawler.multiprocess_crawl()
-        # crawler.save_data_to_file()
-    except Exception as ex:
-        print(ex)
-        print_exception()
-    finish_session()
-else:
-    print("Another session is running. Exit")
+    return wrapper
+
+# Run job every 12 hours
+@print_elapsed_time
+def main():
+    if not is_another_session_running():
+        new_session()
+        try:
+            crawler = Docbao_Crawler(crawl_newspaper=True, export_to_postgres=True)
+            crawler.load_data_from_file()
+            crawler.multiprocess_crawl()
+        except Exception as ex:
+            print(ex)
+            print_exception()
+        finish_session()
+    else:
+        print("Another session is running. Exit")
+
+schedule.every(12).hours.do(main)
+
+schedule.run_all()
