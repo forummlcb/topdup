@@ -1,4 +1,3 @@
-from libs.utils import print_exception
 from libs.utils import open_utf8_file_to_write
 from libs.utils import check_contain_filter, get_utc_now_date, get_fullurl
 from libs.utils import read_url_source, remove_accents, remove_html
@@ -8,6 +7,7 @@ from libs.utils import trim_topic
 import re                     # regular expression to extract data from article
 import json
 import time
+from loguru import logger
 from datetime import datetime
 from lxml import etree
 import pytz
@@ -129,8 +129,7 @@ class Article:
                     else:
                         first_image = False
         except Exception as ex:
-            print(ex)
-            print_exception()
+            logger.exception(ex)
             pass
         return image_list
 
@@ -182,38 +181,6 @@ class Article:
             text, self.get_language())
         self._tokenized = True
 
-    def is_positive(self, neg_prob=3, neu_prob=7):
-        return True
-        # """Check if this article is positive or not too negative"""
-
-        # try:
-        #     URL = 'http://103.192.236.77:2020/sentiment'
-        #     title = self.get_topic()
-        #     content = self.get_semi_full_content()
-        #     #content = article.get_content_as_string()
-        #     response = requests.post(URL, json={'title' : title, 'content':content})
-        #     result = response.json()
-        #     choice = random.randint(1, 10)
-        #     if result == "neg":
-        #         if choice <= neg_prob:
-        #             print("accept negative post")
-        #             return True
-        #         else:
-        #             print("Do not accept negative post")
-        #             return False
-        #     elif result == "pos":
-        #         print("Positive post")
-        #         return True
-        #     else:
-        #         if choice <= neu_prob:
-        #             print("accept neutral post")
-        #             return True
-        #         else:
-        #             print("Do not accept neutral post")
-        #             return False
-        # except:
-        #     return True
-
     def is_quality_content(self, min_word=50, min_long_image=1, min_image=3):
         '''
         Check if this article is long and have many images
@@ -223,7 +190,7 @@ class Article:
 
         if (len(content.split()) >= min_word and len(images) >= min_long_image) or\
                 len(images) >= min_image:
-            return self.is_positive()
+            return True
         else:
             return False
 
@@ -244,12 +211,6 @@ class ArticleManager:
 
     def create_article_uuid(self):
         return str(uuid.uuid4())
-
-    def push_data_to_mysql(self):
-        print("push data to mysql")
-        print(len(self._data))
-        for article in self._data:
-            print(article.get_topic())
 
     def get_sorted_article_list(self, only_newspaper=False):
         if only_newspaper:
@@ -273,68 +234,6 @@ class ArticleManager:
             if self._data[key]._id == id:
                 return self._data[key]
         return None
-
-    def get_latest_article_contain_keyword(
-            self, keyword, only_newspaper=False, number=1):
-        '''
-        function
-        --------
-        return article containing a specific keyword
-
-        input
-        -----
-        number: number of return article
-
-        output
-        ------
-        a list of article
-        '''
-        articles = []
-
-        if self._sorted_article_list is None:
-            self._sorted_article_list = self.get_sorted_article_list()
-        count = 0
-        for i in range(0, len(self._sorted_article_list)):
-            article = self._sorted_article_list[i]
-            # find in topic and in content
-            if keyword.strip() in article.get_topic().lower():
-                if only_newspaper and (article.get_post_type() != 0):
-                    pass
-                else:
-                    count += 1
-                    articles.append(article)
-            if count == number:
-                break
-        if len(articles) == 0:
-            return None
-        else:
-            return articles
-
-    def get_similarity(self, id1, id2, full_content=False, algorithm='cosine'):
-        '''
-        return similarity between articles has id1 and id2
-        :input:
-            full_content: compare title or all content
-            algorithm: from https://pypi.org/project/textdistance/#description
-        :output:
-            normalized_similarity(0..1)
-            None if error
-        '''
-        article_1 = self.get_article(id1)
-        article_2 = self.get_article(id2)
-        if article_1 and article_2:
-            if full_content:
-                content_1 = article_1.get_full_content()
-                content_2 = article_2.get_full_content()
-            else:
-                content_1 = article_1.get_topic()
-                content_2 = article_2.get_topic()
-            similarity = eval("textdistance." + algorithm.lower()
-                              ).normalized_similarity(content_1, content_2)
-            return similarity
-        else:
-            print("Can't find article has id: %s or %s" % (id1, id2))
-            return None
 
     def search_in_database(
             self, search_string, search_content=True, tag_filter=None, max_number=None):
@@ -406,7 +305,7 @@ class ArticleManager:
             #    return None
 
         if webconfig.get_output_html():
-            print(html)  # for test
+            logger.info(html)  # for test
 
         detail_page_html_tree = etree.HTML(html)
 
@@ -421,10 +320,7 @@ class ArticleManager:
                 return (False, detail_page_html_tree)
         else:
             tagstring = get_tagstring_from_etree(detail_page_html_tree)
-
-            # print("html tag that contain date: %s" % tagstring)
             topic = remove_html(tagstring)
-            # print(' _ '* 100)
             return (topic, detail_page_html_tree)
 
     def get_time_of_an_url(
@@ -451,36 +347,31 @@ class ArticleManager:
                 else:
                     detail_page_html_tree = etree.HTML(html)
             except Exception as ex:
-                print(ex)
-                print_exception()
-                print("Can't open detail page to get time")
+                logger.exception(ex)
+                logger.error("Can't open detail page to get time")
                 return None
 
         if webconfig.get_output_html():
-            print(html)  # for testing
+            logger.info(html)
 
         a = True
         while a:
             # try:
             result = detail_page_html_tree.xpath(date_xpath)
-            # print(result)
             if isinstance(result, list):
                 if len(result) > 0:
-                    # print("use_index_number %s" % str(use_index_number))
-                    # print("index: %s" % str(index))
-                    # print(result)
                     if use_index_number is True:
                         result = result[index]
                     else:
                         result = result[0]
                 else:
-                    print("date_xpath return no result")
+                    logger.info("date_xpath return no result")
                     ignore_topic_not_have_publish_date =\
                         webconfig.get_ignore_topic_not_have_publish_date()
                     if ignore_topic_not_have_publish_date:
                         return False
                     else:
-                        print("use current time instead")
+                        logger.info("use current time instead")
                         return\
                             (
                                 pytz.utc.localize(datetime.utcnow()),
@@ -488,11 +379,11 @@ class ArticleManager:
             a = False
 
         tagstring = get_tagstring_from_etree(result)
-        print(tagstring)
+        logger.info(tagstring)
         remove_date_tag_html = webconfig.get_remove_date_tag_html()
         if remove_date_tag_html:
             tagstring = remove_html(tagstring)
-        print("html tag that contain date: %s" % tagstring)
+        logger.info("html tag that contain date: %s" % tagstring)
 
         result = parse_date_from_string(tagstring, webconfig)
         if result is not False:
@@ -563,7 +454,6 @@ class ArticleManager:
             None if link is not an article
         false if browser can't open url
         '''
-        # cdn_manager = CDNManager(self._config_manager)
         id_type = webconfig.get_id_type()
 
         if "href" in id_type:
@@ -579,33 +469,30 @@ class ArticleManager:
         get_detail_content = webconfig.get_detail_content()
         extract_xpath = webconfig.get_extract_xpath()[xpath_index]
         date_xpath = webconfig.get_date_xpath()[xpath_index]
-
         contain_filter = webconfig.get_contain_filter()
+
         topic = ""
         has_visit = False
 
-        if(webconfig.get_topic_from_link()):
+        if webconfig.get_topic_from_link():
             a = True
             while a:
-                # try:
-
                 if "text" in topic_type:
                     result = link.xpath(extract_xpath)
 
                     if (isinstance(result, list)) and len(result) > 0:
-                        # print(result)
                         topic = str(result[0]).strip()
                         max_length =\
                             self._config_manager.get_maximum_topic_display_length()
-                        print("Topic found: %s" % trim_topic(topic, max_length))
+                        logger.info("Topic found: {}", trim_topic(topic, max_length))
                     else:
-                        print("Ignore. Extract result none.\
-                            This link is not an article")
+                        logger.info("Ignore. Extract result none."
+                                    "This link is not an article")
                         return (None, has_visit)
                 else:
                     topic = remove_html(get_tagstring_from_etree(link)).strip()
                     topic = topic.replace('/r', '')
-                    print("TOPIC found: %s" % topic)
+                    logger.info("Topic found: {}", topic)
                 a = False
         else:
             # try to crawl topic
@@ -620,35 +507,35 @@ class ArticleManager:
             if result is not None:
                 if result is not False:
                     (topic, detail_page_html_tree) = result
-                    print("Topic found: %s" % trim_topic(topic, 10))
+                    logger.info("Topic found: {}", trim_topic(topic, 10))
                 else:
-                    print("Ignore. Can't find topic. This link is not an article")
+                    logger.info("Ignore. Can't find topic. This link is not an article")
                     return (False, has_visit)
             else:
-                print("Can't open %s" % fullurl)
+                logger.info("Can't open {}", fullurl)
                 return (None, has_visit)
 
         # check minimun topic length
         minimum_topic_length = webconfig.get_minimum_topic_length()
         if len(topic.strip().split()) < minimum_topic_length:
-            print("Ignore. Topic don't satisfy minimum length")
+            logger.info("Ignore. Topic don't satisfy minimum length")
             return (False, has_visit)
 
         # check contain filter
         if not check_contain_filter(topic, contain_filter):
-            print("Ignore. Topic don't satisfy contain filter")
+            logger.info("Ignore. Topic don't satisfy contain filter")
             return (False, has_visit)
 
         # check repeat topic
         repeat_topic = webconfig.get_limit_repeat_topic()
         if repeat_topic:
             if self.is_repeat_topic_of_same_newspaper(topic, webconfig):
-                print("Ignore. This is repeated topic")
+                logger.info("Ignore. This is repeated topic")
                 return (False, has_visit)
 
-        if(webconfig.get_skip_crawl_publish_date()):
+        if webconfig.get_skip_crawl_publish_date():
             newsdate = pytz.utc.localize(datetime.utcnow())
-            print("Published at: " + newsdate.strftime("%d-%m-%y %H:%M") + " UTC")
+            logger.info("Published at: {} UTC", newsdate.strftime("%d-%m-%y %H:%M"))
         else:
             # try to find published date
             if "detail_page" in date_place:
@@ -669,13 +556,14 @@ class ArticleManager:
                     browser=browser,
                     index=topic_index,
                     date_xpath=date_xpath)
-        if (result is not None):  # found an article
+
+        if result is not None:  # found an article
             if result is not False:
-                newsdate, detail_page_html_tree = result  # extract result
+                newsdate, detail_page_html_tree = result
                 if self.is_not_outdated(newsdate) or\
                         webconfig.get_skip_crawl_publish_date():
-                    print(
-                        "Topic publish date (in newspaper timezone): %s" %
+                    logger.info(
+                        "Topic publish date (in newspaper timezone): {}",
                         get_date_string(
                             newsdate, "%d/%m/%Y %H:%M", webconfig.get_timezone()))
                     # get detail content
@@ -693,30 +581,27 @@ class ArticleManager:
                             avatar_xpath = webconfig.get_avatar_xpath()
 
                             # get sapo
-
                             try:
                                 sapo_xpath = webconfig.get_sapo_xpath()[xpath_index]
                                 sapo = detail_page_html_tree.xpath(sapo_xpath)[0]
                                 if not isinstance(sapo, str):
                                     sapo = remove_html(get_tagstring_from_etree(
-                                        sapo)).strip()  # clean html
-                                else:  # sapo_xpath return text
+                                        sapo)).strip()
+                                else:
                                     sapo = str(sapo).strip()
                             except Exception as ex:
-                                print(ex)
-                                print_exception()
-                            print("sapo: " + sapo)
+                                logger.exception(ex)
+
+                            logger.info("sapo: {}", sapo)
 
                             # get detail contents: text, image, video, audio...
-
                             content_etree = ''
 
                             try:
                                 content_etree =\
                                     detail_page_html_tree.xpath(content_xpath)[0]
                             except Exception as ex:
-                                print(ex)
-                                print_exception()
+                                logger.exception(ex)
 
                             # remove unneeded from content etree
                             ignore_xpaths = webconfig.get_remove_content_html_xpaths()
@@ -729,8 +614,7 @@ class ArticleManager:
                                         if parent is not None:
                                             parent.remove(element)
                             except Exception as ex:
-                                print(ex)
-                                print_exception()
+                                logger.exception(ex)
 
                             # clean all span tag
                             for element in content_etree.iter():
@@ -777,8 +661,7 @@ class ArticleManager:
                                     elements = content_etree.xpath(text_xpath)
                                     text_elements.extend(elements)
                             except Exception as ex:
-                                print(ex)
-                                print_exception()
+                                logger.exception(ex)
 
                             # extract all content elements
 
@@ -807,13 +690,13 @@ class ArticleManager:
                                                 image_title_xpath)[0]
                                             image_titles.append(image_title)
                                     except Exception as ex:
-                                        print(ex)
-                                        print("Can't extract title box from image box")
+                                        logger.exception(ex)
+                                        logger.error(
+                                            "Can't extract title box from image box")
                                         pass
 
                                 except Exception as ex:
-                                    print(ex)
-                                    print_exception()
+                                    logger.exception(ex)
 
                             # video
                             video_boxes = []
@@ -838,8 +721,7 @@ class ArticleManager:
                                         video_titles.append(video_title)
 
                                 except Exception as ex:
-                                    print(ex)
-                                    print_exception()
+                                    logger.exception(ex)
 
                             # audio
                             audio_boxes = []
@@ -865,8 +747,7 @@ class ArticleManager:
                                         audio_titles.append(audio_title)
 
                                 except Exception as ex:
-                                    print(ex)
-                                    print_exception()
+                                    logger.exception(ex)
 
                             # remove DOM
                             for element in content_etree.iter():
@@ -896,9 +777,9 @@ class ArticleManager:
                                             image_url = get_fullurl(
                                                 webconfig.get_weburl(), str(image_url))
                                     except Exception as ex:
-                                        print(ex)
+                                        logger.exception(ex)
                                         image_url = ''
-                                        print("Can't extract image url")
+                                        logger.error("Can't extract image url")
 
                                     image_title = ''
 
@@ -911,9 +792,7 @@ class ArticleManager:
                                                             image_title_xpath)[0])))
                                             break
                                         except Exception as ex:
-                                            print(ex)
-                                            print("Can't extract image title using %s" %
-                                                  image_title_xpath)
+                                            logger.exception(ex)
 
                                     content.append(
                                         {
@@ -936,9 +815,7 @@ class ArticleManager:
                                                 video_title_xpath)[0].xpath('./text()'))
                                             break
                                         except Exception as ex:
-                                            print(ex)
-                                            print("Can't extract video title using %s" %
-                                                  video_title_xpath)
+                                            logger.exception(ex)
 
                                     content.append(
                                         {
@@ -961,9 +838,7 @@ class ArticleManager:
                                                 audio_title_xpath)[0].xpath('./text()'))
                                             break
                                         except Exception as ex:
-                                            print(ex)
-                                            print("Can't extract audio title using %s" %
-                                                  audio_title_xpath)
+                                            logger.exception(ex)
 
                                     content.append(
                                         {
@@ -971,16 +846,15 @@ class ArticleManager:
                                             'link': audio_url,
                                             'content': audio_title})
 
-                            # print content
-                            print("content: ")
-                            for item in content:
-                                if item['type'] == 'text':
-                                    print(item['content'])
-                                elif item['type'] == 'video' or\
-                                        item['type'] == 'audio' or\
-                                        item['type'] == 'image':
-                                    item['link'] = item['link'].replace(' ', '')
-                                    print((item['link'], item['content']))
+                            # logger.info("content: ")
+                            # for item in content:
+                            #     if item['type'] == 'text':
+                            #         logger.info(item['content'])
+                            #     elif item['type'] == 'video' or\
+                            #             item['type'] == 'audio' or\
+                            #             item['type'] == 'image':
+                            #         item['link'] = item['link'].replace(' ', '')
+                            #         logger.info((item['link'], item['content']))
 
                             image_url = content_etree.xpath(feature_image_xpath)
                             if len(image_url) > 0:
@@ -994,7 +868,7 @@ class ArticleManager:
                                 image_url = ''
                                 feature_image = []
 
-                            print("feature image: " + feature_image_fullurl)
+                            logger.info("feature image: {}", feature_image_fullurl)
 
                             # get avatar/logo
                             avatar_type = webconfig.get_avatar_type()
@@ -1006,17 +880,15 @@ class ArticleManager:
                                     avatar_url = str(
                                         detail_page_html_tree.xpath(avatar_xpath)[0])
                                 except Exception as ex:
-                                    print(ex)
-                                    print_exception()
+                                    logger.exception(ex)
 
-                            print("avatar url: %s" % avatar_url)
+                            logger.info("avatar url: {}", avatar_url)
 
                     except Exception as ex:
-                        print(ex)
-                        print_exception()
-                        print(
-                            "Ignore.\
-                                Can't extract detail content.\
+                        logger.exception(ex)
+                        logger.error(
+                            "Ignore."
+                            "Can't extract detail content.\
                                     This might not be an article")
 
                         return (False, has_visit)
@@ -1030,11 +902,12 @@ class ArticleManager:
                           avatar_url),
                          has_visit)
                 else:
-                    print("Ignore. This article is outdated")
+                    logger.info("Ignore. This article is outdated")
                     return (False, has_visit)
             else:
-                print("Ignore.\
-                    This href don't have published date. It is not an article.")
+                logger.info("Ignore."
+                            "This href don't have published date."
+                            "It is not an article.")
                 return (False, has_visit)
         else:
             return (None, has_visit)
@@ -1045,11 +918,10 @@ class ArticleManager:
     def add_article(self, new_article):
         self._new_article[new_article.get_id()] = new_article
 
-    def add_articles_from_newspaper(self, my_pid, webconfig, browser):
+    def add_articles_from_newspaper(self, webconfig, browser):
         '''
         function: crawl articles from a specific website
         input:
-            - my_pid: pid of process that crawl this newspaper
             - webconfig: config of this newspaper
             - browser: browser that is used to crawl this newspaper
         '''
@@ -1067,20 +939,19 @@ class ArticleManager:
         count_visit = 0  # to limit number of url to visit in each turn
         count_lay = 0
 
-        print("Crawler pid %s: Crawling newspaper: %s" % (my_pid, webname))
+        logger.info("Crawling newspaper: {}", webname)
 
         a = True
         while a is True:
-            # try:
             count_visit += 1
             html = read_url_source(crawl_url, webconfig, browser)
 
             if html is not None:
-                print("Crawler pid %s: Getting data, please wait..." % my_pid)
+                logger.info("Getting data, please wait...")
                 html_tree = etree.HTML(html)
 
                 for xpath_index in range(0, len(topics_xpath)):
-                    print(topics_xpath[xpath_index])
+                    # logger.info(topics_xpath[xpath_index])
                     topics_list = html_tree.xpath(topics_xpath[xpath_index])
 
                     for topic_index in range(0, len(topics_list)):
@@ -1088,27 +959,18 @@ class ArticleManager:
                         # loc ket qua
                         if "href" in id_type:
                             fullurl = get_fullurl(weburl, str(link.get("href")))
-                            print()
-                            print("Crawler pid %s: Processing page: %s" %
-                                  (my_pid, fullurl))
+                            logger.info("Processing page: %s" % fullurl)
 
                         else:
                             fullurl = remove_html(get_tagstring_from_etree(link))
-                            print()
-                            print("Crawler pid %s: Processing topic" % my_pid)
-                            print(
-                                "Note: this website don't use href as id_type.\
-                                    Don't set date_place as detail_page")
-                        # epdb.set_trace()
+                            logger.info("Processing topic")
+
                         if not self.is_in_database(fullurl):
                             # check if fullurl satisfies url pattern
                             filter = re.compile(
                                 webconfig.get_url_pattern_re(), re.IGNORECASE)
                             if ('href' in id_type) and (filter.match(fullurl) is None):
-                                print(
-                                    "Crawler pid %s:\
-                                         Ignore. This url is from another site" %
-                                    my_pid)
+                                logger.info("Ignore. This url is from another site")
                             else:
                                 (result, has_visit_page) =\
                                     self.investigate_if_link_is_valid_article(
@@ -1121,7 +983,7 @@ class ArticleManager:
                                 if has_visit_page:
                                     count_visit += 1
 
-                                print(count_visit)
+                                logger.info(count_visit)
 
                                 if result is not None:  # no errors happend
                                     if result is not False:  # valid url
@@ -1161,43 +1023,35 @@ class ArticleManager:
                                             if new_article.is_quality_content():
                                                 self.add_article(new_article)
                                                 count_lay += 1
-                                                print(
-                                                    "Crawler pid %s:\
-                                                         Crawled articles: %s" %
-                                                    (
-                                                        my_pid,
-                                                        str(count_lay)))
+                                                logger.info("Crawled articles: %s" %
+                                                            str(count_lay))
                                             else:
-                                                print("Ignore. Not a quality post")
+                                                logger.info(
+                                                    "Ignore. Not a quality post")
                                         else:
                                             self.add_article(new_article)
                                             count_lay += 1
-                                            print(
-                                                "Crawler pid %s: Crawled articles: %s" %
-                                                (my_pid, str(count_lay)))
+                                            logger.info("Crawled articles: %s" %
+                                                        str(count_lay))
 
                                         if has_visit_page:
                                             # wait for n second before continue crawl
                                             waiting_time =\
                                                 self._config_manager\
                                                     .get_waiting_time_between_crawl()
-                                            print(
-                                                "Crawler pid %s: Waiting %s seconds" %
-                                                (my_pid, str(waiting_time)))
+                                            logger.info("Waiting %s seconds" %
+                                                        str(waiting_time))
                                             time.sleep(
                                                 waiting_time + random.random() * 3)
                                 else:  # timeout or smt else happended
-                                    print("Some errors happen. Check this link later")
+                                    logger.error(
+                                        "Some errors happen. Check this link later")
                         else:
-                            print(
-                                "Crawler pid %s: This article has been in database" %
-                                my_pid)
+                            logger.info("This article has been in database")
             else:
-                print("Crawler pid %s: Can't open: %s" % (my_pid, webname))
+                logger.error("Can't open: %s" % webname)
             a = False
 
-        # except:
-        #    print("Crawler pid %s: Can't open: %s" % (my_pid, webname))
     def reset_data(self):
         self._data = dict()
 
@@ -1272,7 +1126,7 @@ class ArticleManager:
         json_article_list = []
         count = 0
         sorted_article_list = self.get_sorted_article_list(only_newspaper=True)
-        print("Number of articles: %s" % str(len(sorted_article_list)))
+        logger.info("Number of articles: %s" % str(len(sorted_article_list)))
 
         if not number:
             number = len(sorted_article_list)
@@ -1316,10 +1170,7 @@ class ArticleManager:
 
     def export_to_json(self, number=None):
         json_article_list = self.get_articles_as_json(number)
-        print("Ready to write to file")
+        logger.info("Ready to write to file")
         with open_utf8_file_to_write('./article_data.json') as stream:
             json.dump({'article_list': json_article_list}, stream)
-        print("OK")
-
-    def export_suggestion_list_to_json_file(self):
-        pass
+        logger.info("OK")

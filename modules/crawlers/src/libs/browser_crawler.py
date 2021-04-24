@@ -1,17 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from multiprocessing import Process
 import random
 import os
 from time import sleep
-import traceback
-import sys
-
-
-def print_exception():
-    # Print error message in try..exception
-    exec_info = sys.exc_info()
-    traceback.print_exception(*exec_info)
+from loguru import logger
 
 
 def get_independent_os_path(path_list):
@@ -161,9 +153,8 @@ class BrowserCrawler:
                 self._driver.get(url)
             return True
         except Exception as ex:
-            print(ex)
-            print_exception()
-            print("Timeout")
+            logger.exception(ex)
+            logger.exception("Timeout")
             self._has_error = True
             return False
 
@@ -189,59 +180,3 @@ class BrowserCrawler:
 
         self._driver.quit()
         self._quited = True
-
-
-class NewspaperCrawler():
-    # Function: this class crawl a website based on a config
-    _browser_crawler = None
-    _web_config = None
-    _has_error = False
-    _timeout = 0
-    _page_loaded = False
-
-    def __init__(self, web_config, wait=5):
-        # Create new instance of Firefox to crawl
-        self._browser_crawler = BrowserCrawler()
-        self._web_config = web_config
-        self._timeout = wait
-
-    def load_page_async(self, url):
-        # Open url in Firefox to extract information
-        self._has_error = False
-        self._browser_crawler.load_page(url, self._timeout)
-
-        if self._browser_crawler.has_error():
-            print("In NewspaperCrawler-->Init: Can't load page: %s" % url)
-            self._has_error = True
-            self._page_loaded = False
-            return False
-        self._page_loaded = True
-        return True
-
-    def load_page(self, url, run_async=True):
-        # Load page async
-        self._page_loaded = False
-        if run_async:
-            procs = Process(target=self.load_page_async, args=(url,))
-            procs.start()
-        else:
-            self.load_page_async(url)
-            return self.has_page_loaded()
-
-    def has_page_loaded(self):
-        return self._page_loaded
-
-    def get_start_url(self):
-        return self._web_config.get_crawl_url()
-
-    def get_title(self):
-        return self._browser_crawler.get_title()
-
-    def has_error(self):
-        return self._has_error
-
-    def quit(self):
-        self._browser_crawler.quit()
-
-    def has_quited(self):
-        return self._browser_crawler.has_quited()

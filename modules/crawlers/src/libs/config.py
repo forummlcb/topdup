@@ -1,13 +1,7 @@
-from libs.utils import get_independent_os_path
-from libs.utils import get_utc_now_date
-from libs.utils import open_utf8_file_to_read, open_utf8_file_to_write
-from libs.utils import get_date_string
-
 import pytz
 import yaml
-from datetime import datetime
-from datetime import timedelta
-import os
+from loguru import logger
+from libs.utils import open_utf8_file_to_read, open_utf8_file_to_write
 
 
 class WebConfig:
@@ -15,19 +9,19 @@ class WebConfig:
         if web is None:
             self._web = {"default": {}}
         else:
-            # dict of dict {"webname":{"url":...,date_tag:[...], date_class:[...]}
             self._web = web
 
+    @logger.catch
     def get_config(self, key, default):
         if key not in self._web[self.get_webname()]:
             self.set_config(key, default)
             return default
         else:
             value = self._web[self.get_webname()][key]
-            try:
+
+            if isinstance(value, int):
                 return int(value)
-            except Exception as ex:
-                print(ex)
+            else:
                 return value
 
     def delete_config(self, key):
@@ -211,26 +205,8 @@ class WebConfig:
     def set_tags(self, tags):
         self.set_config("tags", tags)
 
-    def get_last_run(self):
-        last_run_string = self.get_config(
-            'last_run', get_utc_now_date() - timedelta(days=7))
-        if isinstance(last_run_string, str):
-            naive_last_run = datetime.strptime(last_run_string, "%d/%m/%Y %H:%M")
-            aware_last_run = self.get_timezone().localize(naive_last_run)
-            return aware_last_run
-        else:
-            last_run = last_run_string
-            self.set_last_run(last_run)
-            return last_run
-
     def get_minimum_topic_length(self):
         return self.get_config('minimum_topic_length', 4)
-
-    def set_last_run(self, date=None):
-        if date is None:
-            date = get_utc_now_date()
-        self.set_config('last_run', get_date_string(
-            date, "%d/%m/%Y %H:%M", pytz.timezone("UTC")))
 
     def get_minimum_duration_between_crawls(self):
         return self.get_config('minimum_duration_between_crawls', 5)
@@ -268,33 +244,6 @@ class WebConfig:
                 return (key, self._web[self.get_webname()][key])
             count += 1
         return None
-
-    def load_default_config(self, site_type=None, config_base_path=None):
-        if config_base_path is None:
-            base_path = os.environ['DOCBAO_BASE_DIR']
-            config_base_path = get_independent_os_path(
-                [base_path, 'resources', 'configs', 'newspaper'])
-
-        if site_type is None:
-            filepath = get_independent_os_path(
-                [config_base_path, 'website_template.md'])
-            self.load_config_from_file(filepath)
-        elif site_type == 'newspaper':
-            filepath = get_independent_os_path(
-                [config_base_path, 'newspaper_template.md'])
-            self.load_config_from_file(filepath)
-        elif site_type == 'wordpress':
-            filepath = get_independent_os_path(
-                [config_base_path, 'wordpress_template.md'])
-            self.load_config_from_file(filepath)
-        elif site_type == 'facebook user':
-            filepath = get_independent_os_path(
-                [config_base_path, 'facebook_template.md'])
-            self.load_config_from_file(filepath)
-        elif site_type == 'facebook fanpage':
-            filepath = get_independent_os_path(
-                [config_base_path, 'fanpage_template.md'])
-            self.load_config_from_file(filepath)
 
     def load_config_from_file(self, filepath):
         with open_utf8_file_to_read(filepath) as stream:
@@ -352,30 +301,6 @@ class ConfigManager:
     def get_use_CDN(self, default=False):
         return self.get_config('use_CDN', default)
 
-    def get_trending_duration(self, default=600):
-        if "trending_duration" in self._config:
-            return int(self._config['trending_duration'])
-        else:
-            return default
-
-    def get_hub_title(self):
-        return self.get_config('hub_title', 'Theo Dõi Báo Chí')
-
-    def get_hub_href(self):
-        return self.get_config('hub_href', 'https://theodoibaochi.com')
-
-    def get_minimum_freq_of_hot_growing_article(self, default=3):
-        if "minimum_freq_of_hot_growing_article" in self._config:
-            return int(self._config["minimum_freq_of_hot_growing_article"])
-        else:
-            return default
-
-    def get_maximum_freq_of_hot_growing_article(self, default=10):
-        if "maximum_freq_of_hot_growing_article" in self._config:
-            return int(self._config["maximum_freq_of_hot_growing_article"])
-        else:
-            return default
-
     def get_minimum_word(self):
         return int(self._config['minimum_topic_length'])
 
@@ -397,13 +322,12 @@ class ConfigManager:
         self._config[config_string] = value
 
     def print_crawl_list(self):
-        print("Websites in crawling list:")
+        logger.info("Websites in crawling list:")
         newspaper_list = self.get_newspaper_list()
         index = 0
         for newspaper in newspaper_list:
             index += 1
-            print("%s. %s" % (str(index), newspaper.get_webname()))
-        return newspaper_list
+            logger.info("{}. {}", str(index), newspaper.get_webname())
 
     def get_maximum_topic_display_length(self):
         return int(self.get_config('maximum_topic_display_length', 20))
@@ -418,10 +342,10 @@ class ConfigManager:
         try:
             result = pytz.timezone(self._config['display_timezone'])
         except Exception as ex:
-            print(ex)
-            print("Wrong timezone format.\
+            logger.exception(ex)
+            logger.exception("Wrong timezone format.\
                 Please provide one in tz database (google it)")
-            print("Choose UTC by default")
+            logger.exception("Choose UTC by default")
             result = pytz.timezone("UTC")
         return result
 
@@ -487,9 +411,3 @@ class ConfigManager:
 
     def get_maximum_url_to_visit_each_turn(self):
         return int(self._config['maximum_url_to_visit_each_turn'])
-
-    def get_minimum_weight(self):
-        return int(self._config['minimum_weight'])
-
-    def get_max_crawler(self):
-        return int(self._config['max_crawler'])
