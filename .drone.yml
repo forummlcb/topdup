@@ -1,0 +1,48 @@
+---
+kind: pipeline
+name: staging-backend
+
+trigger:
+  branch:
+  - staging-test
+  paths:
+    include:
+    - "modules/web_app/backend/**"
+    exclude:
+    - ".gitignore"
+
+environment:
+  REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+  REPO: topdup-prod-backend
+
+steps:
+- name: build
+  image: plugins/ecr
+  pull: if-not-exists
+  settings:
+    tags: ${DRONE_COMMIT_SHA:0:6}
+    access_key:
+      from_secret: ciuser_key_id #ciuser is the IAM user in AWS
+    secret_key:
+      from_secret: ciuser_secret_access_key
+    repo: topdup-prod-backend
+    registry: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+    region: ap-southeast-1
+
+- name: deploy to Nomad
+  image: loq9/drone-nomad
+  network_mode: host
+  environment:
+    POOL_HOST:
+      from_secret: staging_postgresql_host
+    POOL_DB_NAME:
+      from_secret: staging_postgresql_dbname
+    POOL_USR:
+      from_secret: staging_postgresql_user
+    POOL_PWD:
+      from_secret: staging_postgresql_password
+  settings:
+    addr: http://100.64.25.41:4646
+    template: backend.hcl
+    token:
+      from_secret: nomad_deployer_token
