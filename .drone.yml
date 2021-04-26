@@ -16,7 +16,7 @@ environment:
   REPO: topdup-prod-backend
 
 steps:
-- name: build
+- name: build backend images
   image: plugins/ecr
   pull: if-not-exists
   settings:
