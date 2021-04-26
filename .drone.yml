@@ -25,7 +25,7 @@ steps:
       from_secret: ciuser_key_id #ciuser is the IAM user in AWS
     secret_key:
       from_secret: ciuser_secret_access_key
-    repo: ${REPO}
+    repo: topdup-prod-backend
     registry: ${REGISTRY}
     region: ap-southeast-1
     dockerfile: modules/web_app/backend/Dockerfile
