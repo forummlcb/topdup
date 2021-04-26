@@ -28,6 +28,7 @@ steps:
     repo: topdup-prod-backend
     registry: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
     region: ap-southeast-1
+    dockerfile: modules/web_app/backend/Dockerfile
 
 - name: deploy to Nomad
   image: loq9/drone-nomad
