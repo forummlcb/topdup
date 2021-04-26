@@ -25,12 +25,12 @@ steps:
       from_secret: ciuser_key_id #ciuser is the IAM user in AWS
     secret_key:
       from_secret: ciuser_secret_access_key
-    repo: topdup-prod-backend
-    registry: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+    repo: ${REPO}
+    registry: ${REGISTRY}
     region: ap-southeast-1
     dockerfile: modules/web_app/backend/Dockerfile
 
-- name: render backend.hcl
+- name: render nomad.hcl
   image: alpine
   environment:
     TAG: ${DRONE_COMMIT_SHA:0:6}
