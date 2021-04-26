@@ -44,6 +44,6 @@ steps:
       from_secret: staging_postgresql_password
   settings:
     addr: http://100.64.25.41:4646
-    template: backend.hcl
+    template: modules/web_app/backend/nomad.hcl
     token:
       from_secret: nomad_deployer_token
