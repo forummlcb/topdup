@@ -21,6 +21,7 @@ job "backend" {
       tags = [
         "traefik.enable=true",
         "traefik.http.routers.webapp-backend.rule=Path(`/`)",
+        "traefik.http.routers.webapp-backend.rule=Host(`stag.alb.topdup.org`)",
         "function=backend",
         "env=staging"
       ]
@@ -39,5 +40,4 @@ job "backend" {
       }
     }
   }
-}a
-"
+}
