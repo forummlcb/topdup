@@ -29,14 +29,14 @@ job "backend" {
     task "backend" {
       driver = "docker"
       config {
-        image = "${REGISTRY}/${REPO}:${DRONE_COMMIT_SHA:0:6}"
+        image = "$REGISTRY/$REPO:${DRONE_COMMIT_SHA:0:6}"
         ports = ["http"]
       }
       env {
-        POOL_HOST = "${POOL_HOST}"
-        POOL_DB_NAME = "${POOL_DB_NAME}"
-        POOL_USR = "${POOL_USR}"
-        POOL_PWD = "${POOL_PWD}"
+        POOL_HOST = "$POOL_HOST"
+        POOL_DB_NAME = "$POOL_DB_NAME"
+        POOL_USR = "$POOL_USR"
+        POOL_PWD = "$POOL_PWD"
       }
     }
   }

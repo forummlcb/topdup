@@ -30,9 +30,8 @@ steps:
     region: ap-southeast-1
     dockerfile: modules/web_app/backend/Dockerfile
 
-- name: deploy to Nomad
-  image: loq9/drone-nomad
-  network_mode: host
+- name: render backend.hcl
+  image: alpine
   environment:
     POOL_HOST:
       from_secret: staging_postgresql_host
@@ -42,8 +41,16 @@ steps:
       from_secret: staging_postgresql_user
     POOL_PWD:
       from_secret: staging_postgresql_password
+  commands:
+    - apk add gettext
+    - cat modules/web_app/backend/nomad.hcl | envsubst > modules/web_app/backend/nomad.rendered.hcl
+    - cat modules/web_app/backend/nomad.rendered.hcl
+
+- name: deploy to Nomad
+  image: loq9/drone-nomad
+  network_mode: host
   settings:
     addr: http://100.64.25.41:4646
-    template: modules/web_app/backend/nomad.hcl
+    template: modules/web_app/backend/nomad.rendered.hcl
     token:
       from_secret: nomad_deployer_token
