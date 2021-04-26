@@ -55,3 +55,16 @@ steps:
     template: modules/web_app/backend/nomad.rendered.hcl
     token:
       from_secret: nomad_deployer_token
+
+- name: sent notification to slack
+  image: plugins/slack
+  settings:
+    webhook: 
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    template: >
+      {{#success build.status}}
+        build {{build.number}} succeeded. Good job.
+      {{else}}
+        build {{build.number}} failed. Fix me please.
+      {{/success}}
