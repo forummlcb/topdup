@@ -25,7 +25,7 @@ steps:
       from_secret: ciuser_key_id #ciuser is the IAM user in AWS
     secret_key:
       from_secret: ciuser_secret_access_key
-    repo: ${REPO}
+    repo: topdup-prod-backend
     registry: ${REGISTRY}
     region: ap-southeast-1
     dockerfile: modules/web_app/backend/Dockerfile
@@ -55,3 +55,16 @@ steps:
     template: modules/web_app/backend/nomad.rendered.hcl
     token:
       from_secret: nomad_deployer_token
+
+- name: sent notification to slack
+  image: plugins/slack
+  settings:
+    webhook: 
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    template: >
+      {{#success build.status}}
+        build {{build.number}} succeeded. Good job.
+      {{else}}
+        build {{build.number}} failed. Fix me please.
+      {{/success}}
