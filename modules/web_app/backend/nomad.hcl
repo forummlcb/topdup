@@ -29,7 +29,7 @@ job "backend" {
     task "backend" {
       driver = "docker"
       config {
-        image = "$REGISTRY/$REPO:${DRONE_COMMIT_SHA:0:6}"
+        image = "$REGISTRY/$REPO:$TAG"
         ports = ["http"]
       }
       env {

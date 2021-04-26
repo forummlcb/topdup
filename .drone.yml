@@ -33,6 +33,7 @@ steps:
 - name: render backend.hcl
   image: alpine
   environment:
+    TAG: ${DRONE_COMMIT_SHA:0:6}
     POOL_HOST:
       from_secret: staging_postgresql_host
     POOL_DB_NAME:
