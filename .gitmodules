@@ -1,3 +1,6 @@
 [submodule "modules/legacies/docbao"]
 	path = modules/legacies/docbao
 	url = https://github.com/hailoc12/docbao
+[submodule "modules/crawlers/docbao"]
+	path = modules/crawlers/docbao
+	url = https://github.com/hailoc12/docbao
