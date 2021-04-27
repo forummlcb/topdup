@@ -59,17 +59,18 @@ steps:
 - name: sent notification to slack
   image: plugins/slack
   settings:
-    webhook: 
+    webhook:
       from_secret: slack_incoming_webhook
     channel: build-notifications
+    icon_emoji: :>
+    username: DroneCi
     template: >
-      {{#success build.status}}
-        build {{build.number}} succeeded. Good job.
-      {{else}}
-        build {{build.number}} failed. Fix me please.
-      {{/success}}
-    when:
-      status: [ success, failure ]
+      {{uppercasefirst build.branch}}: 
+          Build number {{build.number}} is {{build.status}}
+          Triggered by commit number {{truncate build.commit 8}}
+          Details at {{build.link}}
+  when:
+    status: [success, failure]
 
 ---
 kind: pipeline
@@ -127,15 +128,15 @@ steps:
 - name: sent notification to slack
   image: plugins/slack
   settings:
-    webhook: 
+    webhook:
       from_secret: slack_incoming_webhook
     channel: build-notifications
+    icon_emoji: :>
+    username: DroneCi
     template: >
-      {{ build }}
-      {{#success build.status}}
-        build {{build.number}} succeeded. Good job.
-      {{else}}
-        build {{build.number}} failed. Fix me please.
-      {{/success}}
-    when:
-      status: [ success, failure ]
+      {{uppercasefirst build.branch}}: 
+          Build number {{build.number}} is {{build.status}}
+          Triggered by commit number {{truncate build.commit 8}}
+          Details at {{build.link}}
+  when:
+    status: [success, failure]
