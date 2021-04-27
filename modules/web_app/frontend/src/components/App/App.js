@@ -1,22 +1,21 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'font-awesome/css/font-awesome.min.css'
-import './App.css'
 import React, { useContext, useState } from "react"
-import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom"
-import { ToastContainer } from 'react-toastify'
+import { BrowserRouter, Route, Switch } from "react-router-dom"
 import useUserData from '../../shared/useUserData'
+import About from '../about'
+import Address from '../address'
 import { AuthContext } from '../auth/auth-context'
 import Dashboard from '../dashboard'
 import DupCompare from '../dup-compare/dup-compare'
 import DupReport from '../dup-report/dup-report'
-import ErrorPage from "../error/index";
+import ErrorPage from "../error/index"
 import Footer from '../footer/footer'
 import NavigationBar from '../navigation-bar/navigation-bar'
 import Preferences from '../preferences'
-import About from '../about'
-import TermCondition from '../term-condition'
 import PrivacyPolicy from '../privacy-policy'
-import Address from '../address'
+import TermCondition from '../term-condition'
+import './App.css'
 
 function App() {
   const { userData, setUserData } = useUserData()
@@ -61,7 +60,6 @@ function App() {
               <Route path='*' exact={true} component={ErrorPage} />
             </Switch>
           </div>
-          <ToastContainer />
           <Footer />
         </div>
       </BrowserRouter>

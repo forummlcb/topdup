@@ -1,7 +1,8 @@
 import React from "react"
 import { Container, Nav, Navbar } from "react-bootstrap"
-import { useLocation, NavLink } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import Authentication from "../auth/auth"
+import logo from "./../../images/logo.svg"
 import "./navigation-bar.css"
 
 const NavigationBar = (props) => {
@@ -13,11 +14,10 @@ const NavigationBar = (props) => {
 
   return (
     <>
-
       <Navbar expand="lg" fixed="top">
         <Container>
           <Navbar.Brand className="topdup-brand" href="/">
-            TopDup
+            <img src={logo} style={{ width: "120px" }} alt="" />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -37,10 +37,8 @@ const NavigationBar = (props) => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-
     </>
-
-  );
-};
+  )
+}
 
 export default NavigationBar

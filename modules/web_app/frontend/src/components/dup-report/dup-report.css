@@ -98,6 +98,14 @@
   align-items: center;
 }
 
+.sr-title a:link {
+  color: black;
+}
+
+.sr-title a:visited {
+  color: black;
+}
+
 .sr-title span {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -277,7 +285,7 @@
   height: 35px;
 }
 
-.pagination-btn:hover {
+.pagination-btn:hover:not([disabled]) {
   background-color: grey;
 }
 
@@ -286,10 +294,11 @@
   color: white;
 }
 
-
+.pagination-btn:disabled {
+  pointer-events: auto;
+  color: grey;
+}
 @media only screen and (max-width: 768px) {
-  
-  
   .sim-header-row {
     max-width: 650px;
     min-width: 600px;
@@ -329,52 +338,48 @@
     max-width: 156px !important;
     flex-grow: 2 !important;
     margin-right: 0px !important;
-    font-size:12px !important;
+    font-size: 12px !important;
   }
-  
+
   .sim-header-row.sr-title-container {
     margin-right: 5px;
     max-width: 156px;
     flex-direction: column;
-    
   }
-  .sr-title-container.input-group.input-group-sm.mb-3{
+  .sr-title-container.input-group.input-group-sm.mb-3 {
     width: 156px !important;
-   
   }
 
-  .header-domain{
-    max-width: 158px  !important;
+  .header-domain {
+    max-width: 158px !important;
     flex-grow: 1 !important;
-    font-size:12px !important;
-}
-.header-domain > *{
-  margin-left: 89px !important;
-  width: 60px  !important;
-}
+    font-size: 12px !important;
+  }
+  .header-domain > * {
+    margin-left: 89px !important;
+    width: 60px !important;
+  }
 
-  .header-date{
+  .header-date {
     max-width: 150px !important;
     flex-grow: 1 !important;
-    font-size:12px !important;
+    font-size: 12px !important;
   }
 
-
-  .sr-title{
+  .sr-title {
     width: 156px;
     height: 12px;
 
     margin: 15px;
-    
   }
-  .btn.btn-outline-secondary.btn-sm.sr-vote-btn{
+  .btn.btn-outline-secondary.btn-sm.sr-vote-btn {
     width: 40px;
   }
-  .btn.btn-outline-secondary.btn-sm.sr-vote-error-btn{
+  .btn.btn-outline-secondary.btn-sm.sr-vote-error-btn {
     width: 13px;
     height: 12px;
   }
-  .btn.btn-outline-secondary.btn-sm.sr-vote-irrelevant-btn{
+  .btn.btn-outline-secondary.btn-sm.sr-vote-irrelevant-btn {
     width: 12px;
     height: 9px;
   }
@@ -384,22 +389,19 @@
     margin-right: 5px;
     width: 50px;
   }
- 
-  
+
   .sr-domain-date {
     display: flex;
     margin-left: 24px;
     margin-right: 20px;
     flex: 0 0 25%;
-    max-width: 160px
+    max-width: 160px;
   }
-  
 }
-
 
 @media only screen and (max-width: 480px) {
   .sr-header-title.margin-bottom--xxs {
     background-color: rgb(255, 0, 0);
-    color :rgba(255, 0, 0, 0.6)
+    color: rgba(255, 0, 0, 0.6);
   }
 }

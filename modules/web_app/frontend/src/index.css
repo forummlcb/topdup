@@ -89,7 +89,6 @@ span {
   justify-content: center;
   margin-top: 70px;
   max-width: 1200px;
-  overflow: auto;
   padding-top: 50px;
   padding-bottom: 50px;
 }
@@ -130,6 +129,14 @@ span {
   margin-bottom: 20px;
 }
 
+.margin-bottom--30 {
+  margin-bottom: 20px;
+}
+
+.margin-vertical--xs {
+  margin: 10px 0px;
+}
+
 .centered-container {
   display: flex;
   align-items: center;
@@ -151,4 +158,18 @@ span {
 .ext-login-btn {
   height: 30px;
   width: 30px;
+}
+
+.ellipsis-container {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.label--5 {
+  font-size: larger;
 }
