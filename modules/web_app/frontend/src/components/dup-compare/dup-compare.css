@@ -45,7 +45,7 @@ span {
   background-color: #f2f2f2;
 }
 
-.compare-item:hover .compare-item-info {
+/* .compare-item:hover .compare-item-info {
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -54,13 +54,14 @@ span {
   z-index: 9;
   box-shadow: -5px 0px 5px 1px #aaaaaa;
   background-color: whitesmoke;
-}
+} */
 
 @media only screen and (max-width: 768px) {
   .page-content {
     max-width: 650px !important;
     min-width: 600px !important;
   }
+
   .dup-compare-title {
     font-size: 30px !important;
   }

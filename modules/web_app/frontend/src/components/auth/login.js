@@ -4,9 +4,8 @@ import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props
 import { GoogleLogin } from 'react-google-login'
 import { FaFacebookSquare } from "react-icons/fa"
 import { FcGoogle } from "react-icons/fc"
-import { AuthMode, Severity } from "../../shared/constants"
+import { AuthMode } from "../../shared/constants"
 import ReactIconRender from "../../shared/react-icon-renderer"
-import { ToastService } from "../../shared/toast.service"
 import { AuthContext } from "./auth-context"
 import AuthService from "./auth-service"
 import "./auth.css"
@@ -16,7 +15,6 @@ import ValidatedLoginForm from "./validated-login-form"
 export default function LoginModal(props) {
   const setUserData = props.setUserData
   const authService = new AuthService()
-  const toastService = new ToastService()
   const authContext = useContext(AuthContext)
 
   const onSubmitLogin = (loginMode, userCredential, modalProps) => {
@@ -31,13 +29,9 @@ export default function LoginModal(props) {
         result => {
           authContext.login(result.data.user)
           setUserData(result.data.user)
-          toastService.displayToast(result, Severity.Success)
           modalProps.onHide()
-        },
-        error => toastService.displayToast(error.response, Severity.Error)
-      ).catch(err => {
-        console.log(err)
-      })
+        }
+      )
     }
   }
 

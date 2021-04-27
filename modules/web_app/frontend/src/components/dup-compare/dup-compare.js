@@ -6,9 +6,8 @@ import { FaCheck, FaFacebookSquare, FaHashtag, FaTimes, FaTwitterSquare } from '
 import { useLocation } from "react-router-dom"
 import { FacebookShareButton, TwitterShareButton } from 'react-share'
 import ReactTooltip from 'react-tooltip'
-import { Severity, TopDup } from "../../shared/constants"
+import { TopDup } from "../../shared/constants"
 import ReactIconRender from '../../shared/react-icon-renderer'
-import { ToastService } from "../../shared/toast.service"
 import { AuthContext } from '../auth/auth-context'
 import DupReportService from '../dup-report/dup-report.service'
 import "./dup-compare.css"
@@ -64,7 +63,6 @@ const DupCompare = (props) => {
   const [loading, setLoading] = useState(false)
   const [displayOrder, setDisplayOrder] = useState(displayOrderDict.indexA)
 
-  const toastService = new ToastService()
   const simCheckService = new DupCompareService()
 
   useEffect(() => {
@@ -83,7 +81,7 @@ const DupCompare = (props) => {
     if (sourceMode === Mode.Text) queryParam['sourceText'] = sourceContent
     if (targetMode === Mode.Url) queryParam['targetUrl'] = targetContent
     if (targetMode === Mode.Text) queryParam['targetText'] = targetContent
-    setShareUrl(`${ TopDup.BaseUrl }/dup-compare?${ queryString.stringify(queryParam) }`)
+    setShareUrl(`${TopDup.BaseUrl}/dup-compare?${queryString.stringify(queryParam)}`)
 
     console.log('shareUrl: ', shareUrl)
 
@@ -102,7 +100,6 @@ const DupCompare = (props) => {
         setIsVisibleVoteBlock(isVisibleVoteBlock)
       })
       .catch((error) => {
-        toastService.displayToast(error.response, Severity.Error)
         setCompareResult({})
       })
       .finally(_ => setLoading(false))
