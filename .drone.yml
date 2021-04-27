@@ -166,12 +166,13 @@ steps:
     BACKEND_URL: "https://stag.alb.topdup.org"
   commands:
     - apk add gettext
-    - cat modules/web_app/frontend/src/api.js | envsubst > modules/web_app/frontend/src/api.js
+    - cd modules/web_app/frontend/
+    - cat src/api.js | envsubst > src/api.js
     - npm install
     - npm run build
 
 - name: deploy to Cloudfront
-  image: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com/topdup-drone-plugins
+  image: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com/topdup-drone-cloudfront-plugin
   pull: if-not-exists
   settings:
     aws_access_key_id:
@@ -179,6 +180,7 @@ steps:
     aws_secret_access_key:
       from_secret: ciuser_secret_access_key
     aws_default_region: ap-southeast-1
+    dir_to_sync: modules/web_app/frontend/build
     s3_bucket: topdup-staging-frontend
     cloudfront_id: E2VT0WYUZ03J04
 
@@ -190,7 +192,7 @@ steps:
       from_secret: slack_incoming_webhook
     channel: build-notifications
     icon_emoji: :>
-    username: DroneCi
+    username: DronePlayer
     template: >
       {{uppercasefirst build.branch}}: 
           Build number {{build.number}} is {{build.status}}
