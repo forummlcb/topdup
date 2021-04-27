@@ -68,6 +68,8 @@ steps:
       {{else}}
         build {{build.number}} failed. Fix me please.
       {{/success}}
+    when:
+      status: [ success, failure ]
 
 ---
 kind: pipeline
@@ -135,3 +137,5 @@ steps:
       {{else}}
         build {{build.number}} failed. Fix me please.
       {{/success}}
+    when:
+      status: [ success, failure ]
