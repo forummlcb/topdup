@@ -69,11 +69,9 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
-
 @app.get("/", tags=["get"])
 def get_query():
     return Response()
-
 
 def compare_(text_A: str, text_B: str):
     # Split texts before cleaning
@@ -180,5 +178,4 @@ def http_exception_handler(request, exc):
 if __name__ == "__main__":
     # For debugging only
     import uvicorn
-
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

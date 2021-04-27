@@ -68,3 +68,70 @@ steps:
       {{else}}
         build {{build.number}} failed. Fix me please.
       {{/success}}
+
+---
+kind: pipeline
+name: staging-ml-api
+
+trigger:
+  branch:
+  - staging
+  paths:
+    include:
+    - "modules/ml_api/**"
+    - "modules/ml/**"
+    exclude:
+    - ".gitignore"
+
+environment:
+  REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+  REPO: topdup-prod-ml
+
+steps:
+- name: build ml-api images
+  image: plugins/ecr
+  pull: if-not-exists
+  settings:
+    tags: ${DRONE_COMMIT_SHA:0:6}
+    access_key:
+      from_secret: ciuser_key_id #ciuser is the IAM user in AWS
+    secret_key:
+      from_secret: ciuser_secret_access_key
+    repo: topdup-prod-ml
+    registry: ${REGISTRY}
+    region: ap-southeast-1
+    dockerfile: modules/ml_api/Dockerfile
+
+- name: render nomad.hcl
+  image: alpine
+  environment:
+    TAG: ${DRONE_COMMIT_SHA:0:6}
+    POSTGRES_URI:
+      from_secret: staging_postgresql_uri
+  commands:
+    - apk add gettext
+    - cat modules/ml_api/nomad.hcl | envsubst > modules/ml_api/nomad.rendered.hcl
+    - cat modules/ml_api/nomad.rendered.hcl
+
+- name: deploy to Nomad
+  image: loq9/drone-nomad
+  network_mode: host
+  settings:
+    addr: http://100.64.25.41:4646
+    template: modules/ml_api/nomad.rendered.hcl
+    token:
+      from_secret: nomad_deployer_token
+
+- name: sent notification to slack
+  image: plugins/slack
+  settings:
+    webhook: 
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    template: >
+      {{ build }}
+      {{#success build.status}}
+        build {{build.number}} succeeded. Good job.
+      {{else}}
+        build {{build.number}} failed. Fix me please.
+      {{/success}}

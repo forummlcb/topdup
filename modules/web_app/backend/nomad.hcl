@@ -37,6 +37,9 @@ job "backend" {
         POOL_DB_NAME = "$POOL_DB_NAME"
         POOL_USR = "$POOL_USR"
         POOL_PWD = "$POOL_PWD"
+        ML_API_URL = "$ML_API_URL"
+        WEB_EMAIL = "$WEB_EMAIL"
+        WEB_EMAIL_PASS = "$WEB_EMAIL_PASS"
       }
     }
   }
