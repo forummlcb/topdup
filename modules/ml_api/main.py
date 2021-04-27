@@ -69,11 +69,9 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
-
 @app.get("/", tags=["get"])
 def get_query():
     return Response()
-
 
 def compare_(text_A: str, text_B: str):
     # Split texts before cleaning

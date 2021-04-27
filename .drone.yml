@@ -1,0 +1,200 @@
+---
+kind: pipeline
+name: staging-backend
+
+trigger:
+  branch:
+  - staging
+  paths:
+    include:
+    - "modules/web_app/backend/**"
+    exclude:
+    - ".gitignore"
+
+environment:
+  REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+  REPO: topdup-prod-backend
+
+steps:
+- name: build backend images
+  image: plugins/ecr
+  pull: if-not-exists
+  settings:
+    tags: ${DRONE_COMMIT_SHA:0:6}
+    access_key:
+      from_secret: ciuser_key_id #ciuser is the IAM user in AWS
+    secret_key:
+      from_secret: ciuser_secret_access_key
+    repo: topdup-prod-backend
+    registry: ${REGISTRY}
+    region: ap-southeast-1
+    dockerfile: modules/web_app/backend/Dockerfile
+
+- name: render nomad.hcl
+  image: alpine
+  pull: if-not-exists
+  environment:
+    TAG: ${DRONE_COMMIT_SHA:0:6}
+    POOL_HOST:
+      from_secret: staging_postgresql_host
+    POOL_DB_NAME:
+      from_secret: staging_postgresql_dbname
+    POOL_USR:
+      from_secret: staging_postgresql_user
+    POOL_PWD:
+      from_secret: staging_postgresql_password
+  commands:
+    - apk add gettext
+    - cat modules/web_app/backend/nomad.hcl | envsubst > modules/web_app/backend/nomad.rendered.hcl
+    - cat modules/web_app/backend/nomad.rendered.hcl
+
+- name: deploy to Nomad
+  image: loq9/drone-nomad
+  pull: if-not-exists
+  network_mode: host
+  settings:
+    addr: http://100.64.25.41:4646
+    template: modules/web_app/backend/nomad.rendered.hcl
+    token:
+      from_secret: nomad_deployer_token
+
+- name: sent notification to slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    icon_emoji: :>
+    username: DroneCi
+    template: >
+      {{uppercasefirst build.branch}}: 
+          Build number {{build.number}} is {{build.status}}
+          Triggered by commit number {{truncate build.commit 8}}
+          Details at {{build.link}}
+  when:
+    status: [success, failure]
+
+---
+kind: pipeline
+name: staging-ml-api
+
+trigger:
+  branch:
+  - staging
+  paths:
+    include:
+    - "modules/ml_api/**"
+    - "modules/ml/**"
+    exclude:
+    - ".gitignore"
+
+environment:
+  REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+  REPO: topdup-prod-ml
+
+steps:
+- name: build ml-api images
+  image: plugins/ecr
+  pull: if-not-exists
+  settings:
+    tags: ${DRONE_COMMIT_SHA:0:6}
+    access_key:
+      from_secret: ciuser_key_id #ciuser is the IAM user in AWS
+    secret_key:
+      from_secret: ciuser_secret_access_key
+    repo: topdup-prod-ml
+    registry: ${REGISTRY}
+    region: ap-southeast-1
+    dockerfile: modules/ml_api/Dockerfile
+
+- name: render nomad.hcl
+  image: alpine
+  pull: if-not-exists
+  environment:
+    TAG: ${DRONE_COMMIT_SHA:0:6}
+    POSTGRES_URI:
+      from_secret: staging_postgresql_uri
+  commands:
+    - apk add gettext
+    - cat modules/ml_api/nomad.hcl | envsubst > modules/ml_api/nomad.rendered.hcl
+    - cat modules/ml_api/nomad.rendered.hcl
+
+- name: deploy to Nomad
+  image: loq9/drone-nomad
+  pull: if-not-exists
+  network_mode: host
+  settings:
+    addr: http://100.64.25.41:4646
+    template: modules/ml_api/nomad.rendered.hcl
+    token:
+      from_secret: nomad_deployer_token
+
+- name: sent notification to slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    icon_emoji: :>
+    username: DroneCi
+    template: >
+      {{uppercasefirst build.branch}}: 
+          Build number {{build.number}} is {{build.status}}
+          Triggered by commit number {{truncate build.commit 8}}
+          Details at {{build.link}}
+  when:
+    status: [success, failure]
+
+---
+kind: pipeline
+name: staging-frontend
+
+trigger:
+  branch:
+  - staging
+  paths:
+    include:
+    - "modules/web_app/frontend/**"
+    exclude:
+    - ".gitignore"
+
+steps:
+- name: build Frontend package
+  image: node:15.11.0-alpine
+  pull: if-not-exists
+  environment:
+    BACKEND_URL: "https://stag.alb.topdup.org"
+  commands:
+    - apk add gettext
+    - cat modules/web_app/frontend/src/api.js | envsubst > modules/web_app/frontend/src/api.js
+    - npm install
+    - npm run build
+
+- name: deploy to Cloudfront
+  image: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com/topdup-drone-plugins
+  pull: if-not-exists
+  settings:
+    aws_access_key_id:
+      from_secret: ciuser_key_id
+    aws_secret_access_key:
+      from_secret: ciuser_secret_access_key
+    aws_default_region: ap-southeast-1
+    s3_bucket: topdup-staging-frontend
+    cloudfront_id: E2VT0WYUZ03J04
+
+- name: sent notification to slack
+  image: plugins/slack
+  pull: if-not-exists
+  settings:
+    webhook:
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    icon_emoji: :>
+    username: DroneCi
+    template: >
+      {{uppercasefirst build.branch}}: 
+          Build number {{build.number}} is {{build.status}}
+          Triggered by commit number {{truncate build.commit 8}}
+          Details at {{build.link}}
+  when:
+    status: [success, failure]
