@@ -197,11 +197,11 @@ class FAISSDocumentStore(SQLDocumentStore):
 
             docs_to_write_in_sql = []
             for doc in document_objects[i : i + self.index_buffer_size]:
-                # meta = doc.meta
                 if add_vectors:
-                    # meta["vector_id"] = vector_id
                     doc.vector_id = vector_id
                     vector_id += 1
+                else:
+                    doc.vector_id = None
                 docs_to_write_in_sql.append(doc)
 
             super(FAISSDocumentStore, self).write_documents(
