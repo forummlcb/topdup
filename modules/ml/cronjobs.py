@@ -1,7 +1,7 @@
-import logging
 import os
 import uuid
 from datetime import datetime, timedelta
+from logging import log
 
 import pandas as pd
 import schedule
@@ -10,7 +10,7 @@ from tqdm.auto import tqdm
 
 from modules.ml.document_store.faiss import FAISSDocumentStore
 from modules.ml.retriever.retriever import Retriever
-from modules.ml.utils import meta_parser
+from modules.ml.utils import get_logger, meta_parser
 from modules.ml.vectorizer.tf_idf import TfidfDocVectorizer
 
 LOCAL_DB_URI = os.getenv("LOCAL_DB_URI", "sqlite:///local.db")
@@ -26,8 +26,8 @@ INDEX = "document"
 LOCAL_IDX_PATH = os.getenv("LOCAL_IDX_PATH", "faiss_index_local.bin")
 REMOTE_IDX_PATH = os.getenv("REMOTE_IDX_PATH", "faiss_index_remote.bin")
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+
+logger = get_logger()
 
 
 def get_connection(uri: str, vector_dim: int):

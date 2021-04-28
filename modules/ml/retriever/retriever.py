@@ -6,9 +6,10 @@ from tqdm import tqdm
 from modules.ml.document_store.faiss import FAISSDocumentStore
 from modules.ml.preprocessor.vi_preprocessor import ViPreProcessor
 from modules.ml.schema import Document
+from modules.ml.utils import get_logger
 from modules.ml.vectorizer.base import DocVectorizerBase
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 class Retriever:

@@ -9,16 +9,14 @@ from sqlalchemy import Column, DateTime, ForeignKey, String, Text, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import case, null
-from sqlalchemy.sql.sqltypes import Float
 from tqdm.auto import tqdm
 
 from modules.ml.constants import META_MAPPING
 from modules.ml.document_store.base import BaseDocumentStore
 from modules.ml.schema import Document
-from modules.ml.utils import meta_parser
+from modules.ml.utils import get_logger
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 Base = declarative_base()  # type: Any
