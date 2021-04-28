@@ -47,21 +47,18 @@ def chunks(lst, n):
 
 
 def update_local_db(local_doc_store, remote_doc_store):
-    """
-    Write a proper docstring later
-    This method runs in serial as follow:
-    1. Get document ids from remote and local db
-    2. Check if there is new document
-    If Yes:
-    3. Write new document to local db
-    4. Update embeddings on small FAISS index
-    5. Update vector ids on local db
-    6. Run sequential retriever to pre-calculate the similarity scores
-    and update on local db meta data
+    """This method runs in serial as follow:
+
+    - Compares list of `document_id` between local and
+    remote database
+    - Fetches and writes new documents into local database
+    - Updates embeddings and vector ids on small FAISS index
+    - Runs batch retriever to pre-calculate the similarity scores
+    and updates metadata on remote database
     """
 
     if not local_doc_store or not remote_doc_store:
-        logger.warning("DB connection not initialized, trying re-connect...")
+        logger.warning("DB connection not initialized, try to re-connect...")
         local_doc_store = get_connection(LOCAL_DB_URI, CAND_DIM)
         remote_doc_store = get_connection(POSTGRES_URI, CAND_DIM)
         if not local_doc_store or not remote_doc_store:
@@ -76,19 +73,20 @@ def update_local_db(local_doc_store, remote_doc_store):
         )
     else:
         new_ids = remote_doc_store.get_document_ids(
-            from_time=now - timedelta(minutes=3), index=INDEX
+            from_time=now - timedelta(days=1), index=INDEX
         )
-    if not new_ids:
-        logger.info(f"No new updates in local db at {now}")
-        return
 
     local_ids = local_doc_store.get_document_ids(index=INDEX)
 
     # Filter existing ids in local out of recent updated ids from remote db
     new_ids = sorted([_id for _id in new_ids if _id not in local_ids])
 
+    if not new_ids:
+        logger.info(f"No new updates in local db")
+        return
+
     docs = remote_doc_store.get_documents_by_id(new_ids, index=INDEX)
-    logger.info(f"Retrieved {len(docs)} at {datetime.now()}")
+    logger.info(f"Retrieved {len(docs)} docs")
 
     local_doc_store.write_documents(docs)
     logger.info(f"Stored {len(docs)} docs to local db")
@@ -108,9 +106,6 @@ def update_local_db(local_doc_store, remote_doc_store):
         remote_retriever.train_candidate_vectorizer(retrain=True, save_path=CAND_PATH)
         remote_retriever.train_retriever_vectorizer(retrain=True, save_path=RTRV_PATH)
         logger.info("Vectorizers retrained")
-    else:
-        remote_retriever.train_candidate_vectorizer(retrain=False, save_path=CAND_PATH)
-        remote_retriever.train_retriever_vectorizer(retrain=False, save_path=RTRV_PATH)
 
     local_retriever.train_candidate_vectorizer(retrain=False, save_path=CAND_PATH)
     local_retriever.train_retriever_vectorizer(retrain=False, save_path=RTRV_PATH)
@@ -119,54 +114,35 @@ def update_local_db(local_doc_store, remote_doc_store):
     local_retriever.update_embeddings(
         retrain=True, save_path=LOCAL_IDX_PATH, sql_url=LOCAL_DB_URI
     )
-    remote_retriever.update_embeddings(
-        retrain=remote_reindex, save_path=REMOTE_IDX_PATH, sql_url=POSTGRES_URI
-    )
     logger.info("Embeddings updated")
 
-    if remote_reindex:
-        local_results = local_retriever.batch_retrieve(docs)
-        remote_results = local_results.copy()
-    else:
-        local_results = local_retriever.batch_retrieve(docs)
-        remote_results = remote_retriever.batch_retrieve(docs)
+    results = local_retriever.batch_retrieve(docs)
 
     # Split payloads to chunks to reduce pressure on the database
-    local_results_chunks = list(chunks(local_results, 1000))
-    remote_results_chunks = list(chunks(remote_results, 1000))
-    id_meta = list()
-    for i in tqdm(range(len(local_results_chunks)), desc="Updating meta.....  "):
-        for l, r in zip(local_results_chunks[i], remote_results_chunks[i]):
-            rank = "_".join(list(l.keys())[-1].split("_")[-2:])
-            local_sim = l.get(f"sim_score_{rank}", 0)
-            remote_sim = r.get(f"sim_score_{rank}", 0)
-            if (local_sim > HARD_SIM_THRESHOLD) or (remote_sim > HARD_SIM_THRESHOLD):
-                if local_sim >= remote_sim:
-                    sim_data = {
-                        "document_id": l["document_id"],
-                        f"sim_score_{rank}": local_sim,
-                        f"similar_to_{rank}": l[f"sim_document_id_{rank}"],
-                    }
-                else:
-                    sim_data = {
-                        "document_id": r["document_id"],
-                        f"sim_score_{rank}": remote_sim,
-                        f"similar_to_{rank}": r[f"sim_document_id_{rank}"],
-                    }
+    results_chunks = list(chunks(results, 1000))
+
+    for i in tqdm(range(len(results_chunks)), desc="Updating meta.....  "):
+        id_meta = list()
+        for r in results_chunks[i]:
+            rank = "_".join(list(r.keys())[-1].split("_")[-2:])
+            sim_score = r.get(f"sim_score_{rank}", 0)
+            if sim_score > HARD_SIM_THRESHOLD:
+                sim_data = {
+                    "document_id": r["document_id"],
+                    f"sim_score_{rank}": sim_score,
+                    f"similar_to_{rank}": r[f"sim_document_id_{rank}"],
+                }
                 id_meta.append(sim_data)
 
-        remote_doc_store.update_documents_meta(id_meta=id_meta)
+        if id_meta:
+            remote_doc_store.update_documents_meta(id_meta=id_meta)
     logger.info("Similarity scores updated into metadata")
+
+    consolidate_sim_docs(remote_doc_store)
 
 
 def update_remote_db(remote_doc_store):
-    """
-    Write a proper docstring later
-    This method runs in serial as follow:
-    1. Update embeddings on large FAISS index
-    2. Update vector ids on remote db
-    3. Update meta data of documents on local db to remote db
-    4. Clear local db
+    """This method updates embeddings and vector ids on remote database
     """
 
     remote_retriever = Retriever(
@@ -178,20 +154,17 @@ def update_remote_db(remote_doc_store):
     remote_retriever.update_embeddings(retrain=True)
     logger.info("Remote embeddings and vector ids updated")
 
-    local_doc_store.delete_all_documents()
-
 
 def consolidate_sim_docs(remote_doc_store):
-    """
-    Write a proper docstring later
+    """This method gathers the similar document pairs and writes to `similar_docs` table
     """
 
     docs = remote_doc_store.get_similar_documents_by_threshold(
-        threshold=HARD_SIM_THRESHOLD, from_time=datetime.now() - timedelta(minutes=3)
+        threshold=HARD_SIM_THRESHOLD, from_time=datetime.now() - timedelta(days=7)
     )
 
     if not docs:
-        logger.info(f"No new similar docs at {datetime.now()}")
+        logger.info(f"No new similar docs")
         return
 
     data = list()
@@ -218,9 +191,8 @@ def consolidate_sim_docs(remote_doc_store):
                     ),
                 ]
             )
-        except Exception as e:
-            logger.error(str(e))
-            logger.info(doc)
+        except ValueError as e:
+            logger.error(f"{str(e)}: doc = {doc}")
 
     df = pd.DataFrame(
         data,
@@ -249,10 +221,10 @@ def consolidate_sim_docs(remote_doc_store):
     df = df[~df.sim_id.isin(existing_sim_id)]
 
     if df.empty:
-        logger.info(f"No new similar docs at {datetime.now()}")
+        logger.info(f"No new similar docs")
         return
     else:
-        logger.info(f"Retrieved {len(df)} similar docs at {datetime.now()}")
+        logger.info(f"Retrieved {len(df)} similar docs")
 
     df.to_sql(
         name="similar_docs",
@@ -273,7 +245,6 @@ if __name__ == "__main__":
     remote_doc_store = get_connection(POSTGRES_URI, CAND_DIM)
 
     schedule.every().minute.do(update_local_db, local_doc_store, remote_doc_store)
-    schedule.every().minute.do(consolidate_sim_docs, remote_doc_store)
     schedule.every().day.at("00:00").do(update_remote_db, remote_doc_store)
     while True:
         schedule.run_pending()
