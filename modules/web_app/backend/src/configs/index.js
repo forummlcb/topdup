@@ -9,6 +9,6 @@ export const hostName = process.env.url || "topdup.xyz"
 console.log("Host MailServe: " + hostName)
 
 export const emailServer = {
-  user: process.env.userEmail,
-  pass: process.env.passEmail
+  user: process.env.WEB_EMAIL,
+  pass: process.env.WEB_EMAIL_PASS
 }

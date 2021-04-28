@@ -23,10 +23,8 @@ const getCompareResults = async (request, response) => {
       response.status(CODE.SUCCESS).send(result.data)
     })
     .catch((error) => {
-      console.log(error.response && error.response.data)
-      const responseData = error.response && error.response.data
-      response.status(CODE.ERROR).send(responseData)
-    })  
+      next(Error(error))
+    })
 }
 
 export default {

@@ -3,9 +3,9 @@ const logger = require('winston')
 
 const configDatabase = {
   user: "admin",
-  host: "3.1.100.54",
-  database: "topdup_db",
-  password: "uyL7WgydqKNkNMWe",
+  host: "localhost",
+  database: "topdup_local",
+  password: "admin",
   port: "5432"
 }
 
@@ -34,12 +34,12 @@ async function initDatabase() {
   try {
     await createUserTable()
     logger.info("Create user table successfully")
-    await createArticleTable()
-    logger.info('Create article table successfully')
+    await createDocumentTable()
+    logger.info('Create document table successfully')
     await createVoteTable()
     logger.info('Create vote table successfully')
-    await createSimilarityReportTable()
-    logger.info('Create similarity report table successfully')
+    await createSimilarDocsTable()
+    logger.info('Create similar docs table successfully')
   } catch (err) {
     logger.error(err)
   }
@@ -54,7 +54,7 @@ function createUserTable() {
             lastname  varchar(50),
             email     varchar(50) not null,
             login     varchar(50),
-            password  varchar(50),
+            password  varchar(200),
             is_verified boolean not null, 
             secret_code varchar(50),
             thumbnail varchar(200),
@@ -65,16 +65,20 @@ function createUserTable() {
   client.query(query)
 }
 
-function createArticleTable() {
+function createDocumentTable() {
   const query = `
-        create table if not exists article
+        create table if not exists public."document"
         (
-            id              SERIAL PRIMARY KEY,
-            title           varchar(255) not null,
-            created_date     date         not null,
-            last_updated_date date,
-            domain          varchar(255) not null,
-            author          varchar(255) not null
+            id                  varchar(100) PRIMARY KEY,
+            created             time,
+            updated             time,
+            text                text NOT NULL,
+            index               varchar(100) NOT NULL,
+            vector_id           varchar(100),
+            datasource          varchar(255),
+            topdup_article_id   varchar(100),
+            text_original       text,
+            unique(topdup_article_id)
         )
     `
 
@@ -83,41 +87,44 @@ function createArticleTable() {
 
 function createVoteTable() {
   const query = `
-      create table if not exists vote
+      create table if not exists public."vote"
       (
           id                SERIAL PRIMARY KEY,
           voted_option      integer not null,
           created_date      date not null,
-          article_a_id      varchar not null,
-          article_b_id      varchar not null,
+          article_a_id      varchar(100) not null,
+          article_b_id      varchar(100) not null,
           user_id           integer not null,
           constraint fk_user foreign key (user_id) references public.user(id),
-          constraint fk_article1 foreign key (article_a_id) references topdup_articles(article_id),
-          constraint fk_article2 foreign key (article_b_id) references topdup_articles(article_id)
+          constraint fk_article1 foreign key (article_a_id) references document(topdup_article_id),
+          constraint fk_article2 foreign key (article_b_id) references document(topdup_article_id)
       )
     `
 
   client.query(query)
 }
 
-function createSimilarityReportTable() {
+function createSimilarDocsTable() {
   const query = `
-        create table if not exists similarity_report
+        create table if not exists public."similar_docs"
         (
-            id              SERIAL PRIMARY KEY,
-            article_a_id integer not null,
-            article_b_id integer not null,
-            sim_score numeric,
-            updated_date date,
-            revelant_degree varchar(255),
-            constraint fk_article_source foreign key (article_a_id) references article(id),
-            constraint fk_article_target foreign key (article_b_id) references article(id)
+            sim_id              text PRIMARY KEY,
+            sim_score           text,
+            title_A             text,
+            title_B             text,
+            publish_date_A      text,
+            publish_date_B      text,
+            url_A               text,
+            url_B               text,
+            domain_A            text,
+            domain_B            text,
+            document_id_A       text,
+            document_id_B       text
         )
     `
 
   client.query(query, (err, res) => client.end())
 }
-
 
 async function init() {
   try {

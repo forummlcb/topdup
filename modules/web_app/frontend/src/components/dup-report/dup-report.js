@@ -7,10 +7,16 @@ import DupReportService from "./dup-report.service"
 import HeaderRow from "./header-row"
 import Pagination from "./pagination"
 
+const queryString = require("query-string")
+
 class DupReport extends Component {
   constructor(props) {
     super(props)
     this.dupReportService = new DupReportService()
+
+    const searchStr = props.location.search || ''
+    const queryParam = queryString.parse(searchStr) || {}
+    const _currentPage = parseInt(queryParam['page'])
 
     this.state = {
       userData: props.userData,
@@ -19,7 +25,7 @@ class DupReport extends Component {
       allReports: [],
       reportsPerPage: 8,
       loading: false,
-      currentPage: 1,
+      currentPage: _currentPage || 1,
       searchObj: {
         titleSearchT: '',
         domainSearchT: '',
@@ -31,6 +37,12 @@ class DupReport extends Component {
   componentDidMount = () => {
     this.getData()
   };
+
+  componentDidUpdate = (_prevProps, prevState, _snapshot) => {
+    if (prevState.currentPage !== this.state.currentPage) {
+
+    }
+  }
 
   getData = () => {
     const user = this.state.userData && this.state.userData.user
@@ -64,8 +76,7 @@ class DupReport extends Component {
     })
     this.setState(prevState => ({
       ...prevState,
-      simReports: filteredReports,
-      currentPage: 1
+      simReports: filteredReports
     }))
   }
 
