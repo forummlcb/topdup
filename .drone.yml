@@ -67,7 +67,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      {{uppercasefirst build.branch}}: 
+      {{uppercasefirst build.branch}} - Webapp Backend: 
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
@@ -138,7 +138,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      {{uppercasefirst build.branch}}: 
+      {{uppercasefirst build.branch}} - Ml Api: 
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
@@ -163,11 +163,10 @@ steps:
   image: node:15.11.0-alpine
   pull: if-not-exists
   environment:
-    BACKEND_URL: "https://stag.alb.topdup.org"
+    REACT_APP_BASE_API_URL: "https://stag.alb.topdup.org"
   commands:
     - apk add gettext
     - cd modules/web_app/frontend/
-    - cat src/api.js | envsubst > src/api.js
     - npm install
     - npm run build
 
@@ -194,7 +193,7 @@ steps:
     icon_emoji: :>
     username: DronePlayer
     template: >
-      {{uppercasefirst build.branch}}: 
+      {{uppercasefirst build.branch}} - Webapp Frontend:
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
