@@ -6,7 +6,7 @@ job "backend" {
     count = 2
     network {
       port "http" {
-        to = -1
+        to = 5000
       }
     }
     restart {
