@@ -152,11 +152,27 @@ class SQLDocumentStore(BaseDocumentStore):
 
     def get_similar_documents_by_threshold(
         self,
-        threshold: float = 0.90,
+        threshold: float = 0.50,
         from_time: datetime = None,
         to_time: datetime = None,
     ) -> List[Document]:
         """Fetches documents by specifying a threshold to filter the similarity scores in meta data"""
+
+        # Update `updated` column with last update timestamp per `document_id`
+        with self.engine.connect() as conn:
+            conn.execute(
+                """
+        UPDATE meta AS m1
+        SET updated = m2.last_updated
+        FROM (
+            SELECT document_id
+                ,MAX(updated) last_updated
+            FROM meta
+            GROUP BY document_id
+            HAVING COUNT(DISTINCT updated) > 1
+            ) AS m2
+        WHERE m1.document_id = m2.document_id"""
+            )
 
         if not from_time and not to_time:  # get all
             meta = self.session.query(MetaORM)
