@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { FaFacebook, FaTwitter } from "react-icons/fa"
 import { FacebookShareButton, TwitterShareButton } from "react-share"
-import { TopDup } from "../../shared/constants"
 import "./footer.css"
 
 class Footer extends Component {
@@ -17,6 +16,8 @@ class Footer extends Component {
       { label: "Thông tin liên lạc", link: "/contact" }
     ]
 
+    const baseUrl = window.location.href.split('/')[0]
+
     return (
       <footer className="footer">
         <div className="container">
@@ -28,12 +29,12 @@ class Footer extends Component {
               <div className="layout-grid margin-bottom--xs">Mang đến một cộng đồng sáng tạo và đầy nhiệt huyết</div>
               <div className="layout-grid">
                 <div className="layout-cell" style={{ 'margin-right': '5px' }}>
-                  <FacebookShareButton url={TopDup.BaseUrl}>
+                  <FacebookShareButton url={baseUrl}>
                     <span><FaFacebook /></span>
                   </FacebookShareButton>
                 </div>
                 <div className="layout-cell">
-                  <TwitterShareButton url={TopDup.BaseUrl}>
+                  <TwitterShareButton url={baseUrl}>
                     <span><FaTwitter /></span>
                   </TwitterShareButton>
                 </div>

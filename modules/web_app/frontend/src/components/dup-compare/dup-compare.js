@@ -6,7 +6,6 @@ import { FaCheck, FaFacebookSquare, FaHashtag, FaTimes, FaTwitterSquare } from '
 import { useLocation } from "react-router-dom"
 import { FacebookShareButton, TwitterShareButton } from 'react-share'
 import ReactTooltip from 'react-tooltip'
-import { TopDup } from "../../shared/constants"
 import ReactIconRender from '../../shared/react-icon-renderer'
 import { AuthContext } from '../auth/auth-context'
 import DupReportService from '../dup-report/dup-report.service'
@@ -81,7 +80,8 @@ const DupCompare = (props) => {
     if (sourceMode === Mode.Text) queryParam['sourceText'] = sourceContent
     if (targetMode === Mode.Url) queryParam['targetUrl'] = targetContent
     if (targetMode === Mode.Text) queryParam['targetText'] = targetContent
-    setShareUrl(`${TopDup.BaseUrl}/dup-compare?${queryString.stringify(queryParam)}`)
+    const baseURL = window.location.href.split('/')[0]
+    setShareUrl(`${ baseURL }/dup-compare?${ queryString.stringify(queryParam) }`)
 
     console.log('shareUrl: ', shareUrl)
 
