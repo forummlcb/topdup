@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Dict, List, Tuple
 
 from tqdm import tqdm
@@ -37,7 +36,7 @@ class Retriever:
         if not self.document_store:
             raise ValueError(
                 "Document store cannot be None."
-                "Try to set document_store to a DocumentStore object again ..."
+                " Try to set document_store to a DocumentStore object again."
             )
 
         self.index_vector_dim = self.document_store.vector_dim
@@ -75,7 +74,7 @@ class Retriever:
         if not self.candidate_vectorizer:
             raise ValueError(
                 "Candidate vectorizer cannot be None."
-                "Try to set candidate_vectorizer to a DocVectorizerBase object..."
+                " Try to set candidate_vectorizer to a DocVectorizerBase object."
             )
 
         if not training_documents or len(training_documents) == 0:
@@ -86,7 +85,7 @@ class Retriever:
             if not self.training_documents or len(self.training_documents) == 0:
                 raise ValueError(
                     "Fit method can not be called with empty DocumentStore"
-                    " and empty training docuents"
+                    " and empty training documents."
                 )
         else:
             self.training_documents = training_documents
@@ -118,8 +117,8 @@ class Retriever:
 
         if not self.retriever_vectorizer:
             raise ValueError(
-                "Retriver vectorizer cannot be None"
-                " Try to set retriever_vectorizer to a DocVectorizerBase object..."
+                "Retriver vectorizer cannot be None."
+                " Try to set retriever_vectorizer to a DocVectorizerBase object."
             )
 
         if not training_documents or len(training_documents) == 0:
@@ -130,7 +129,7 @@ class Retriever:
             if not self.training_documents or len(self.training_documents) == 0:
                 raise ValueError(
                     "Fit method can not be called with empty DocumentStore"
-                    " and empty training docuents"
+                    " and empty training documents."
                 )
         else:
             self.training_documents = training_documents
@@ -151,7 +150,7 @@ class Retriever:
             if not self.candidate_vectorizer.is_trained:
                 raise ValueError(
                     "Candidate vectorizer is not trained yet."
-                    " Try to call train_candidate_vectorizer first"
+                    " Try to call train_candidate_vectorizer first."
                 )
 
             self.document_store.update_embeddings(self.candidate_vectorizer)
@@ -179,7 +178,7 @@ class Retriever:
         if not self.candidate_vectorizer.is_trained:
             raise ValueError(
                 "Candidate vectorizer is not trained yet."
-                "Try to call train_candidate_vectorizer first"
+                " Try to call train_candidate_vectorizer first."
             )
 
         query_embs = self.candidate_vectorizer.transform(query_texts)
@@ -204,7 +203,7 @@ class Retriever:
         if not self.retriever_vectorizer.is_trained:
             raise ValueError(
                 "Retriever vectorizer is not trained yet."
-                " Try to call train_retriever_vectorizer first"
+                " Try to call train_retriever_vectorizer first."
             )
 
         query_emb = self.retriever_vectorizer.transform([query_text])
@@ -247,8 +246,8 @@ class Retriever:
         """
         if not self.document_store.is_synchronized():
             raise ValueError(
-                "Faiss_index and database haven't been synchronized yet."
-                " Please, call update_embeddings methods first!"
+                "faiss_index and database haven't been synchronized yet."
+                " Try to call update_embeddings methods first."
             )
 
         query_texts = [doc.text for doc in query_docs]
