@@ -4,6 +4,11 @@ job "ml-api" {
   namespace = "default"
   group "ml-api" {
     count = 2
+    network {
+      port "http"{ 
+        to = 8000
+      }
+    }
     restart {
       attempts = 2
       interval = "1m"
@@ -30,7 +35,7 @@ job "ml-api" {
         ]
       }
       env {
-        POSTGRES_URI = $POSTGRES_URI
+        POSTGRES_URI = "$POSTGRES_URI"
       }
     }
   }
