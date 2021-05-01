@@ -22,8 +22,7 @@ job "backend" {
         "traefik.enable=true",
         "traefik.http.routers.webapp-backend.rule=Path(`/`)",
         "traefik.http.routers.webapp-backend.rule=Host(`stag.alb.topdup.org`)",
-        "function=backend",
-        "env=staging"
+        "staging"
       ]
     }
     task "backend" {
@@ -31,6 +30,7 @@ job "backend" {
       config {
         image = "$REGISTRY/$REPO:$TAG"
         ports = ["http"]
+        dns_servers = ["${attr.unique.network.ip-address}"]
       }
       env {
         POOL_HOST = "$POOL_HOST"

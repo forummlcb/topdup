@@ -43,6 +43,10 @@ steps:
       from_secret: staging_postgresql_user
     POOL_PWD:
       from_secret: staging_postgresql_password
+    ML_API_URL: http://traefik.service.consul:8080/mlapi
+    WEB_EMAIL: "topdup.org@gmail.com"
+    WEB_EMAIL_PASS:
+      from_secret: web_email_password
   commands:
     - apk add gettext
     - cat modules/web_app/backend/nomad.hcl | envsubst > modules/web_app/backend/nomad.rendered.hcl
