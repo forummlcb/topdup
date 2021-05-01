@@ -19,7 +19,13 @@ job "ml-api" {
       name = "ml-api"
       port = "http"
       tags = [
-        "function=ml-api",
+        "staging",
+        "traefik.enable=true",
+        "traefik.http.routers.ml-api.entrypoints=web",
+        "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/mlapi",
+        "traefik.http.routers.ml-api.middlewares=strip-prefix",
+        "traefik.http.routers.ml-api.rule=Host(`traefik.service.consul`) && PathPrefix(`/mlapi`)",
+        "traefik.http.routers.ml-api.service=ml-api",
       ]
       meta {
         name = "staging-ml-api"
@@ -27,12 +33,17 @@ job "ml-api" {
     }
     task "ml-api" {
       driver = "docker"
+        resources {
+          cpu = 1024
+          mem = 1024
+        }
       config {
         image = "$REGISTRY/$REPO:$TAG"
         ports = ["http"]
         volumes = [
            "/home/ubuntu/artifacts/:/artifacts"
         ]
+        dns_servers = ["${attr.unique.network.ip-address}"]
       }
       env {
         POSTGRES_URI = "$POSTGRES_URI"
