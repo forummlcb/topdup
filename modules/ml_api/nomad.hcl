@@ -35,7 +35,7 @@ job "ml-api" {
       driver = "docker"
         resources {
           cpu = 1024
-          mem = 1024
+          memory = 1024
         }
       config {
         image = "$REGISTRY/$REPO:$TAG"
