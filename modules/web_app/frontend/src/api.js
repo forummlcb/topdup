@@ -1,5 +1,5 @@
-import axios from "axios";
+import axios from "axios"
 
 export default axios.create({
-  baseURL: `https://alb.topdup.org/`
+  baseURL: `${process.env.REACT_APP_BASE_API_URL}`
 });
