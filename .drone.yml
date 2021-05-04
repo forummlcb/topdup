@@ -168,6 +168,8 @@ steps:
   pull: if-not-exists
   environment:
     REACT_APP_BASE_API_URL: "https://stag.alb.topdup.org"
+    REACT_APP_GA_ID:
+      from_secret: staging_react_app_ga_id
   commands:
     - apk add gettext
     - cd modules/web_app/frontend/
@@ -195,7 +197,7 @@ steps:
       from_secret: slack_incoming_webhook
     channel: build-notifications
     icon_emoji: :>
-    username: DronePlayer
+    username: DroneCi
     template: >
       {{uppercasefirst build.branch}} - Webapp Frontend:
           Build number {{build.number}} is {{build.status}}
