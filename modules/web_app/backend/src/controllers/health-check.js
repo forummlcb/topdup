@@ -9,7 +9,7 @@ const createPool = (host, database, user, password, port = process.env.POOL_PORT
         database: database,
         password: password,
         port: port,
-        connectionTimeoutMillis: 15
+        connectionTimeoutMillis: 3000
     })
 );
 
