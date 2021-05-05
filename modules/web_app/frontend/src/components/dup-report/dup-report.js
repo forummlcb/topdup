@@ -1,7 +1,11 @@
 import "ag-grid-community/dist/styles/ag-grid.css"
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"
 import React, { Component } from "react"
-import { DupReportList } from "./dub-report-list"
+import {
+  BrowserView,
+  MobileView
+} from "react-device-detect"
+import DupReportList from "./dub-report-list"
 import "./dup-report.css"
 import DupReportService from "./dup-report.service"
 import HeaderRow from "./header-row"
@@ -102,10 +106,29 @@ class DupReport extends Component {
       this.onChangeSearchObject(searchObj)
     }
 
-    const listView = (
+    const listDesktopView = (
       <div className="sim-reports-container">
         <div className="sr-list-with-header">
           <HeaderRow searchObjectChanged={this.onChangeSearchObject} searchObj={searchObj} />
+          <DupReportList
+            simReports={currentSimReports}
+            reportVoted={updateVotedReport}
+            loading={loading} />
+        </div>
+        <Pagination
+          reportsPerPage={reportsPerPage}
+          totalReports={simReports.length}
+          paginate={paginate}
+          prevPage={prevPage}
+          nextPage={nextPage}
+          currentPage={currentPage}
+        />
+      </div>
+    )
+
+    const listMobileView = (
+      <div>
+        <div style={{ 'marginBottom': '20px' }}>
           <DupReportList
             simReports={currentSimReports}
             reportVoted={updateVotedReport}
@@ -126,12 +149,17 @@ class DupReport extends Component {
       <div>
         <div className="slogan-container">
           <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
-          {/* Next phrase */}
-          {/* <div className="slogan-description">Nhận thông báo khi nội dung của bạn bị sao chép.</div>  */}
         </div>
-        <div style={{ width: "100%", height: "900px" }}>
-          {listView}
-        </div>
+        <BrowserView>
+          <div style={{ width: "100%", height: "900px" }}>
+            {listDesktopView}
+          </div>
+        </BrowserView>
+        <MobileView>
+          <div style={{ width: "100%", height: "950px" }}>
+            {listMobileView}
+          </div>
+        </MobileView>
       </div>
     )
   }

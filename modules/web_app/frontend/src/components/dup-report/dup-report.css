@@ -210,6 +210,8 @@
   letter-spacing: 0.03em;
   color: #000000;
   margin-bottom: 10px;
+  width: 100%;
+  word-break: break-word;
 }
 
 .slogan-description {
@@ -298,7 +300,15 @@
   pointer-events: auto;
   color: grey;
 }
-@media only screen and (max-width: 768px) {
+
+.report-row-mobile {
+  padding: 5px 10px;
+  box-shadow: 0px 0px 20px 2px lightgray; 
+  border-radius: 5px;
+  margin: 10px 10px;
+}
+
+/* @media only screen and (max-width: 768px) {
   .sim-header-row {
     max-width: 650px;
     min-width: 600px;
@@ -397,11 +407,11 @@
     flex: 0 0 25%;
     max-width: 160px;
   }
-}
+} */
 
-@media only screen and (max-width: 480px) {
+/* @media only screen and (max-width: 480px) {
   .sr-header-title.margin-bottom--xxs {
     background-color: rgb(255, 0, 0);
     color: rgba(255, 0, 0, 0.6);
   }
-}
+} */

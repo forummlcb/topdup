@@ -1,4 +1,9 @@
 import React, { useContext, useEffect, useState } from "react"
+import { OverlayTrigger, Popover } from "react-bootstrap"
+import {
+  BrowserView,
+  MobileView
+} from "react-device-detect"
 import { IconContext } from "react-icons"
 import { FaCheck, FaHashtag, FaTimes } from "react-icons/fa"
 import { Link } from 'react-router-dom'
@@ -45,7 +50,7 @@ export const DupReportList = (props) => {
     }
   }
 
-  const reportRowRenderer = simReport => {
+  const reportRowDesktopRenderer = (simReport) => {
     console.log('dub report list rerendered!')
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
     const voteTooltip = authContext.isLoggedIn ? '' : 'Đăng nhập để vote'
@@ -129,7 +134,7 @@ export const DupReportList = (props) => {
         <div className="sr-compare">
           <Link to={{
             pathname: '/dup-compare',
-            search: `?sourceUrl=${urlA}&targetUrl=${urlB}`,
+            search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
             state: { simReport: simReport }
           }}>
             <button class="btn btn-outline-secondary">So sánh</button>
@@ -139,7 +144,119 @@ export const DupReportList = (props) => {
     )
   }
 
-  return <div className="sr-list-container">{simReports.map(item => reportRowRenderer(item))}</div>
+  const reportMobileRowRenderer = (simReport) => {
+    const { articleA, articleB, articleANbVotes, articleBNbVotes, domainA, domainB, createdDateA, createdDateB, urlA, urlB } = simReport
+
+    const voteBlock = () => {
+      const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
+      const voteTooltip = authContext.isLoggedIn ? '' : 'Đăng nhập để vote'
+      const { articleANbVotes, articleBNbVotes } = simReport
+      return (
+        <>
+          <ReactTooltip type="warning" />
+
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+            <div className="col-md-auto centered-container flex-column no-padding">
+              <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+                <button className="btn"
+                  disabled={!authContext.isLoggedIn}
+                  onClick={() => applyVote(simReport, 1)}>
+                  <div class="centered-container">{iconRenderer(FaCheck, "#3571FF")} (A) </div>
+                </button>
+              </div>
+              {articleANbVotes}
+            </div>
+            <div className="col-md-auto no-padding">
+              <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+                <button className="btn"
+                  disabled={!authContext.isLoggedIn}
+                  onClick={() => applyVote(simReport, 3)}>
+                  {iconRenderer(FaTimes, "#EF5A5A")}
+                </button>
+              </div>
+            </div>
+            <div className="col-md-auto no-padding">
+              <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+                <button className="btn"
+                  disabled={!authContext.isLoggedIn}
+                  onClick={() => applyVote(simReport, 4)}>
+                  {iconRenderer(FaHashtag, "#F69E0C")}
+                </button>
+              </div>
+            </div>
+            <div className="col-md-auto centered-container flex-column no-padding">
+              <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+                <button className="btn"
+                  disabled={!authContext.isLoggedIn}
+                  onClick={() => applyVote(simReport, 2)}>
+                  <div class="centered-container">{iconRenderer(FaCheck, "#3571FF")} (B) </div>
+                </button>
+              </div>
+              {articleBNbVotes}
+            </div>
+          </div>
+        </>
+      )
+    }
+
+    return (
+      <div class="report-row-mobile">
+        <div class="centered-container">
+          <div style={{ width: 'calc(100% - 90px)' }}>
+            <div class="ellipsis-container">
+              (A) {articleA}
+            </div>
+            <div class="ellipsis-container color--grey">
+              {domainA}
+            </div>
+          </div>
+          <div>
+            <OverlayTrigger trigger="click" rootClose key="top" placement="top"
+              overlay={
+                <Popover id="popover-positioned-top">
+                  <Popover.Content>
+                    {voteBlock()}
+                  </Popover.Content>
+                </Popover>
+              }
+            >
+              <button class="btn btn-outline-secondary" style={{ width: '90px' }}>Vote</button>
+            </OverlayTrigger>
+          </div>
+        </div>
+
+        <div class="centered-container">
+          <div style={{ width: 'calc(100% - 90px)' }}>
+            <div class="ellipsis-container">
+              (B) {articleB}
+            </div>
+            <div class="ellipsis-container color--grey">
+              {domainB}
+            </div>
+          </div>
+          <div>
+            <Link to={{
+              pathname: '/dup-compare',
+              search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
+              state: { simReport: simReport }
+            }}>
+              <button class="btn btn-dark" style={{ width: '90px' }}>So sánh</button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return <>
+    <BrowserView>
+      <div className="sr-list-container">{simReports.map(item => reportRowDesktopRenderer(item))}</div>
+    </BrowserView>
+    <MobileView>
+      {simReports.map(item => reportMobileRowRenderer(item))}
+    </MobileView>
+  </>
+
 }
 
 export default DupReportList

@@ -1,7 +1,7 @@
 import React, { useContext } from "react"
 import { Modal } from "react-bootstrap"
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props'
-import { GoogleLogin } from 'react-google-login'
+import GoogleLogin from "react-google-login"
 import { FaFacebookSquare } from "react-icons/fa"
 import { FcGoogle } from "react-icons/fc"
 import { AuthMode } from "../../shared/constants"

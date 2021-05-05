@@ -9,7 +9,7 @@ import App from './components/App/App'
 import './index.css'
 import reportWebVitals from './reportWebVitals'
 
-ReactGA.initialize('G-EY0TC1L82J');
+ReactGA.initialize(process.env.REACT_APP_GA_ID);
 ReactGA.pageview(window.location.pathname + window.location.search);
 
 

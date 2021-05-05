@@ -85,10 +85,10 @@ span {
 }
 
 .page-content {
-  display: flex;
-  justify-content: center;
+  /* display: flex;
+  justify-content: center; */
   margin-top: 70px;
-  max-width: 1200px;
+  /* max-width: 1200px; */
   padding-top: 50px;
   padding-bottom: 50px;
 }
@@ -172,4 +172,12 @@ span {
 
 .label--5 {
   font-size: larger;
+}
+
+.color--grey {
+  color: rgba(38, 38, 38, 0.4);
+}
+
+.no-padding {
+  padding: 0px
 }
