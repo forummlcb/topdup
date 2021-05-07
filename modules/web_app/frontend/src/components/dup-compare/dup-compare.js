@@ -203,7 +203,7 @@ const DupCompare = (props) => {
   )
 
   const voteBlock = () => {
-    if (!isVisibleVoteBlock) return ''
+    // if (!isVisibleVoteBlock) return ''
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
     const voteTooltip = authContext.isLoggedIn ? '' : 'Đăng nhập để vote'
     const { articleANbVotes, articleBNbVotes } = simReport
@@ -358,7 +358,8 @@ const DupCompare = (props) => {
         </div> */}
       </div>
 
-      {loading ? <div className="sr-list-container centered-container"> <h2>Loading...</h2> </div> : resultPairsRenderer()}
+      {resultPairsRenderer()}
+      {/* {loading ? <div className="sr-list-container centered-container"> <h2>Loading...</h2> </div> : resultPairsRenderer()} */}
 
       <div className="row margin-bottom--xs" style={{ 'align-items': 'center' }}>
         <div class="col"></div>
