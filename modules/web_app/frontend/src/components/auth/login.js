@@ -47,7 +47,7 @@ export default function LoginModal(props) {
         <div className="layout-grid centered-container margin-bottom--20">
           <div style={{ cursor: 'pointer' }}>
             <GoogleLogin
-              clientId="712851565891-s8rjhfg50a8ebqmeq8ssdd4f0u0s24ca.apps.googleusercontent.com"
+              clientId="712851565891-fs77om22mk0ttiompu5qcdi7lube6jsu.apps.googleusercontent.com"
               buttonText="Login"
               onSuccess={(ggResponse) => {
                 onSubmitLogin(AuthMode.Google, ggResponse, props)

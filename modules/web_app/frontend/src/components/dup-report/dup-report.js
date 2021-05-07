@@ -147,16 +147,20 @@ class DupReport extends Component {
 
     return (
       <div>
-        <div className="slogan-container">
-          <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
-        </div>
         <BrowserView>
+          <div className="slogan-container">
+            <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
+          </div>
           <div style={{ width: "100%", height: "900px" }}>
             {listDesktopView}
           </div>
         </BrowserView>
+
         <MobileView>
-          <div style={{ width: "100%", height: "950px" }}>
+          <div className="slogan-container-mobile">
+            <div className="slogan-heading-mobile">Bảo vệ nội dung của bạn</div>
+          </div>
+          <div style={{ width: "100%", height: "950px", marginBottom: "20px" }}>
             {listMobileView}
           </div>
         </MobileView>

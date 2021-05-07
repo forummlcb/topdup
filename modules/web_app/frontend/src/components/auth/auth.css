@@ -5,6 +5,7 @@
 }
 
 .login-btn {
+  width: 90px;
   background-color: black;
   color: white;
 }
