@@ -177,7 +177,7 @@ steps:
     - npm run build
 
 - name: deploy to Cloudfront
-  image: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com/topdup-drone-cloudfront-plugin
+  image: drone-cloudfront-s3
   pull: if-not-exists
   settings:
     aws_access_key_id:
