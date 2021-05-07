@@ -46,7 +46,7 @@ const DupCompare = (props) => {
   const [targetMode, setTargetMode] = useState(defaultModeB)
 
   // Similarity threshold set for results dipslay: 0.0
-  const [sScoreThreshold, ] = useState(0)
+  const [sScoreThreshold,] = useState(0)
 
   const [sourceUrl, setSourceUrl] = useState(_sourceUrl)
   const [targetUrl, setTargetUrl] = useState(_targetUrl)
@@ -69,7 +69,8 @@ const DupCompare = (props) => {
     if ((_sourceUrl || _sourceText) && (_targetUrl || _targetText)) {
       checkSimilarity()
     }
-  })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const checkSimilarity = () => {
     // TODO: handle url vs url and url vs text
@@ -81,7 +82,7 @@ const DupCompare = (props) => {
     if (sourceMode === Mode.Text) queryParam['sourceText'] = sourceContent
     if (targetMode === Mode.Url) queryParam['targetUrl'] = targetContent
     if (targetMode === Mode.Text) queryParam['targetText'] = targetContent
-    setShareUrl(`${TopDup.BaseUrl}/dup-compare?${queryString.stringify(queryParam)}`)
+    setShareUrl(`${ TopDup.BaseUrl }/dup-compare?${ queryString.stringify(queryParam) }`)
 
     console.log('shareUrl: ', shareUrl)
 
@@ -201,36 +202,8 @@ const DupCompare = (props) => {
     </>
   )
 
-  const resultPairsRenderer = () => {
-    return filteredResults.map(pair => {
-      const sourceSegIdx = pair.segmentIdxA
-      const targetSegIdx = pair.segmentIdxB
-      return (
-        <>
-          <div class="row margin-bottom--xs compare-item">
-            <div className="col layout-cell text-justify"> {resultRenderer(sourceSegements, sourceSegIdx)} </div>
-            <div className="col layout-cell text-justify"> {resultRenderer(targetSegements, targetSegIdx)} </div>
-            <div className="compare-item-info">
-              <span class="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
-              {shareButtons}
-            </div>
-          </div>
-          <hr />
-        </>
-      )
-    })
-  }
-
-  const iconRenderer = (IconComponent, color) => {
-    return (
-      <IconContext.Provider value={{ color: color, className: "global-class-name" }}>
-        <IconComponent />
-      </IconContext.Provider>
-    )
-  }
-
   const voteBlock = () => {
-    if (!isVisibleVoteBlock) return ''
+    // if (!isVisibleVoteBlock) return ''
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
     const voteTooltip = authContext.isLoggedIn ? '' : 'Đăng nhập để vote'
     const { articleANbVotes, articleBNbVotes } = simReport
@@ -282,6 +255,44 @@ const DupCompare = (props) => {
     )
   }
 
+  const resultPairsRenderer = () => {
+    const resultList = filteredResults.map(pair => {
+      const sourceSegIdx = pair.segmentIdxA
+      const targetSegIdx = pair.segmentIdxB
+      return (
+        <>
+          <div class="row margin-bottom--xs compare-item">
+            <div className="col layout-cell text-justify"> {resultRenderer(sourceSegements, sourceSegIdx)} </div>
+            <div className="col layout-cell text-justify"> {resultRenderer(targetSegements, targetSegIdx)} </div>
+            <div className="compare-item-info">
+              <span class="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
+              {shareButtons}
+            </div>
+          </div>
+          <hr />
+        </>
+      )
+    })
+    return (
+      <div className="compare-results-container">
+        {resultList}
+        <div className="vote-panel-container">
+          <div className="floating-vote-panel">
+            {voteBlock()}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const iconRenderer = (IconComponent, color) => {
+    return (
+      <IconContext.Provider value={{ color: color, className: "global-class-name" }}>
+        <IconComponent />
+      </IconContext.Provider>
+    )
+  }
+
   const onChangeDisplayOrder = ($event) => {
     setDisplayOrder($event.target.value)
   }
@@ -320,7 +331,7 @@ const DupCompare = (props) => {
           Kết quả: {filteredResults.length}
         </div>
         <div class="layout-cell col">
-          {voteBlock()}
+          {/* {voteBlock()} */}
         </div>
         <div class="layout-cell" style={{ width: '260px' }}>
           <Form>
@@ -347,7 +358,8 @@ const DupCompare = (props) => {
         </div> */}
       </div>
 
-      {loading ? <div className="sr-list-container centered-container"> <h2>Loading...</h2> </div> : resultPairsRenderer()}
+      {resultPairsRenderer()}
+      {/* {loading ? <div className="sr-list-container centered-container"> <h2>Loading...</h2> </div> : resultPairsRenderer()} */}
 
       <div className="row margin-bottom--xs" style={{ 'align-items': 'center' }}>
         <div class="col"></div>
