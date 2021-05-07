@@ -1,7 +1,7 @@
 import React, { useContext } from "react"
 import { Modal } from "react-bootstrap"
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props'
-import { GoogleLogin } from 'react-google-login'
+import GoogleLogin from "react-google-login"
 import { FaFacebookSquare } from "react-icons/fa"
 import { FcGoogle } from "react-icons/fc"
 import { AuthMode } from "../../shared/constants"
@@ -87,7 +87,7 @@ export default function LoginModal(props) {
         </div>
 
         <div className="layout-grid centered-container margin-bottom--20">
-          Chưa có tài khoản? &nbsp; <a href="#" onClick={openSignUp}>Đăng ký</a>
+          Chưa có tài khoản? &nbsp; <button type="button" className="link-button" onClick={openSignUp} > Đăng ký </button>
         </div>
       </div>
     </Modal>

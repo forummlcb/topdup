@@ -7,10 +7,10 @@ import "./navigation-bar.css"
 
 const NavigationBar = (props) => {
   const location = useLocation()
-  const logOut = () => {
-    props.setUserData()
-    window.location.assign("/")
-  }
+  // const logOut = () => {
+  //   props.setUserData()
+  //   window.location.assign("/")
+  // }
 
   return (
     <>

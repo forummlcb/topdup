@@ -56,7 +56,7 @@ span {
   background-color: whitesmoke;
 } */
 
-@media only screen and (max-width: 768px) {
+/* @media only screen and (max-width: 768px) {
   .page-content {
     max-width: 650px !important;
     min-width: 600px !important;
@@ -65,4 +65,4 @@ span {
   .dup-compare-title {
     font-size: 30px !important;
   }
-}
+} */

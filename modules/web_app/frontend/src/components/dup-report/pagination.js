@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-
+import { isMobile } from 'react-device-detect'
 export class Pagination extends Component {
   render() {
     const { reportsPerPage, totalReports, paginate, nextPage, prevPage, currentPage } = this.props
@@ -12,9 +12,10 @@ export class Pagination extends Component {
 
     const maxPage = pageNumbers[pageNumbers.length - 1]
 
-    const displayPageNumbers = currentPage <= 5
-      ? pageNumbers.slice(0, 10)
-      : pageNumbers.slice(currentPage - 5, currentPage + 5)
+    const halfNbPage = isMobile ? 4 : 5
+    const displayPageNumbers = currentPage <= halfNbPage
+      ? pageNumbers.slice(0, 2 * halfNbPage)
+      : pageNumbers.slice(currentPage - halfNbPage, currentPage + halfNbPage)
 
     return (
       <nav>

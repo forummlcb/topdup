@@ -39,17 +39,17 @@
 }
 
 .App {
-  display: flex;
+  /* display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; */
 }
-.page-content {
+/* .page-content {
   overflow-x: hidden  !important;
-}
+} */
 
-@media only screen and (max-width : 995px) {
+/* @media only screen and (max-width : 995px) {
   .page-content {
-    margin-top: 220px !important;
+    margin-top: 70px !important;
     overflow-x: hidden  !important;
   }
-}
+} */
