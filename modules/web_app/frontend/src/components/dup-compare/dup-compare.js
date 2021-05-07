@@ -46,7 +46,7 @@ const DupCompare = (props) => {
   const [targetMode, setTargetMode] = useState(defaultModeB)
 
   // Similarity threshold set for results dipslay: 0.0
-  const [sScoreThreshold, setSScoreThreshold] = useState(0)
+  const [sScoreThreshold, ] = useState(0)
 
   const [sourceUrl, setSourceUrl] = useState(_sourceUrl)
   const [targetUrl, setTargetUrl] = useState(_targetUrl)
@@ -55,7 +55,7 @@ const DupCompare = (props) => {
 
   const [sourceSegements, setSourceSegments] = useState([])
   const [targetSegements, setTargetSegments] = useState([])
-  const [resultPairs, setResultPairs] = useState([])
+  const [, setResultPairs] = useState([])
   const [filteredResults, setFilteredResults] = useState([])
   const [compareResult, setCompareResult] = useState({})
   const [shareUrl, setShareUrl] = useState('')
@@ -69,7 +69,7 @@ const DupCompare = (props) => {
     if ((_sourceUrl || _sourceText) && (_targetUrl || _targetText)) {
       checkSimilarity()
     }
-  }, [])
+  })
 
   const checkSimilarity = () => {
     // TODO: handle url vs url and url vs text

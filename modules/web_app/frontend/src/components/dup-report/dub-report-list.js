@@ -113,10 +113,10 @@ export const DupReportList = (props) => {
       <div className="sim-report-row">
         <div className="sr-title-container">
           <div className="sr-title">
-            <span><a href={urlA} target="_blank"> {articleA} </a></span>
+            <span><a href={urlA} target="_blank" rel="noreferrer"> {articleA} </a></span>
           </div>
           <div className="sr-title">
-            <span><a href={urlB} target="_blank"> {articleB} </a></span>
+            <span><a href={urlB} target="_blank" rel="noreferrer"> {articleB} </a></span>
           </div>
         </div>
         <ReactTooltip type="warning" />
@@ -145,7 +145,7 @@ export const DupReportList = (props) => {
   }
 
   const reportMobileRowRenderer = (simReport) => {
-    const { articleA, articleB, articleANbVotes, articleBNbVotes, domainA, domainB, createdDateA, createdDateB, urlA, urlB } = simReport
+    const { articleA, articleB, domainA, domainB, urlA, urlB } = simReport
 
     const voteBlock = () => {
       const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")

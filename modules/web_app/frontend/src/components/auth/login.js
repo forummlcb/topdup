@@ -87,7 +87,7 @@ export default function LoginModal(props) {
         </div>
 
         <div className="layout-grid centered-container margin-bottom--20">
-          Chưa có tài khoản? &nbsp; <a href="#" onClick={openSignUp}>Đăng ký</a>
+          Chưa có tài khoản? &nbsp; <button type="button" className="link-button" onClick={openSignUp} > Đăng ký </button>
         </div>
       </div>
     </Modal>

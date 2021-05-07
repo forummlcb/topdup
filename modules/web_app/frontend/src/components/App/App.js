@@ -23,7 +23,7 @@ function App() {
   const authContext = useContext(AuthContext)
 
   const [loggedIn, setLoggedIn] = useState(authContext.isLoggedIn)
-  const [user, setUser] = useState()
+  const [, setUser] = useState()
 
   const login = (user) => {
     setLoggedIn(true)

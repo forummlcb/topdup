@@ -22,7 +22,6 @@ const ValidatedSignupForm = (inputProps) => {
 
     const formikContent = (props) => {
         const { values, touched, errors, isSubmitting, handleChange, handleBlur, handleSubmit } = props
-        const isDisabled = () => isSubmitting || (values.password !== values.verifiedPassword)
         return (
             <form className="centered-container full-width" style={{ 'flex-direction': 'column' }} onSubmit={handleSubmit}>
                 <div className="form-group width--80">
