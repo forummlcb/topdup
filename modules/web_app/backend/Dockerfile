@@ -10,4 +10,3 @@ RUN npm install \
 EXPOSE 5000
 
 CMD ["node", "dist/src/bin/www.js"]
-
