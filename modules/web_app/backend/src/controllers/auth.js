@@ -88,7 +88,7 @@ const register = async (req, res, next) => {
                 <strong><a href="${ hostName }/api/v1/auth/verification/verify-account/${ result.rows[0].id }/${ secretCode }" target="_blank">Email Topdup.xyz</a></strong></p>`
     }
 
-    await transporter.sendMail(mailOptions)
+    await transporter.sendMail(mailOptions).catch(next)
 
     if (!result) {
       res.status(CODE.ERROR).send({ message: "Đăng ký thất bại!" })

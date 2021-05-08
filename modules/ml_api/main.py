@@ -180,5 +180,4 @@ def http_exception_handler(request, exc):
 if __name__ == "__main__":
     # For debugging only
     import uvicorn
-
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
