@@ -5,6 +5,8 @@ name: staging-backend
 trigger:
   branch:
   - staging
+  event:
+  - pull_request
   paths:
     include:
     - "modules/web_app/backend/**"
@@ -57,7 +59,7 @@ steps:
   pull: if-not-exists
   network_mode: host
   settings:
-    addr: http://100.64.25.41:4646
+    addr: http://100.64.12.62:4646
     template: modules/web_app/backend/nomad.rendered.hcl
     token:
       from_secret: nomad_deployer_token
@@ -77,6 +79,40 @@ steps:
           Details at {{build.link}}
   when:
     status: [success, failure]
+# ---
+# kind: pipeline
+# name: production-backend-promotion
+#
+# trigger:
+#   event:
+#   - promote
+#   target:
+#   - production
+#
+# steps:
+# - name: deploy to Nomad
+#   image: loq9/drone-nomad
+#   pull: if-not-exists
+#   network_mode: host
+#   settings:
+#     addr: http://100.64.12.62:4646
+#     template: modules/web_app/backend/nomad.rendered.hcl
+#     token:
+# - name: sent notification to slack
+#   image: plugins/slack
+#   settings:
+#     webhook:
+#       from_secret: slack_incoming_webhook
+#     channel: build-notifications
+#     icon_emoji: :>
+#     username: DroneCi
+#     template: >
+#       {{uppercasefirst build.branch}} - Webapp Backend: 
+#           Build number {{build.number}} is {{build.status}}
+#           Triggered by commit number {{truncate build.commit 8}}
+#           Details at {{build.link}}
+#   when:
+#     status: [success, failure]
 
 ---
 kind: pipeline
@@ -128,7 +164,7 @@ steps:
   pull: if-not-exists
   network_mode: host
   settings:
-    addr: http://100.64.25.41:4646
+    addr: http://100.64.12.62:4646
     template: modules/ml_api/nomad.rendered.hcl
     token:
       from_secret: nomad_deployer_token
@@ -205,3 +241,63 @@ steps:
           Details at {{build.link}}
   when:
     status: [success, failure]
+
+# ---
+# kind: pipeline
+# name: staging-crawler
+#
+# trigger:
+#   branch:
+#   - staging
+#   event:
+#   - pull_request
+#   paths:
+#     include:
+#     - "modules/crawlers/**"
+#     exclude:
+#     - "modules/crawlers/.gitignore"
+#     - "modules/crawlers/.env.example"
+#
+# steps:
+# - name: build Crawler docker images
+#   image: node:15.11.0-alpine
+#   pull: if-not-exists
+#   environment:
+#     REACT_APP_BASE_API_URL: "https://stag.alb.topdup.org"
+#     REACT_APP_GA_ID:
+#       from_secret: staging_react_app_ga_id
+#   commands:
+#     - apk add gettext
+#     - cd modules/web_app/frontend/
+#     - npm install --legacy-peer-deps
+#     - npm run build
+#
+# - name: deploy to Cloudfront
+#   image: drone-cloudfront-s3
+#   pull: if-not-exists
+#   settings:
+#     aws_access_key_id:
+#       from_secret: ciuser_key_id
+#     aws_secret_access_key:
+#       from_secret: ciuser_secret_access_key
+#     aws_default_region: ap-southeast-1
+#     dir_to_sync: modules/web_app/frontend/build
+#     s3_bucket: topdup-staging-frontend
+#     cloudfront_id: E2VT0WYUZ03J04
+#
+# - name: sent notification to slack
+#   image: plugins/slack
+#   pull: if-not-exists
+#   settings:
+#     webhook:
+#       from_secret: slack_incoming_webhook
+#     channel: build-notifications
+#     icon_emoji: :>
+#     username: DroneCi
+#     template: >
+#       {{uppercasefirst build.branch}} - Webapp Frontend:
+#           Build number {{build.number}} is {{build.status}}
+#           Triggered by commit number {{truncate build.commit 8}}
+#           Details at {{build.link}}
+#   when:
+#     status: [success, failure]
