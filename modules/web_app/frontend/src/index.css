@@ -101,7 +101,7 @@ span {
 }
 
 .layout-cell {
-  margin-right: 3px;
+  margin-right: 3px;  
 }
 
 .layout-right {
@@ -118,6 +118,11 @@ span {
   margin-bottom: 10px;
 }
 
+.margin-horizontal {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 .margin-bottom--xxs {
   margin-bottom: 5px;
 }
@@ -131,7 +136,11 @@ span {
 }
 
 .margin-bottom--30 {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.margin-bottom--40 {
+  margin-bottom: 40px;
 }
 
 .margin-vertical--xs {
