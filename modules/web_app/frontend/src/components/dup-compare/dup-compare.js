@@ -62,7 +62,7 @@ const DupCompare = (props) => {
   const [shareUrl, setShareUrl] = useState('')
 
   const [loading, setLoading] = useState(false)
-  const [displayOrder, setDisplayOrder] = useState(displayOrderDict.indexA)
+  const [displayOrder,] = useState(displayOrderDict.indexA)
 
   const simCheckService = new DupCompareService()
 
