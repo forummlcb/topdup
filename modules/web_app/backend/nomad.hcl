@@ -20,8 +20,8 @@ job "backend" {
       port = "http"
       tags = [
         "traefik.enable=true",
-        "traefik.http.routers.webapp-backend.rule=Path(`/`)",
         "traefik.http.routers.webapp-backend.rule=Host(`stag.alb.topdup.org`)",
+        "traefik.http.routers.webapp-backend.service=backend",
         "staging"
       ]
     }

@@ -1,11 +1,12 @@
 job "ml-api" {
   type = "service"
-  datacenters = ["components"]
+  datacenters = ["dc1"]
   namespace = "default"
   group "ml-api" {
     count = 2
     network {
       port "http"{ 
+        static = -1
         to = 8000
       }
     }
@@ -19,13 +20,13 @@ job "ml-api" {
       name = "ml-api"
       port = "http"
       tags = [
-        "staging",
+        "production",
         "traefik.enable=true",
-        "traefik.http.routers.ml-api.rule=Headers(`function`, `api`)",
+        "traefik.http.routers.ml-api.rule=Headers(`function`: `api`)",
         "traefik.http.routers.ml-api.service=ml-api",
       ]
       meta {
-        name = "staging-ml-api"
+        name = "prod-ml-api"
       }
     }
     task "ml-api" {

@@ -1,6 +1,6 @@
 job "backend" {
   type = "service"
-  datacenters = ["webapp"]
+  datacenters = ["dc1"]
   namespace = "default"
   group "backend" {
     count = 4
@@ -20,9 +20,9 @@ job "backend" {
       port = "http"
       tags = [
         "traefik.enable=true",
-        "traefik.http.routers.webapp-backend.rule=Path(`/`)",
         "traefik.http.routers.webapp-backend.rule=Host(`alb.topdup.org`)",
-        "staging"
+        "traefik.http.routers.webapp-backend.service=backend",
+        "production"
       ]
     }
     task "backend" {

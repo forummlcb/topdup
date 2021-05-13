@@ -32,6 +32,7 @@ steps:
     registry: ${REGISTRY}
     region: ap-southeast-1
     dockerfile: modules/web_app/backend/Dockerfile
+    force_tag: true
 
 - name: render Nomad configurtion for Backend
   image: alpine
@@ -205,6 +206,7 @@ steps:
     registry: ${REGISTRY}
     region: ap-southeast-1
     dockerfile: modules/ml_api/Dockerfile
+    force_tag: false
 
 - name: render nomad.hcl
   image: alpine
