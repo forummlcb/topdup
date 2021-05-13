@@ -47,7 +47,7 @@ steps:
       from_secret: staging_postgresql_user
     POOL_PWD:
       from_secret: staging_postgresql_password
-    ML_API_URL: http://ml-api.service.consul:8000
+    ML_API_URL: http://traefik.service.consul:8080
     WEB_EMAIL: "topdup.org@gmail.com"
     WEB_EMAIL_PASS:
       from_secret: web_email_password
@@ -208,7 +208,7 @@ steps:
     dockerfile: modules/ml_api/Dockerfile
     force_tag: false
 
-- name: render nomad.hcl
+- name: render nomad.hcl for ml-api
   image: alpine
   pull: if-not-exists
   environment:
@@ -219,6 +219,7 @@ steps:
     - apk add gettext
     - cat modules/ml_api/nomad.hcl | envsubst > modules/ml_api/nomad.rendered.hcl
     - cat modules/ml_api/nomad.rendered.hcl
+    - echo "ml-api-${DRONE_REPO_BRANCH} ${DRONE_COMMIT_SHA:0:6}" > ml-api-version
 
 - name: deploy to Nomad
   image: loq9/drone-nomad
@@ -229,6 +230,108 @@ steps:
     template: modules/ml_api/nomad.rendered.hcl
     token:
       from_secret: nomad_deployer_token
+
+- name: save artifact's commit to S3
+  image: plugins/s3
+  pull: if-not-exists
+  settings:
+    bucket: artifact-versioning
+    access_key:
+      from_secret: ciuser_key_id
+    secret_key:
+      from_secret: ciuser_secret_access_key
+    region: ap-southeast-1
+    source: ml-api-version
+    target: staging/
+  when:
+    status: [success]
+
+- name: sent notification to slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    icon_emoji: :>
+    username: DroneCi
+    template: >
+      {{uppercasefirst build.branch}} - Ml Api: 
+          Build number {{build.number}} is {{build.status}}
+          Triggered by commit number {{truncate build.commit 8}}
+          Details at {{build.link}}
+  when:
+    status: [success, failure]
+
+---
+kind: pipeline
+name: production-ml-api
+
+trigger:
+  branch:
+  - master
+  event:
+  - push
+  - pull_request
+  paths:
+    include:
+    - "modules/ml_api/**"
+    - "modules/ml/**"
+    exclude:
+    - ".gitignore"
+
+environment:
+  REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+  REPO: topdup-prod-ml
+
+steps:
+- name: Get the Staging-Ml-Api artifacts' version
+  image: amazon/aws-cli
+  pull: if-not-exists
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ciuser_key_id #ciuser is the IAM user in AWS
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: ciuser_secret_access_key
+    AWS_DEFAULT_REGION: ap-southeast-1
+  commands:
+    - aws s3api get-object --bucket artifact-versioning --key staging/ml-api-version ml-api-version
+
+- name: render nomad.hcl for Ml-Api
+  image: alpine
+  pull: if-not-exists
+  environment:
+    POSTGRES_URI:
+      from_secret: prod_postgresql_uri
+  commands:
+    - apk add gettext
+    - export VERSION=$(awk '/ml-api/ {print $2}' ml-api-version)
+    - cat modules/ml_api/nomad.prod.hcl | envsubst > modules/ml_api/nomad.rendered.hcl
+    - cat modules/ml_api/nomad.rendered.hcl
+
+- name: deploy to Nomad
+  image: loq9/drone-nomad
+  pull: if-not-exists
+  network_mode: host
+  settings:
+    addr: 
+    template: modules/ml_api/nomad.rendered.hcl
+    token:
+      from_secret: prod_nomad_deployer_token
+
+- name: save artifact's commit to S3
+  image: plugins/s3
+  pull: if-not-exists
+  settings:
+    bucket: artifact-versioning
+    access_key:
+      from_secret: ciuser_key_id
+    secret_key:
+      from_secret: ciuser_secret_access_key
+    region: ap-southeast-1
+    source: ml-api-version
+    target: prod/
+  when:
+    status: [success]
 
 - name: sent notification to slack
   image: plugins/slack
@@ -253,6 +356,9 @@ name: staging-frontend
 trigger:
   branch:
   - staging
+  event:
+  - push
+  - pull_request
   paths:
     include:
     - "modules/web_app/frontend/**"
@@ -285,6 +391,64 @@ steps:
     dir_to_sync: modules/web_app/frontend/build
     s3_bucket: topdup-staging-frontend
     cloudfront_id: E2VT0WYUZ03J04
+
+- name: sent notification to slack
+  image: plugins/slack
+  pull: if-not-exists
+  settings:
+    webhook:
+      from_secret: slack_incoming_webhook
+    channel: build-notifications
+    icon_emoji: :>
+    username: DroneCi
+    template: >
+      {{uppercasefirst build.branch}} - Webapp Frontend:
+          Build number {{build.number}} is {{build.status}}
+          Triggered by commit number {{truncate build.commit 8}}
+          Details at {{build.link}}
+  when:
+    status: [success, failure]
+
+---
+kind: pipeline
+name: production-frontend
+
+trigger:
+  branch:
+  - master
+  event:
+  - push
+  - pull_request
+  paths:
+    include:
+    - "modules/web_app/frontend/**"
+
+steps:
+- name: Get the Staging-Frontend artifacts
+  image: amazon/aws-cli
+  pull: if-not-exists
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: ciuser_key_id #ciuser is the IAM user in AWS
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: ciuser_secret_access_key
+    AWS_DEFAULT_REGION: ap-southeast-1
+  commands:
+    - mkdir artifacts
+    - aws s3api get-object --bucket topdup-staging-frontend --key staging/backend-version artifacts/
+
+- name: deploy to Cloudfront Topdup
+  image: drone-cloudfront-s3
+  pull: if-not-exists
+  settings:
+    aws_access_key_id:
+      from_secret: ciuser_key_id
+    aws_secret_access_key:
+      from_secret: ciuser_secret_access_key
+    aws_default_region: ap-southeast-1
+    dir_to_sync: artifacts/*
+    s3_bucket: topdup-prod-frontend
+    cloudfront_id: E3QWNT8KOEN3DH #topdup-prod cloudfront Id
 
 - name: sent notification to slack
   image: plugins/slack
