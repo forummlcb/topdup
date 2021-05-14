@@ -64,6 +64,7 @@ steps:
   settings:
     addr: http://100.64.12.62:4646
     template: modules/web_app/backend/nomad.rendered.hcl
+    watch_deployment: true
     token:
       from_secret: nomad_deployer_token
 
@@ -155,6 +156,7 @@ steps:
   settings:
     addr: 
     template: modules/web_app/backend/nomad.rendered.hcl
+    watch_deployment: true
     token:
       from_secret: prod_nomad_deployer_token
 
@@ -228,6 +230,7 @@ steps:
   settings:
     addr: http://100.64.12.62:4646
     template: modules/ml_api/nomad.rendered.hcl
+    watch_deployment: true
     token:
       from_secret: nomad_deployer_token
 
@@ -315,6 +318,7 @@ steps:
   settings:
     addr: 
     template: modules/ml_api/nomad.rendered.hcl
+    watch_deployment: true
     token:
       from_secret: prod_nomad_deployer_token
 

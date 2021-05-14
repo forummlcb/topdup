@@ -13,7 +13,10 @@ job "backend" {
       attempts = 2
       interval = "1m"
       delay = "15s"
-      mode = "fail"
+    }
+    update {
+      min_healthy_time  = "30s"
+      healthy_deadline  = "2m"
     }
     service {
       name = "backend"
