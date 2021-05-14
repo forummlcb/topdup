@@ -138,7 +138,7 @@ steps:
       from_secret: prod_postgresql_user
     POOL_PWD:
       from_secret: prod_postgresql_password
-    ML_API_URL: http://ml-api.service.consul:8080
+    ML_API_URL: http://traefik.service.consul:8080
     WEB_EMAIL: "topdup.org@gmail.com"
     WEB_EMAIL_PASS:
       from_secret: web_email_password
@@ -435,7 +435,7 @@ steps:
     AWS_DEFAULT_REGION: ap-southeast-1
   commands:
     - mkdir artifacts
-    - aws s3api get-object --bucket topdup-staging-frontend --key staging/backend-version artifacts/
+    - aws s3api get-object --bucket topdup-staging-frontend --key * artifacts/
 
 - name: deploy to Cloudfront Topdup
   image: drone-cloudfront-s3

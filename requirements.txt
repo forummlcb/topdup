@@ -28,3 +28,4 @@ tika==1.24
 tox==3.21.2
 uvloop==0.15.2; sys_platform != 'win32' and sys_platform != 'cygwin'
 vncorenlp==1.0.3
+gunicorn=20.1.0
