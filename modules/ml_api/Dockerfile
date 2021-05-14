@@ -54,3 +54,4 @@ RUN pip3 install -r requirements.txt
 EXPOSE $PORT
 WORKDIR /var/app
 CMD gunicorn modules.ml_api.main:app --max-requests 100 -b 0.0.0.0:$PORT -w 4 -k uvicorn.workers.UvicornWorker -t 60
+
