@@ -15,6 +15,10 @@ job "ml-api" {
       delay = "15s"
       mode = "fail"
     }
+    update {
+      min_healthy_time  = "1m"
+      healthy_deadline  = "3m"
+    }
     service {
       name = "ml-api"
       port = "http"
