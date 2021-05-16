@@ -118,7 +118,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-env_kd/
+topdup_env/
 
 # Spyder project settings
 .spyderproject
@@ -154,3 +154,8 @@ tags
 *.db
 *.pkl
 *.bin*
+
+# DB
+database.ini
+vuhuutiep.conf
+modules/dashboards/scheduler.py

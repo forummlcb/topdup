@@ -1,11 +1,16 @@
-import 'bootstrap/dist/css/bootstrap.min.css'
 import "bootstrap-daterangepicker/daterangepicker.css"
+import 'bootstrap/dist/css/bootstrap.min.css'
 import React from 'react'
+import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css'
 import ReactDOM from 'react-dom'
+import ReactGA from 'react-ga'
 import 'react-toastify/dist/ReactToastify.css'
 import App from './components/App/App'
 import './index.css'
 import reportWebVitals from './reportWebVitals'
+
+ReactGA.initialize(process.env.REACT_APP_GA_ID);
+ReactGA.pageview(window.location.pathname + window.location.search);
 
 
 ReactDOM.render(

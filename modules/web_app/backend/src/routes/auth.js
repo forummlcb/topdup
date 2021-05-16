@@ -3,7 +3,6 @@ import authController from "../controllers/auth"
 import { requiredField } from "./middlewares"
 const router = express.Router()
 
-
 router.get(
     "/verification/verify-account/:userId/:secret_code",
     authController.confirmEmail
@@ -11,9 +10,7 @@ router.get(
 
 router.post("/get-token",
     // middlewares
-    (req, res, next) => {
-        requiredField(req, res, ["email", "password"], [], [], next)
-    },
+    (req, res, next) => requiredField(req, res, ["email", "password"], [], [], next),
     authController.loginNormal
 )
 

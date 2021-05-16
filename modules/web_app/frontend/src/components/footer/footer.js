@@ -1,5 +1,7 @@
 import React, { Component } from "react"
 import { FaFacebook, FaTwitter } from "react-icons/fa"
+import { FacebookShareButton, TwitterShareButton } from "react-share"
+import { TopDup } from "../../shared/constants"
 import "./footer.css"
 
 class Footer extends Component {
@@ -25,15 +27,15 @@ class Footer extends Component {
               </div>
               <div className="layout-grid margin-bottom--xs">Mang đến một cộng đồng sáng tạo và đầy nhiệt huyết</div>
               <div className="layout-grid">
-                <div className="layout-cell">
-                  <a href="/contact/facebook" className="footer-link">
-                    <FaFacebook />
-                  </a>
+                <div className="layout-cell" style={{ 'margin-right': '5px' }}>
+                  <FacebookShareButton url={TopDup.BaseUrl}>
+                    <span><FaFacebook /></span>
+                  </FacebookShareButton>
                 </div>
                 <div className="layout-cell">
-                  <a href="/contact/twitter" className="footer-link">
-                    <FaTwitter />
-                  </a>
+                  <TwitterShareButton url={TopDup.BaseUrl}>
+                    <span><FaTwitter /></span>
+                  </TwitterShareButton>
                 </div>
               </div>
             </div>

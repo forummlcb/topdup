@@ -1,7 +1,7 @@
 .footer {
   padding: 40px 0px;
   bottom: 0;
-  width: 100%;
+  width: 100vw;
   /* Set the fixed height of the footer here */
   background-color: black;
   color: white;

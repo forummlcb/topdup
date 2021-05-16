@@ -1,16 +1,26 @@
 import "ag-grid-community/dist/styles/ag-grid.css"
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"
 import React, { Component } from "react"
-import { DupReportList } from "./dub-report-list"
+import {
+  BrowserView,
+  MobileView
+} from "react-device-detect"
+import DupReportList from "./dub-report-list"
 import "./dup-report.css"
 import DupReportService from "./dup-report.service"
 import HeaderRow from "./header-row"
 import Pagination from "./pagination"
 
+const queryString = require("query-string")
+
 class DupReport extends Component {
   constructor(props) {
     super(props)
     this.dupReportService = new DupReportService()
+
+    const searchStr = props.location.search || ''
+    const queryParam = queryString.parse(searchStr) || {}
+    const _currentPage = parseInt(queryParam['page'])
 
     this.state = {
       userData: props.userData,
@@ -19,7 +29,7 @@ class DupReport extends Component {
       allReports: [],
       reportsPerPage: 8,
       loading: false,
-      currentPage: 1,
+      currentPage: _currentPage || 1,
       searchObj: {
         titleSearchT: '',
         domainSearchT: '',
@@ -31,6 +41,12 @@ class DupReport extends Component {
   componentDidMount = () => {
     this.getData()
   };
+
+  componentDidUpdate = (_prevProps, prevState, _snapshot) => {
+    if (prevState.currentPage !== this.state.currentPage) {
+
+    }
+  }
 
   getData = () => {
     const user = this.state.userData && this.state.userData.user
@@ -64,8 +80,7 @@ class DupReport extends Component {
     })
     this.setState(prevState => ({
       ...prevState,
-      simReports: filteredReports,
-      currentPage: 1
+      simReports: filteredReports
     }))
   }
 
@@ -78,7 +93,11 @@ class DupReport extends Component {
     const currentSimReports = simReports.slice(indexOfFirstReport, indexOfLastReport)
     const paginate = pageNum => this.setState({ currentPage: pageNum })
     const nextPage = () => this.setState({ currentPage: currentPage + 1 })
-    const prevPage = () => this.setState({ currentPage: currentPage - 1 })
+    const prevPage = () => {
+      if (currentPage > 1) {
+        this.setState({ currentPage: currentPage - 1 })
+      }
+    }
 
     const updateVotedReport = (report) => {
       const allReports = this.state.allReports
@@ -87,7 +106,7 @@ class DupReport extends Component {
       this.onChangeSearchObject(searchObj)
     }
 
-    const listView = (
+    const listDesktopView = (
       <div className="sim-reports-container">
         <div className="sr-list-with-header">
           <HeaderRow searchObjectChanged={this.onChangeSearchObject} searchObj={searchObj} />
@@ -107,16 +126,44 @@ class DupReport extends Component {
       </div>
     )
 
+    const listMobileView = (
+      <div>
+        <div style={{ 'marginBottom': '20px' }}>
+          <DupReportList
+            simReports={currentSimReports}
+            reportVoted={updateVotedReport}
+            loading={loading} />
+        </div>
+        <Pagination
+          reportsPerPage={reportsPerPage}
+          totalReports={simReports.length}
+          paginate={paginate}
+          prevPage={prevPage}
+          nextPage={nextPage}
+          currentPage={currentPage}
+        />
+      </div>
+    )
+
     return (
       <div>
-        <div className="slogan-container">
-          <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
-          {/* Next phrase */}
-          {/* <div className="slogan-description">Nhận thông báo khi nội dung của bạn bị sao chép.</div>  */}
-        </div>
-        <div style={{ width: "100%", height: "900px" }}>
-          {listView}
-        </div>
+        <BrowserView>
+          <div className="slogan-container">
+            <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
+          </div>
+          <div style={{ width: "100%", height: "900px" }}>
+            {listDesktopView}
+          </div>
+        </BrowserView>
+
+        <MobileView>
+          <div className="slogan-container-mobile">
+            <div className="slogan-heading-mobile">Bảo vệ nội dung của bạn</div>
+          </div>
+          <div style={{ width: "100%", height: "950px", marginBottom: "20px" }}>
+            {listMobileView}
+          </div>
+        </MobileView>
       </div>
     )
   }
