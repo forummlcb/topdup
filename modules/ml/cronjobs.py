@@ -1,7 +1,6 @@
 import os
 import uuid
 from datetime import datetime, timedelta
-from logging import log
 
 import pandas as pd
 import schedule
