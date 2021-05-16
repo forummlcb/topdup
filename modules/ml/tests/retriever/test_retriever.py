@@ -350,6 +350,6 @@ def test_batch_retriever():
 
 
 if __name__ == "__main__":
-    # test_batch_retriever()
+    test_batch_retriever()
     test_train_candidate_vectorizer()
-    # test_train_retriever_vectorizer()
+    test_train_retriever_vectorizer()
