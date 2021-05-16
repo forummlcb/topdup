@@ -12,7 +12,8 @@ trigger:
     include:
     - "modules/web_app/backend/**"
     exclude:
-    - ".gitignore"
+    - "modules/web_app/backend/.gitignore"
+    - "modules/web_app/backend/nomad.prod.hcl"
 
 environment:
   REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
@@ -112,7 +113,8 @@ trigger:
     include:
     - "modules/web_app/backend/**"
     exclude:
-    - ".gitignore"
+    - "modules/web_app/backend/nomad.hcl"
+    - "modules/web_app/backend/.gitignore"
 
 steps:
 - name: Get the Staging-Backend artifacts' version
@@ -190,7 +192,7 @@ trigger:
     - "modules/ml_api/**"
     - "modules/ml/**"
     exclude:
-    - ".gitignore"
+    - "modules/ml_api/nomad.prod.hcl"
 
 environment:
   REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
@@ -353,7 +355,7 @@ trigger:
     include:
     - "modules/web_app/frontend/**"
     exclude:
-    - ".gitignore"
+    - "modules/web_app/frontend/.gitignore"
 
 steps:
 - name: build Frontend package
