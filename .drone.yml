@@ -154,7 +154,7 @@ steps:
   pull: if-not-exists
   network_mode: host
   settings:
-    addr: 
+    addr: http://100.65.106.206:4646
     template: modules/web_app/backend/nomad.rendered.hcl
     watch_deployment: true
     token:
@@ -183,6 +183,8 @@ name: staging-ml-api
 trigger:
   branch:
   - staging
+  event:
+  - push
   paths:
     include:
     - "modules/ml_api/**"
@@ -208,7 +210,7 @@ steps:
     registry: ${REGISTRY}
     region: ap-southeast-1
     dockerfile: modules/ml_api/Dockerfile
-    force_tag: false
+    force_tag: true
 
 - name: render nomad.hcl for ml-api
   image: alpine
@@ -274,7 +276,6 @@ trigger:
   - master
   event:
   - push
-  - pull_request
   paths:
     include:
     - "modules/ml_api/**"
@@ -311,31 +312,16 @@ steps:
     - cat modules/ml_api/nomad.prod.hcl | envsubst > modules/ml_api/nomad.rendered.hcl
     - cat modules/ml_api/nomad.rendered.hcl
 
-- name: deploy to Nomad
+- name: deploy to Nomad Production
   image: loq9/drone-nomad
   pull: if-not-exists
   network_mode: host
   settings:
-    addr: 
+    addr: http://100.65.106.206:4646
     template: modules/ml_api/nomad.rendered.hcl
     watch_deployment: true
     token:
       from_secret: prod_nomad_deployer_token
-
-- name: save artifact's commit to S3
-  image: plugins/s3
-  pull: if-not-exists
-  settings:
-    bucket: artifact-versioning
-    access_key:
-      from_secret: ciuser_key_id
-    secret_key:
-      from_secret: ciuser_secret_access_key
-    region: ap-southeast-1
-    source: ml-api-version
-    target: prod/
-  when:
-    status: [success]
 
 - name: sent notification to slack
   image: plugins/slack
@@ -394,7 +380,7 @@ steps:
     aws_default_region: ap-southeast-1
     dir_to_sync: modules/web_app/frontend/build
     s3_bucket: topdup-staging-frontend
-    cloudfront_id: E2VT0WYUZ03J04
+    cloudfront_id: E2VT0WYUZ03J04 #topdup-staging cloudfront Id
 
 - name: sent notification to slack
   image: plugins/slack
@@ -422,24 +408,23 @@ trigger:
   - master
   event:
   - push
-  - pull_request
   paths:
     include:
     - "modules/web_app/frontend/**"
 
 steps:
-- name: Get the Staging-Frontend artifacts
-  image: amazon/aws-cli
+- name: build Frontend package
+  image: node:15.11.0-alpine
   pull: if-not-exists
   environment:
-    AWS_ACCESS_KEY_ID:
-      from_secret: ciuser_key_id #ciuser is the IAM user in AWS
-    AWS_SECRET_ACCESS_KEY:
-      from_secret: ciuser_secret_access_key
-    AWS_DEFAULT_REGION: ap-southeast-1
+    REACT_APP_BASE_API_URL: "https://alb.topdup.org"
+    REACT_APP_GA_ID:
+      from_secret: prod_react_app_ga_id
   commands:
-    - mkdir artifacts
-    - aws s3api get-object --bucket topdup-staging-frontend --key * artifacts/
+    - apk add gettext
+    - cd modules/web_app/frontend/
+    - npm install --legacy-peer-deps
+    - npm run build
 
 - name: deploy to Cloudfront Topdup
   image: drone-cloudfront-s3
@@ -450,7 +435,7 @@ steps:
     aws_secret_access_key:
       from_secret: ciuser_secret_access_key
     aws_default_region: ap-southeast-1
-    dir_to_sync: artifacts/*
+    dir_to_sync: modules/web_app/frontend/build
     s3_bucket: topdup-prod-frontend
     cloudfront_id: E3QWNT8KOEN3DH #topdup-prod cloudfront Id
 
