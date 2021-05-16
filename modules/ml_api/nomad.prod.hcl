@@ -3,10 +3,10 @@ job "ml-api" {
   datacenters = ["dc1"]
   namespace = "default"
   group "ml-api" {
-    count = 2
+    count = 1
     network {
       port "http"{ 
-        static = -1
+        static = 8000
         to = 8000
       }
     }
