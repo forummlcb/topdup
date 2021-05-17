@@ -297,7 +297,7 @@ const DupCompare = (props) => {
   }
 
   return (
-    <div className="dup-compare-container" style={{ margin: isMobile ? '-20px 10px 0px 10px' : 'unset' }}>
+    <div className="dup-compare-container" style={{ margin: isMobile ? '-20px 10px 0px 10px' : 'auto' }}>
       <div className="layout-grid margin-bottom--30">
         <div className="layout-cell flex-fill dup-compare-title" style={{ fontSize: isMobile && '32px' }}>
           Nhập liên kết hoặc <br /> nội dung cần so sánh
