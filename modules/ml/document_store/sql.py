@@ -4,17 +4,19 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
+import pandas as pd
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text, create_engine, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import case, null
-from sqlalchemy.sql.sqltypes import Float
+from tqdm.auto import tqdm
 
+from modules.ml.constants import META_MAPPING
 from modules.ml.document_store.base import BaseDocumentStore
 from modules.ml.schema import Document
-from modules.ml.utils import meta_parser
+from modules.ml.utils import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 Base = declarative_base()  # type: Any
@@ -143,7 +145,6 @@ class SQLDocumentStore(BaseDocumentStore):
             for row in query.all():
                 documents.append(self._convert_sql_row_to_document(row))
 
-        # sorted_documents = sorted(documents, key=lambda doc: vector_ids.index(doc.meta["vector_id"]))  # type: ignore
         sorted_documents = sorted(
             documents, key=lambda doc: vector_ids.index(doc.vector_id)
         )
@@ -151,11 +152,27 @@ class SQLDocumentStore(BaseDocumentStore):
 
     def get_similar_documents_by_threshold(
         self,
-        threshold: float = 0.90,
+        threshold: float = 0.50,
         from_time: datetime = None,
         to_time: datetime = None,
     ) -> List[Document]:
         """Fetches documents by specifying a threshold to filter the similarity scores in meta data"""
+
+        # Update `updated` column with last update timestamp per `document_id`
+        with self.engine.connect() as conn:
+            conn.execute(
+                """
+        UPDATE meta AS m1
+        SET updated = m2.last_updated
+        FROM (
+            SELECT document_id
+                ,MAX(updated) last_updated
+            FROM meta
+            GROUP BY document_id
+            HAVING COUNT(DISTINCT updated) > 1
+            ) AS m2
+        WHERE m1.document_id = m2.document_id"""
+            )
 
         if not from_time and not to_time:  # get all
             meta = self.session.query(MetaORM)
@@ -168,49 +185,75 @@ class SQLDocumentStore(BaseDocumentStore):
                 MetaORM.updated > from_time, MetaORM.updated <= to_time
             )
 
+        meta_df = pd.read_sql(
+            sql=f"""
+        SELECT DISTINCT m1.document_id_a
+            ,m2.document_id_b
+            ,m1.sim_score
+        FROM (
+            SELECT DISTINCT document_id AS document_id_a
+                ,value AS sim_score
+                ,updated
+                ,RIGHT(name, 2) AS rank
+            FROM meta
+            WHERE name LIKE 'sim_score%%'
+                AND cast(value AS DECIMAL) > {threshold}
+            ) AS m1
+        INNER JOIN (
+            SELECT DISTINCT document_id AS document_id_a
+                ,value AS document_id_b
+                ,RIGHT(name, 2) AS rank
+            FROM meta
+            WHERE name LIKE 'similar_to%%'
+            ) AS m2 ON m1.document_id_a = m2.document_id_a
+            AND m1.rank = m2.rank
+        INNER JOIN (
+            SELECT DISTINCT document_id
+                ,lower(value) AS "domain"
+            FROM meta
+            WHERE LOWER("name") IN ({", ".join(["'{}'".format(x) for x in META_MAPPING["domain"]])})
+            ) AS m3 ON m1.document_id_a = m3.document_id
+        INNER JOIN (
+            SELECT DISTINCT document_id
+                ,LOWER(value) AS "domain"
+            FROM meta
+            WHERE LOWER("name") IN ({", ".join(["'{}'".format(x) for x in META_MAPPING["domain"]])})
+            ) AS m4 ON m2.document_id_b = m4.document_id
+        --filter rules defined by PO
+        WHERE (m3.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])})
+            OR m4.domain NOT IN ({", ".join(["'{}'".format(x) for x in WHITELIST])}))
+        AND m3.domain != m4.domain
+        AND m1.updated > '{from_time.strftime("%Y-%m-%d %H:%M:%S")}'""",
+            con=self.engine,
+        )
+
         documents = list()
         document_id_AB = list()
-        document_id_A = meta.filter(
-            MetaORM.name == "sim_score",
-            MetaORM.value.cast(Float) >= threshold,
-            MetaORM.value.cast(Float) < 1,
-        )
-        for row in document_id_A.all():
-            document_id_B = meta.filter(
-                MetaORM.document_id == row.document_id, MetaORM.name == "similar_to"
-            )
-
+        for _, row in meta_df.iterrows():
             document_id_AB.append(
-                sorted([row.document_id, document_id_B.first().value]) + [row.value]
-            )  # row.value = `sim_score`
+                sorted([row["document_id_a"], row["document_id_b"]])
+                + [row["sim_score"]]
+            )
+        # Remove duplicate A-->B and B-->A are identical
+        document_id_AB_set = set(tuple(x) for x in document_id_AB)
+        document_id_AB = [list(x) for x in document_id_AB_set]
 
-        document_id_AB.sort()
-        document_id_AB = list(
-            document_id_AB for document_id_AB, _ in itertools.groupby(document_id_AB)
-        )
-
-        for document_id in document_id_AB:
+        for document_id in tqdm(document_id_AB):
             meta_A = dict()
             meta_B = dict()
+
             meta_A.update({"document_id": document_id[0]})
             meta_B.update({"document_id": document_id[1]})
             for row in meta.filter(MetaORM.document_id == document_id[0]).all():
-                if row.name == "sim_score":
-                    meta_A.update({row.name: document_id[2]})
-                else:
+                if "sim" not in row.name:
                     meta_A.update({row.name: row.value})
             for row in meta.filter(MetaORM.document_id == document_id[1]).all():
-                if row.name == "sim_score":
-                    meta_B.update({row.name: document_id[2]})
-                else:
+                if "sim" not in row.name:
                     meta_B.update({row.name: row.value})
+            meta_A.update({"sim_score": document_id[2]})
+            meta_B.update({"sim_score": document_id[2]})
 
-            domain_A = meta_parser("domain", meta_A).lower()
-            domain_B = meta_parser("domain", meta_B).lower()
-            domain_A = "domain" if domain_A in WHITELIST else domain_A
-            domain_B = "domain" if domain_B in WHITELIST else domain_B
-            if domain_A != domain_B:  # rule defined by the PO
-                documents.append((meta_A, meta_B))
+            documents.append((meta_A, meta_B))
 
         return documents
 
@@ -399,6 +442,64 @@ class SQLDocumentStore(BaseDocumentStore):
         for m in meta_orms:
             self.session.add(m)
         self.session.commit()
+
+    def update_documents_meta(self, id_meta: List[Dict[str, str]]):
+        """Updates the metadata dictionary of multiple documents
+        """
+        # Query the current metadata of documents
+        document_ids = list(set([im["document_id"] for im in id_meta]))
+        names = list(set(sum([list(im.keys()) for im in id_meta], [])))
+        names.remove("document_id")
+        current_meta = pd.read_sql(
+            sql="""
+        SELECT DISTINCT document_id, name, value FROM meta
+        WHERE document_id IN ({})""".format(
+                ", ".join(["'{}'".format(id) for id in document_ids])
+            ),
+            con=self.engine,
+        )
+
+        # Remove the current metadata from table
+        with self.engine.connect() as conn:
+            conn.execute(
+                """
+        DELETE FROM meta
+        WHERE document_id IN ({0})
+        AND name IN ({1})""".format(
+                    ", ".join(["'{}'".format(id) for id in document_ids]),
+                    ", ".join(["'{}'".format(name) for name in names]),
+                )
+            )
+
+        # Insert the metadata on DataFrame `current_meta`
+        ## Build id_meta to DataFrame
+        id_meta_df = list()
+        for im in id_meta:
+            for k in im.keys():
+                if k != "document_id":
+                    id_meta_df.append([im["document_id"], k, im[k]])
+
+        id_meta_df = pd.DataFrame(id_meta_df, columns=current_meta.columns)
+        ## Bulk insert
+        df = pd.merge(
+            current_meta,
+            id_meta_df,
+            how="outer",
+            on=["document_id", "name"],
+            suffixes=("_current", "_update"),
+        )
+        df = df[df["value_update"].notna()]
+
+        insert = list()
+        for _, row in df.iterrows():
+            insert.append(
+                {
+                    "name": row["name"],
+                    "value": row["value_update"],
+                    "document_id": row["document_id"],
+                }
+            )
+        self.engine.execute(MetaORM.__table__.insert().values(insert))
 
     def get_document_count(
         self,

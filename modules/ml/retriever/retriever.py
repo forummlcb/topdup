@@ -1,13 +1,14 @@
-import logging
 from typing import Any, Dict, List, Tuple
 
 from tqdm import tqdm
 
 from modules.ml.document_store.faiss import FAISSDocumentStore
 from modules.ml.preprocessor.vi_preprocessor import ViPreProcessor
+from modules.ml.schema import Document
+from modules.ml.utils import get_logger
 from modules.ml.vectorizer.base import DocVectorizerBase
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 class Retriever:
@@ -35,7 +36,7 @@ class Retriever:
         if not self.document_store:
             raise ValueError(
                 "Document store cannot be None."
-                "Try to set document_store to a DocumentStore object again ..."
+                " Try to set document_store to a DocumentStore object again."
             )
 
         self.index_vector_dim = self.document_store.vector_dim
@@ -73,7 +74,7 @@ class Retriever:
         if not self.candidate_vectorizer:
             raise ValueError(
                 "Candidate vectorizer cannot be None."
-                "Try to set candidate_vectorizer to a DocVectorizerBase object..."
+                " Try to set candidate_vectorizer to a DocVectorizerBase object."
             )
 
         if not training_documents or len(training_documents) == 0:
@@ -84,12 +85,12 @@ class Retriever:
             if not self.training_documents or len(self.training_documents) == 0:
                 raise ValueError(
                     "Fit method can not be called with empty DocumentStore"
-                    " and empty training docuents"
+                    " and empty training documents."
                 )
         else:
             self.training_documents = training_documents
 
-        self.spare_documnet_embedding = self.candidate_vectorizer.fit_transform(
+        self.sparse_documnet_embedding = self.candidate_vectorizer.fit_transform(
             self.training_documents
         )
 
@@ -116,8 +117,8 @@ class Retriever:
 
         if not self.retriever_vectorizer:
             raise ValueError(
-                "Retriver vectorizer cannot be None"
-                " Try to set retriever_vectorizer to a DocVectorizerBase object..."
+                "Retriver vectorizer cannot be None."
+                " Try to set retriever_vectorizer to a DocVectorizerBase object."
             )
 
         if not training_documents or len(training_documents) == 0:
@@ -128,12 +129,12 @@ class Retriever:
             if not self.training_documents or len(self.training_documents) == 0:
                 raise ValueError(
                     "Fit method can not be called with empty DocumentStore"
-                    " and empty training docuents"
+                    " and empty training documents."
                 )
         else:
             self.training_documents = training_documents
 
-        self.spare_documnet_embedding = self.retriever_vectorizer.fit_transform(
+        self.sparse_documnet_embedding = self.retriever_vectorizer.fit_transform(
             self.training_documents
         )
 
@@ -149,24 +150,24 @@ class Retriever:
             if not self.candidate_vectorizer.is_trained:
                 raise ValueError(
                     "Candidate vectorizer is not trained yet."
-                    " Try to call train_candidate_vectorizer first"
+                    " Try to call train_candidate_vectorizer first."
                 )
 
             self.document_store.update_embeddings(self.candidate_vectorizer)
             if save_path:
                 self.document_store.save(file_path=save_path)
-        # else:
-        #     self.document_store = FAISSDocumentStore.load(
-        #         faiss_file_path=save_path, sql_url=sql_url
-        #     )
+        else:
+            self.document_store = FAISSDocumentStore.load(
+                faiss_file_path=save_path, sql_url=sql_url
+            )
 
     def get_candidates(
-        self, query_docs: List[str], top_k: int = 10, index: str = None, filters=None
+        self, query_texts: List[str], top_k: int = 10, index: str = None, filters=None
     ) -> Tuple:
         """First phase of retriever to get top_k candidates
 
         Args:
-            query_docs (List[str]): The documents to query. Defaults to None.
+            query_texts (List[str]): The documents to query. Defaults to None.
             top_k (int, optional): Number of documents to return for each query_doc.
                 Defaults to 10.
 
@@ -177,21 +178,23 @@ class Retriever:
         if not self.candidate_vectorizer.is_trained:
             raise ValueError(
                 "Candidate vectorizer is not trained yet."
-                "Try to call train_candidate_vectorizer first"
+                " Try to call train_candidate_vectorizer first."
             )
 
-        query_embs = self.candidate_vectorizer.transform(query_docs)
+        query_embs = self.candidate_vectorizer.transform(query_texts)
         score_matrix, vector_id_matrix = self.document_store.query_ids_by_embedding(
             query_emb=query_embs, filters=filters, top_k=top_k, index=index
         )
 
         return query_embs, score_matrix, vector_id_matrix
 
-    def _calc_scores_for_candidates(self, query_doc, candidate_ids):
+    def _calc_scores_for_candidates(
+        self, query_text, candidate_ids, top_k_results: int = 10
+    ):
         """Caculates scores for each candidate in 2nd phase
 
         Args:
-            query_doc (str, optional): The document to query. Defaults to None.
+            query_text (str, optional): The document to query. Defaults to None.
             candidate_ids (List[int]): List of candidate_ids of query. Defaults to None.
 
         Returns:
@@ -200,10 +203,10 @@ class Retriever:
         if not self.retriever_vectorizer.is_trained:
             raise ValueError(
                 "Retriever vectorizer is not trained yet."
-                " Try to call train_retriever_vectorizer first"
+                " Try to call train_retriever_vectorizer first."
             )
 
-        query_emb = self.retriever_vectorizer.transform([query_doc])
+        query_emb = self.retriever_vectorizer.transform([query_text])
         candidate_ids = list(map(str, candidate_ids))
 
         candidate_docs = self.document_store.get_documents_by_vector_ids(candidate_ids)
@@ -214,16 +217,18 @@ class Retriever:
         scores = candidate_embs.dot(query_emb.T)
         idx_scores = [(idx, score) for idx, score in enumerate(scores)]
 
-        # 0 location is the query_doc itself, so pick the next one
-        highest_score = sorted(idx_scores, key=(lambda tup: tup[1]), reverse=True)[1]
+        # 0 location is the query_text itself, so pick the next ones
+        highest_scores = sorted(idx_scores, key=(lambda tup: tup[1]), reverse=True)[
+            1 : top_k_results + 1
+        ]
 
-        return candidate_docs_id[highest_score[0]], highest_score[1]
+        return [[candidate_docs_id[score[0]], score[1]] for score in highest_scores]
 
     def batch_retrieve(
         self,
-        query_docs: List[str],
-        top_k_candidates: int = 10,
-        process_query_docs: bool = False,
+        query_docs: List[Document],
+        top_k_results: int = 10,
+        process_query_texts: bool = False,
         index: str = None,
         filters=None,
     ) -> List[Dict[str, Any]]:
@@ -231,8 +236,8 @@ class Retriever:
 
         Args:
             query_docs ([type]): [description]
-            top_k_candidates (int, optional): [description]. Defaults to 10.
-            process_query_docs (bool, optional): [description]. Defaults to False.
+            top_k_results (int, optional): [description]. Defaults to 10.
+            process_query_texts (bool, optional): [description]. Defaults to False.
             index ([type], optional): [description]. Defaults to None.
             filters ([type], optional): [description]. Defaults to None.
 
@@ -241,39 +246,52 @@ class Retriever:
         """
         if not self.document_store.is_synchronized():
             raise ValueError(
-                "Faiss_index and database haven't been synchronized yet."
-                " Please, call update_embeddings methods first!"
+                "faiss_index and database haven't been synchronized yet."
+                " Try to call update_embeddings methods first."
             )
 
-        if process_query_docs:
+        query_texts = [doc.text for doc in query_docs]
+
+        if process_query_texts:
             processor = ViPreProcessor()
-            query_docs = [
-                processor.clean({"text": query_doc})["text"] for query_doc in query_docs
+            query_texts = [
+                processor.clean({"text": query_text})["text"]
+                for query_text in query_texts
             ]
 
         _, _, candidate_id_matrix = self.get_candidates(
-            query_docs=query_docs, top_k=top_k_candidates, index=index, filters=filters
-        )
+            query_texts=query_texts,
+            top_k=10 * top_k_results,
+            index=index,
+            filters=filters,
+        )  # create large candidates search space 10*top_k_results
 
         retrieve_results = []
 
-        for idx, query_doc in enumerate(tqdm(query_docs, desc="Retrieving.....  ")):
+        for idx, query_text in enumerate(tqdm(query_texts, desc="Retrieving.....  ")):
             candidate_ids = [
                 candidate_id
                 for candidate_id in candidate_id_matrix[idx]
                 if candidate_id >= 0
             ]
 
-            retrieve_result, score = self._calc_scores_for_candidates(
-                query_doc=query_doc, candidate_ids=candidate_ids
+            reranked_candidates = self._calc_scores_for_candidates(
+                query_text=query_text,
+                candidate_ids=candidate_ids,
+                top_k_results=top_k_results,
             )
 
-            retrieve_results.append(
-                {
-                    "query_doc": query_doc,
-                    "retrieve_result": retrieve_result,
-                    "similarity_score": round(score[0], 5),
-                }
-            )
+            for rank, reranked_candidate in enumerate(reranked_candidates):
+                retrieve_results.append(
+                    {
+                        "document_id": query_docs[idx].id,
+                        f"sim_document_id_rank_{str(rank).zfill(2)}": reranked_candidate[
+                            0
+                        ],
+                        f"sim_score_rank_{str(rank).zfill(2)}": round(
+                            reranked_candidate[1][0], 5
+                        ),
+                    }
+                )
 
         return retrieve_results

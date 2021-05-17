@@ -1,9 +1,11 @@
-import logging
 import os
 
 import psycopg2
-from psycopg2 import Error
 from psycopg2.extras import RealDictCursor
+
+from modules.data_wranglers.utils import get_logger
+
+logger = get_logger()
 
 # -----------------------------------------------------------
 #           POSTGRES DATABASE CONFIGURATION
@@ -52,11 +54,11 @@ def executesqls(sqls):
         cursor = conn.cursor()
         for sql in sqls:
             iCount += 1
-            print("Record %s of %s" % (iCount, iTotal))
+            logger.info("Record %s of %s" % (iCount, iTotal))
             cursor.execute(sql)
         conn.commit()
     except Exception as e:
-        print(e, sql)
+        logger.error(f"{str(e)}: sql = {sql}")
         conn.rollback()
 
 

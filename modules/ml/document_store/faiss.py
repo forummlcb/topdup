@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from modules.ml.document_store.sql import SQLDocumentStore
 from modules.ml.schema import Document
+from modules.ml.utils import get_logger
 from modules.ml.vectorizer.base import DocVectorizerBase
 
 if platform != "win32" and platform != "cygwin":
@@ -16,7 +17,8 @@ if platform != "win32" and platform != "cygwin":
 else:
     raise ModuleNotFoundError("FAISSDocumentStore on windows platform is not supported")
 
-logger = logging.getLogger(__name__)
+
+logger = get_logger()
 
 
 class FAISSDocumentStore(SQLDocumentStore):
@@ -195,11 +197,11 @@ class FAISSDocumentStore(SQLDocumentStore):
 
             docs_to_write_in_sql = []
             for doc in document_objects[i : i + self.index_buffer_size]:
-                # meta = doc.meta
                 if add_vectors:
-                    # meta["vector_id"] = vector_id
                     doc.vector_id = vector_id
                     vector_id += 1
+                else:
+                    doc.vector_id = None
                 docs_to_write_in_sql.append(doc)
 
             super(FAISSDocumentStore, self).write_documents(
