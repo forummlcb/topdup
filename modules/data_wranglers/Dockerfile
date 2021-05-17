@@ -18,6 +18,7 @@ RUN mkdir -p /var/app/modules/data_wranglers
 COPY modules/data_wranglers/datalayer.py /var/app/modules/data_wranglers/datalayer.py
 COPY modules/data_wranglers/docbao_processor.py /var/app/modules/data_wranglers/docbao_processor.py
 COPY modules/data_wranglers/preprocessor /var/app/modules/data_wranglers/preprocessor
+COPY modules/data_wranglers/plugins /var/app/modules/data_wranglers/plugins
 COPY requirements.txt /var/app/modules/data_wranglers/requirements.txt
 
 # Install system dependencies
