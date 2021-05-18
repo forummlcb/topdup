@@ -1,9 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import { OverlayTrigger, Popover } from "react-bootstrap"
-import {
-  BrowserView,
-  MobileView
-} from "react-device-detect"
+import { BrowserView, MobileView } from "react-device-detect"
 import { IconContext } from "react-icons"
 import { FaCheck, FaHashtag, FaTimes } from "react-icons/fa"
 import { Link } from 'react-router-dom'
@@ -50,7 +47,7 @@ export const DupReportList = (props) => {
     }
   }
 
-  const reportRowDesktopRenderer = (simReport) => {
+  const reportRowDesktopRenderer = (simReport, isLastItem) => {
     console.log('dub report list rerendered!')
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
     const voteTooltip = authContext.isLoggedIn ? '' : 'Đăng nhập để vote'
@@ -110,7 +107,7 @@ export const DupReportList = (props) => {
     )
 
     return (
-      <div className="sim-report-row">
+      <div className="sim-report-row" style={{ borderBottom: isLastItem && 'unset' }}>
         <div className="sr-title-container">
           <div className="sr-title">
             <span><a href={urlA} target="_blank" rel="noreferrer"> {articleA} </a></span>
@@ -250,7 +247,7 @@ export const DupReportList = (props) => {
 
   return <>
     <BrowserView>
-      <div className="sr-list-container">{simReports.map(item => reportRowDesktopRenderer(item))}</div>
+      <div className="sr-list-container">{simReports.map((item, idx) => reportRowDesktopRenderer(item, idx === simReports.length - 1))}</div>
     </BrowserView>
     <MobileView>
       {simReports.map(item => reportMobileRowRenderer(item))}

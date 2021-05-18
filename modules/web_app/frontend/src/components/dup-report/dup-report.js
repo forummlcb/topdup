@@ -1,10 +1,7 @@
 import "ag-grid-community/dist/styles/ag-grid.css"
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"
 import React, { Component } from "react"
-import {
-  BrowserView,
-  MobileView
-} from "react-device-detect"
+import { BrowserView, MobileView } from "react-device-detect"
 import DupReportList from "./dub-report-list"
 import "./dup-report.css"
 import DupReportService from "./dup-report.service"
@@ -27,7 +24,8 @@ class DupReport extends Component {
       setUserData: props.setUserData,
       simReports: [],
       allReports: [],
-      reportsPerPage: 8,
+      reportsPerPage: 10,
+      totalNbReports: 0,
       loading: false,
       currentPage: _currentPage || 1,
       searchObj: {
@@ -44,19 +42,35 @@ class DupReport extends Component {
 
   componentDidUpdate = (_prevProps, prevState, _snapshot) => {
     if (prevState.currentPage !== this.state.currentPage) {
-
+      this.getData()
+      const searchStr = _prevProps.location.search || ''
+      const queryParam = queryString.parse(searchStr) || {}
+      queryParam.page = this.state.currentPage
+      this.props.history.push({ search: queryString.stringify(queryParam) })
     }
   }
 
   getData = () => {
-    const user = this.state.userData && this.state.userData.user
-    const userId = user && user.id
+    const { currentPage, reportsPerPage, searchObj } = this.state
+    const startPoint = reportsPerPage * (currentPage - 1)
+    const queryParam = { startPoint, limit: reportsPerPage, ...searchObj }
     this.setState({ loading: true })
-    this.dupReportService.getSimilarityRecords(userId)
-      .then(results => {
-        this.setState({ loading: false })
-        this.setState({ simReports: results })
-        this.setState({ allReports: results })
+    this.dupReportService.getSimilarityRecords(queryParam)
+      .then(result => {
+        // Save current displayed reports in
+        // window object
+        window['saveReportResult'] = {
+          response: result,
+          queryParam: queryParam
+        }
+        const { reports, totalNbReports } = result.data
+        this.setState(prevState => ({
+          ...prevState,
+          loading: false,
+          simReports: reports,
+          allReports: reports,
+          totalNbReports: totalNbReports
+        }))
       })
   };
 
@@ -86,11 +100,7 @@ class DupReport extends Component {
 
   render() {
     console.log('Dup report - rerendered')
-    const { simReports, reportsPerPage, loading, currentPage, searchObj } = this.state
-
-    const indexOfLastReport = reportsPerPage * currentPage
-    const indexOfFirstReport = reportsPerPage * (currentPage - 1)
-    const currentSimReports = simReports.slice(indexOfFirstReport, indexOfLastReport)
+    const { simReports, reportsPerPage, totalNbReports, loading, currentPage, searchObj } = this.state
     const paginate = pageNum => this.setState({ currentPage: pageNum })
     const nextPage = () => this.setState({ currentPage: currentPage + 1 })
     const prevPage = () => {
@@ -106,42 +116,37 @@ class DupReport extends Component {
       this.onChangeSearchObject(searchObj)
     }
 
+    const paginationPanel = <Pagination
+      reportsPerPage={reportsPerPage}
+      totalReports={totalNbReports}
+      paginate={paginate}
+      prevPage={prevPage}
+      nextPage={nextPage}
+      currentPage={currentPage}
+    />
+
+    const dureportListPanel = <DupReportList
+      simReports={simReports}
+      reportVoted={updateVotedReport}
+      loading={loading}
+    />
+
     const listDesktopView = (
       <div className="sim-reports-container">
         <div className="sr-list-with-header">
           <HeaderRow searchObjectChanged={this.onChangeSearchObject} searchObj={searchObj} />
-          <DupReportList
-            simReports={currentSimReports}
-            reportVoted={updateVotedReport}
-            loading={loading} />
+          {dureportListPanel}
         </div>
-        <Pagination
-          reportsPerPage={reportsPerPage}
-          totalReports={simReports.length}
-          paginate={paginate}
-          prevPage={prevPage}
-          nextPage={nextPage}
-          currentPage={currentPage}
-        />
+        {paginationPanel}
       </div>
     )
 
     const listMobileView = (
       <div>
         <div style={{ 'marginBottom': '20px' }}>
-          <DupReportList
-            simReports={currentSimReports}
-            reportVoted={updateVotedReport}
-            loading={loading} />
+          {dureportListPanel}
         </div>
-        <Pagination
-          reportsPerPage={reportsPerPage}
-          totalReports={simReports.length}
-          paginate={paginate}
-          prevPage={prevPage}
-          nextPage={nextPage}
-          currentPage={currentPage}
-        />
+        {paginationPanel}
       </div>
     )
 
@@ -151,7 +156,7 @@ class DupReport extends Component {
           <div className="slogan-container">
             <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
           </div>
-          <div style={{ width: "100%", height: "900px" }}>
+          <div style={{ width: "100%", minHeight: "900px" }}>
             {listDesktopView}
           </div>
         </BrowserView>
@@ -160,7 +165,7 @@ class DupReport extends Component {
           <div className="slogan-container-mobile">
             <div className="slogan-heading-mobile">Bảo vệ nội dung của bạn</div>
           </div>
-          <div style={{ width: "100%", height: "950px", marginBottom: "20px" }}>
+          <div style={{ width: "100%", minHeight: "950px", marginBottom: "20px" }}>
             {listMobileView}
           </div>
         </MobileView>

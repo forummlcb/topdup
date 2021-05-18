@@ -58,26 +58,45 @@ const getSimRecordById = async (id, userId) => {
 }
 
 const getSimilarityRecords = async (request, response) => {
-  const userId = request.query.userId
+  const startPoint = request.query.startPoint
+  const limit = request.query.limit
+
+  const userId = request.query.userId || 1
   const getSimReportsQuery = `
-      SELECT * 
-      FROM public.similar_docs 
-      ORDER BY sim_score DESC
-    `
-  const getVotesQuery = `SELECT * FROM public.vote`
+    select sub_sm.*, v2.user_id, v2.voted_option, v2.id as vote_id
+    from (
+        select sm.*, withCount.nb_vote_for_a, withCount.nb_vote_for_b, withCount.nb_vote_error, withCount.nb_vote_irrelevant
+        from
+            (
+                select "document_id_A",
+                      "document_id_B",
+                      count(v1.id) filter (where v1.voted_option = 1) as nb_vote_for_a,
+                      count(v1.id) filter (where v1.voted_option = 2) as nb_vote_for_b,
+                      count(v1.id) filter (where v1.voted_option = 3) as nb_vote_error,
+                      count(v1.id) filter (where v1.voted_option = 4) as nb_vote_irrelevant
+                from similar_docs sm
+                    left join vote v1 on v1.article_a_id = sm."document_id_A" and v1.article_b_id = sm."document_id_B"
+                group by sm."document_id_A", sm."document_id_B"
+            ) withCount,
+            similar_docs sm
+        where sm."document_id_A" = withCount."document_id_A" and sm."document_id_B" = withCount."document_id_B"
+        limit ${limit }
+        offset ${startPoint }
+    ) sub_sm
+    left join vote v2 on v2.article_a_id = sub_sm."document_id_A" and v2.article_b_id = sub_sm."document_id_B" and ${useId ? 'v2.user_id = ' + userId : 'False' }
+  `
+  const countItemsQuery = `
+    SELECT COUNT(*) AS nb_items
+    FROM public.similar_docs    
+  `
+
   const getSimReportsRes = await pool.query(getSimReportsQuery)
-  const getVotesRes = await pool.query(getVotesQuery)
+  const getItemCount = await pool.query(countItemsQuery)
+
   const simReports = getSimReportsRes.rows
-  const votes = getVotesRes.rows
+  const totalNbReports = getItemCount.rows && getItemCount.rows[0] && getItemCount.rows[0]['nb_items']
 
-  const results = simReports.map(report => {
-    const voteRecords = votes.filter(vote => vote['article_a_id'] === report['document_id_A'] && vote['article_b_id'] === report['document_id_B'])
-    const articleAVotes = voteRecords.filter(vote => vote['voted_option'] === 1)
-    const articleBVotes = voteRecords.filter(vote => vote['voted_option'] === 2)
-    const errorVotes = voteRecords.filter(vote => vote['voted_option'] === 3)
-    const irrelevantVotes = voteRecords.filter(vote => vote['voted_option'] === 4)
-    const foundVote = voteRecords.find(vote => vote['user_id'] === userId)
-
+  const reportItems = simReports.map(report => {
     return {
       id: report["sim_id"],
       articleA: report["title_A"],
@@ -90,17 +109,21 @@ const getSimilarityRecords = async (request, response) => {
       domainB: report["domain_B"],
       urlB: report["url_B"],
       createdDateB: report["publish_date_B"],
-      articleANbVotes: articleAVotes.length,
-      articleBNbVotes: articleBVotes.length,
-      errorNbVotes: errorVotes.length,
-      irrelevantNbVotes: irrelevantVotes.length,
-      simScore: report["sim_score"],
-      userVoted: foundVote !== undefined,
-      voteId: foundVote && foundVote.id,
-      votedOption: foundVote && foundVote['voted_option']
+      articleANbVotes: report["nb_vote_for_a"],
+      articleBNbVotes: report["nb_vote_for_b"],
+      errorNbVotes: report["nb_vote_error"],
+      irrelevantNbVotes: report["nb_vote_irrelevant"],
+      simScore: parseFloat(report["sim_score"]).toFixed(3),
+      non: report[userId] !== undefined,
+      voteId: report['vote_id'],
+      votedOption: report['voted_option']
     }
   })
-  response.status(CODE.SUCCESS).json(results)
+
+  response.status(CODE.SUCCESS).json({
+    reports: reportItems,
+    totalNbReports: totalNbReports
+  })
 }
 
 const applyVote = async (request, response) => {
