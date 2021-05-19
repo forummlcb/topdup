@@ -83,7 +83,7 @@ const getSimilarityRecords = async (request, response) => {
         limit ${limit }
         offset ${startPoint }
     ) sub_sm
-    left join vote v2 on v2.article_a_id = sub_sm."document_id_A" and v2.article_b_id = sub_sm."document_id_B" and ${useId ? 'v2.user_id = ' + userId : 'False' }
+    left join vote v2 on v2.article_a_id = sub_sm."document_id_A" and v2.article_b_id = sub_sm."document_id_B" and ${ userId ? 'v2.user_id = ' + userId : 'False' }
   `
   const countItemsQuery = `
     SELECT COUNT(*) AS nb_items
