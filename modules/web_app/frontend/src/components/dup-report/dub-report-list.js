@@ -61,9 +61,8 @@ export const DupReportList = (props) => {
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
     const { articleA, articleB, articleANbVotes, articleBNbVotes, domainA, domainB, createdDateA, createdDateB, urlA, urlB } = simReport
     const voteForABtn = (
-      <div className={voteItemClassName(1)}>
+      <div className={voteItemClassName(1)} data-tip={getBtnVoteTooltip(1)}>
         <button className="btn btn-outline-secondary btn-sm sr-vote-btn"
-          data-tip={getBtnVoteTooltip(1)}
           disabled={!authContext.isLoggedIn}
           onClick={() => applyVote(simReport, 1)}>
           {articleANbVotes}&nbsp;{iconRenderer(FaCheck, "#3571FF")}
@@ -72,9 +71,8 @@ export const DupReportList = (props) => {
     )
 
     const voteForBBtn = (
-      <div className={voteItemClassName(2)}>
+      <div className={voteItemClassName(2)} data-tip={getBtnVoteTooltip(2)}>
         <button className="btn btn-outline-secondary btn-sm sr-vote-btn"
-          data-tip={getBtnVoteTooltip(2)}
           disabled={!authContext.isLoggedIn}
           onClick={() => applyVote(simReport, 2)}>
           {articleBNbVotes}&nbsp;{iconRenderer(FaCheck, "#3571FF")}
@@ -83,9 +81,8 @@ export const DupReportList = (props) => {
     )
 
     const errorVoteBtn = (
-      <div className={voteItemClassName(3)}>
+      <div className={voteItemClassName(3)} data-tip={getBtnVoteTooltip(3)}>
         <button className="btn btn-outline-secondary btn-sm sr-vote-error-btn"
-          data-tip={getBtnVoteTooltip(3)}
           disabled={!authContext.isLoggedIn}
           onClick={() => applyVote(simReport, 3)}>
           {iconRenderer(FaTimes, "#EF5A5A")}
@@ -94,9 +91,8 @@ export const DupReportList = (props) => {
     )
 
     const irrVoteBtn = (
-      <div className={voteItemClassName(4)}>
+      <div className={voteItemClassName(4)} data-tip={getBtnVoteTooltip(4)}>
         <button className="btn btn-outline-secondary btn-sm sr-vote-irrelevant-btn"
-          data-tip={getBtnVoteTooltip(4)}
           disabled={!authContext.isLoggedIn}
           onClick={() => applyVote(simReport, 4)}>
           {iconRenderer(FaHashtag, "#F69E0C")}
@@ -161,9 +157,8 @@ export const DupReportList = (props) => {
           <ReactTooltip type="warning" />
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
             <div className="col-md-auto centered-container flex-row no-padding">
-              <div className={voteItemClassName(1)}>
+              <div className={voteItemClassName(1)} data-tip={getBtnVoteTooltip(1)}>
                 <button className="btn"
-                  data-tip={getBtnVoteTooltip(1)}
                   disabled={!authContext.isLoggedIn}
                   onClick={() => applyVote(simReport, 1)}>
                   <div class="centered-container">{iconRenderer(FaCheck, "#3571FF")} (A) </div>
@@ -172,9 +167,8 @@ export const DupReportList = (props) => {
               {articleANbVotes}
             </div>
             <div className="col-md-auto no-padding">
-              <div className={voteItemClassName(3)}>
+              <div className={voteItemClassName(3)} data-tip={getBtnVoteTooltip(3)}>
                 <button className="btn"
-                  data-tip={getBtnVoteTooltip(3)}
                   disabled={!authContext.isLoggedIn}
                   onClick={() => applyVote(simReport, 3)}>
                   {iconRenderer(FaTimes, "#EF5A5A")}
@@ -182,9 +176,8 @@ export const DupReportList = (props) => {
               </div>
             </div>
             <div className="col-md-auto no-padding">
-              <div className={voteItemClassName(4)}>
+              <div className={voteItemClassName(4)} data-tip={getBtnVoteTooltip(4)}>
                 <button className="btn"
-                  data-tip={getBtnVoteTooltip(4)}
                   disabled={!authContext.isLoggedIn}
                   onClick={() => applyVote(simReport, 4)}>
                   {iconRenderer(FaHashtag, "#F69E0C")}
@@ -192,9 +185,8 @@ export const DupReportList = (props) => {
               </div>
             </div>
             <div className="col-md-auto centered-container flex-row no-padding">
-              <div className={voteItemClassName(2)}>
+              <div className={voteItemClassName(2)} data-tip={getBtnVoteTooltip(2)}>
                 <button className="btn"
-                  data-tip={getBtnVoteTooltip(2)}
                   disabled={!authContext.isLoggedIn}
                   onClick={() => applyVote(simReport, 2)}>
                   <div class="centered-container">{iconRenderer(FaCheck, "#3571FF")} (B) </div>

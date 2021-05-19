@@ -215,12 +215,13 @@ const DupCompare = (props) => {
     if (!isVisibleVoteBlock) return ''
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
     const { articleANbVotes, articleBNbVotes } = simReport
+    const voteBlockDivClass = isMobile ? 'mb-vote-bloc-div' : 'vote-bloc-div'
+    const voteBtnDivClass = isMobile ? 'mb-vote-btn-div' : 'vote-btn-div'
     return (
       <>
         <ReactTooltip type="warning" />
-
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div className="centered-container flex-row" style={{ justifyContent: 'flex-end' }}>
+        <div className={voteBlockDivClass}>
+          <div className={voteBtnDivClass}>
             {nFormatter(articleANbVotes, 1)}
             <div className={voteItemClassName(1)}>
               <button className="btn"
@@ -231,23 +232,27 @@ const DupCompare = (props) => {
               </button>
             </div>
           </div>
-          <div className={voteItemClassName(3)} style={{ justifyContent: 'flex-end' }}>
-            <button className="btn"
-              data-tip={getBtnVoteTooltip(3)}
-              disabled={!authContext.isLoggedIn}
-              onClick={() => applyVote(simReport, 3)}>
-              {iconRenderer(FaTimes, "#EF5A5A")}
-            </button>
+          <div className={voteBtnDivClass}>
+            <div className={voteItemClassName(3)}>
+              <button className="btn"
+                data-tip={getBtnVoteTooltip(3)}
+                disabled={!authContext.isLoggedIn}
+                onClick={() => applyVote(simReport, 3)}>
+                {iconRenderer(FaTimes, "#EF5A5A")}
+              </button>
+            </div>
           </div>
-          <div className={voteItemClassName(4)} style={{ justifyContent: 'flex-end' }}>
-            <button className="btn"
-              data-tip={getBtnVoteTooltip(4)}
-              disabled={!authContext.isLoggedIn}
-              onClick={() => applyVote(simReport, 4)}>
-              {iconRenderer(FaHashtag, "#F69E0C")}
-            </button>
+          <div className={voteBtnDivClass}>
+            <div className={voteItemClassName(4)}>
+              <button className="btn"
+                data-tip={getBtnVoteTooltip(4)}
+                disabled={!authContext.isLoggedIn}
+                onClick={() => applyVote(simReport, 4)}>
+                {iconRenderer(FaHashtag, "#F69E0C")}
+              </button>
+            </div>
           </div>
-          <div className="centered-container flex-row" style={{ justifyContent: 'flex-end' }}>
+          <div className={voteBtnDivClass}>
             {nFormatter(articleBNbVotes, 1)}
             <div className={voteItemClassName(2)}>
               <button className="btn"
@@ -300,8 +305,8 @@ const DupCompare = (props) => {
       <div className="compare-results-container">
         {resultList}
       </div>
-      <div className="vote-panel-container">
-        <div className="ver-floating-vote-panel">
+      <div className="vote-panel-container" style={{ justifyContent: isMobile ? 'flex-end' : 'center' }}>
+        <div className="floating-vote-panel">
           {voteBlock()}
         </div>
       </div>
