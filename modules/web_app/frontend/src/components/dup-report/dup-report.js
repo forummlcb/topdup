@@ -51,9 +51,11 @@ class DupReport extends Component {
   }
 
   getData = () => {
+    const userData = this.state.userData
+    const userId = userData && userData.id
     const { currentPage, reportsPerPage, searchObj } = this.state
     const startPoint = reportsPerPage * (currentPage - 1)
-    const queryParam = { startPoint, limit: reportsPerPage, ...searchObj }
+    const queryParam = { startPoint, limit: reportsPerPage, ...searchObj, userId }
     this.setState({ loading: true })
     this.dupReportService.getSimilarityRecords(queryParam)
       .then(result => {
