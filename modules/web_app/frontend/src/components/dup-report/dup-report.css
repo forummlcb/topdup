@@ -156,7 +156,7 @@
 }
 
 .sr-list-container {
-  height: 770px;
+  min-height: 200px;
   margin-bottom: 20px;
 }
 
@@ -324,6 +324,14 @@
   box-shadow: 0px 0px 20px 2px lightgray;
   border-radius: 5px;
   margin: 10px 10px;
+}
+
+.report-row-mobile a,
+.report-row-mobile a:hover,
+.report-row-mobile a:focus,
+.report-row-mobile a:active {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* @media only screen and (max-width: 768px) {

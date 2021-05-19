@@ -74,6 +74,15 @@ class DupReport extends Component {
           totalNbReports: totalNbReports
         }))
       })
+      .catch(error => {
+        this.setState(prevState => ({
+          ...prevState,
+          loading: false,
+          simReports: [],
+          allReports: [],
+          totalNbReports: undefined
+        }))
+      })
   };
 
   onChangeSearchObject = (searchObj) => {
@@ -127,7 +136,7 @@ class DupReport extends Component {
       currentPage={currentPage}
     />
 
-    const dureportListPanel = <DupReportList
+    const dupReportListPanel = <DupReportList
       simReports={simReports}
       reportVoted={updateVotedReport}
       loading={loading}
@@ -137,7 +146,7 @@ class DupReport extends Component {
       <div className="sim-reports-container">
         <div className="sr-list-with-header">
           <HeaderRow searchObjectChanged={this.onChangeSearchObject} searchObj={searchObj} />
-          {dureportListPanel}
+          {dupReportListPanel}
         </div>
         {paginationPanel}
       </div>
@@ -146,7 +155,7 @@ class DupReport extends Component {
     const listMobileView = (
       <div>
         <div style={{ 'marginBottom': '20px' }}>
-          {dureportListPanel}
+          {dupReportListPanel}
         </div>
         {paginationPanel}
       </div>

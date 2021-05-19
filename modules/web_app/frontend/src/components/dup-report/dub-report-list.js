@@ -208,51 +208,54 @@ export const DupReportList = (props) => {
     }
 
     return (
-      <div class="report-row-mobile">
-        <div class="centered-container">
-          <div style={{ width: 'calc(100% - 90px)' }}>
-            <div class="ellipsis-container">
-              (A) {articleA}
+      <OverlayTrigger trigger="focus" rootClose key="top" placement="top"
+        overlay={
+          <Popover id="popover-positioned-top">
+            <Popover.Content>
+              {voteBlock()}
+            </Popover.Content>
+          </Popover>
+        }
+      >
+        <div class="report-row-mobile">
+          <Link to={{
+            pathname: '/dup-compare',
+            search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
+            state: { simReport: simReport }
+          }}>
+            <div class="centered-container">
+              <div style={{ width: '100%' }}>
+                <div class="ellipsis-container">
+                  (A) {articleA}
+                </div>
+                <div class="ellipsis-container color--grey">
+                  {domainA}
+                </div>
+              </div>
             </div>
-            <div class="ellipsis-container color--grey">
-              {domainA}
-            </div>
-          </div>
-          <div>
-            <OverlayTrigger trigger="click" rootClose key="top" placement="top"
-              overlay={
-                <Popover id="popover-positioned-top">
-                  <Popover.Content>
-                    {voteBlock()}
-                  </Popover.Content>
-                </Popover>
-              }
-            >
-              <button class="btn btn-outline-secondary" style={{ width: '90px' }}>Vote</button>
-            </OverlayTrigger>
-          </div>
-        </div>
 
-        <div class="centered-container">
-          <div style={{ width: 'calc(100% - 90px)' }}>
-            <div class="ellipsis-container">
-              (B) {articleB}
+            <div class="centered-container">
+              <div style={{ width: '100%' }}>
+                <div class="ellipsis-container">
+                  (B) {articleB}
+                </div>
+                <div class="ellipsis-container color--grey">
+                  {domainB}
+                </div>
+              </div>
+              {/* <div>
+              <Link to={{
+                pathname: '/dup-compare',
+                search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
+                state: { simReport: simReport }
+              }}>
+                <button class="btn btn-dark" style={{ width: '90px' }}>So sánh</button>
+              </Link>
+            </div> */}
             </div>
-            <div class="ellipsis-container color--grey">
-              {domainB}
-            </div>
-          </div>
-          <div>
-            <Link to={{
-              pathname: '/dup-compare',
-              search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
-              state: { simReport: simReport }
-            }}>
-              <button class="btn btn-dark" style={{ width: '90px' }}>So sánh</button>
-            </Link>
-          </div>
+          </Link>
         </div>
-      </div>
+      </OverlayTrigger>
     )
   }
 
