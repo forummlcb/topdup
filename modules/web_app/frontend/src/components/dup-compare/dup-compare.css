@@ -11,6 +11,7 @@
   font-size: 36px;
   line-height: 48px;
   color: #262626;
+  padding-left: 20px
 }
 
 .compare-results-container {
@@ -19,6 +20,8 @@
 }
 
 .vote-panel-container {
+  display: flex;
+  justify-content: flex-end;
   position: sticky;
   bottom: 10px;
   left: 0;
@@ -27,11 +30,20 @@
 }
 
 .floating-vote-panel {
-  margin: auto;
   height: 100%;
   width: 220px;
   border-radius: 8px;
   background-color: white;
+  border: 0.5px solid grey;
+  box-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.2);
+}
+
+.ver-floating-vote-panel {
+  height: 100%;
+  border-radius: 8px;
+  background-color: white;
+  padding: 5px;
+  padding-left: 10px;
   border: 0.5px solid grey;
   box-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.2);
 }

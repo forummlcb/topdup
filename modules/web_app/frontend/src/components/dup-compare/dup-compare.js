@@ -52,6 +52,8 @@ const DupCompare = (props) => {
 
   const [sourceInput, setSourceInput] = useState(_sourceUrl || _sourceText)
   const [targetInput, setTargetInput] = useState(_targetUrl || _targetText)
+  const [sourceTitle, setSourceTitle] = useState('')
+  const [targetTitle, setTargetTitle] = useState('')
 
 
   const [sourceSegements, setSourceSegments] = useState([])
@@ -134,9 +136,13 @@ const DupCompare = (props) => {
     const sourceSegements = compareResult.segmentListA || []
     const targetSegements = compareResult.segmentListB || []
     const resultPairs = compareResult.pairs || []
+    const sourceTitle = compareResult.articleTitleA || ''
+    const targetTitle = compareResult.articleTitleB || ''
     const sortOrder = displayOrder === displayOrderDict.simScore ? 'desc' : 'asc'
     const sortedResultPairs = _.orderBy(resultPairs, [displayOrder], [sortOrder])
     const filteredResults = sortedResultPairs.filter(item => item.similarityScore >= sScoreThreshold)
+    setSourceTitle(sourceTitle)
+    setTargetTitle(targetTitle)
     setSourceSegments(sourceSegements)
     setTargetSegments(targetSegements)
     setResultPairs(sortedResultPairs)
@@ -194,49 +200,63 @@ const DupCompare = (props) => {
     </>
   )
 
+  const getBtnVoteTooltip = (voteOption) => {
+    const isLoggedIn = authContext.isLoggedIn
+
+    if (!isLoggedIn) return 'Đăng nhập để vote'
+    if (voteOption === 1) return 'Vote cho bài ' + (isMobile ? 'ở trên' : 'bên trái')
+    if (voteOption === 2) return 'Vote cho bài ' + (isMobile ? 'ở dưới' : 'bên phải')
+    if (voteOption === 3) return 'Đánh giá lỗi'
+    if (voteOption === 4) return 'Hai bài không liên quan'
+    return ''
+  }
+
   const voteBlock = () => {
     if (!isVisibleVoteBlock) return ''
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
-    const voteTooltip = authContext.isLoggedIn ? '' : 'Đăng nhập để vote'
     const { articleANbVotes, articleBNbVotes } = simReport
     return (
       <>
         <ReactTooltip type="warning" />
 
-        <div class="centered-container">
-          <div className="centered-container flex-column">
-            <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="centered-container flex-row" style={{ justifyContent: 'flex-end' }}>
+            {nFormatter(articleANbVotes, 1)}
+            <div className={voteItemClassName(1)}>
               <button className="btn"
+                data-tip={getBtnVoteTooltip(1)}
                 disabled={!authContext.isLoggedIn}
                 onClick={() => applyVote(simReport, 1)}>
                 {iconRenderer(FaCheck, "#3571FF")}
               </button>
             </div>
-            {nFormatter(articleANbVotes, 1)}
           </div>
-          <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+          <div className={voteItemClassName(3)} style={{ justifyContent: 'flex-end' }}>
             <button className="btn"
+              data-tip={getBtnVoteTooltip(3)}
               disabled={!authContext.isLoggedIn}
               onClick={() => applyVote(simReport, 3)}>
               {iconRenderer(FaTimes, "#EF5A5A")}
             </button>
           </div>
-          <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+          <div className={voteItemClassName(4)} style={{ justifyContent: 'flex-end' }}>
             <button className="btn"
+              data-tip={getBtnVoteTooltip(4)}
               disabled={!authContext.isLoggedIn}
               onClick={() => applyVote(simReport, 4)}>
               {iconRenderer(FaHashtag, "#F69E0C")}
             </button>
           </div>
-          <div className="centered-container flex-column">
-            <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+          <div className="centered-container flex-row" style={{ justifyContent: 'flex-end' }}>
+            {nFormatter(articleBNbVotes, 1)}
+            <div className={voteItemClassName(2)}>
               <button className="btn"
+                data-tip={getBtnVoteTooltip(2)}
                 disabled={!authContext.isLoggedIn}
                 onClick={() => applyVote(simReport, 2)}>
                 {iconRenderer(FaCheck, "#3571FF")}
               </button>
             </div>
-            {nFormatter(articleBNbVotes, 1)}
           </div>
         </div>
       </>
@@ -281,7 +301,7 @@ const DupCompare = (props) => {
         {resultList}
       </div>
       <div className="vote-panel-container">
-        <div className="floating-vote-panel">
+        <div className="ver-floating-vote-panel">
           {voteBlock()}
         </div>
       </div>
@@ -306,9 +326,15 @@ const DupCompare = (props) => {
       <div className="row margin-bottom--40">
         <div className="col-sm-12 col-md-6">
           {inputTextarea(sourceInput, setSourceInput, Side.Source)}
+          <div class="ellipsis-container">
+            {sourceTitle}
+          </div>
         </div>
         <div className="col-sm-12 col-md-6">
           {inputTextarea(targetInput, setTargetInput, Side.Target)}
+          <div class="ellipsis-container">
+            {targetTitle}
+          </div>
         </div>
       </div>
       <div class="row margin-bottom--30">
