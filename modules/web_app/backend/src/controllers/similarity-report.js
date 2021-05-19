@@ -17,8 +17,6 @@ const getSimRecordById = async (id, userId) => {
   const simReportRes = await pool.query(simReportsQuery)
   const foundSimReport = simReportRes && simReportRes.rows && simReportRes.rows[0]
 
-  console.log('foundSimReport', foundSimReport)
-
   if (!foundSimReport) {
     next(Error(`Sim report found with id ${ id }`))
     return
@@ -52,6 +50,7 @@ const getSimRecordById = async (id, userId) => {
     irrelevantNbVotes: irrelevantVotes.length,
     simScore: foundSimReport["sim_score"],
     userVoted: foundVote !== undefined,
+    userId: userId,
     voteId: foundVote && foundVote.id,
     votedOption: foundVote && foundVote['voted_option']
   }
@@ -60,8 +59,7 @@ const getSimRecordById = async (id, userId) => {
 const getSimilarityRecords = async (request, response) => {
   const startPoint = request.query.startPoint
   const limit = request.query.limit
-
-  const userId = request.query.userId || 1
+  const userId = request.query.userId
   const getSimReportsQuery = `
     select sub_sm.*, v2.user_id, v2.voted_option, v2.id as vote_id
     from (
@@ -114,7 +112,8 @@ const getSimilarityRecords = async (request, response) => {
       errorNbVotes: report["nb_vote_error"],
       irrelevantNbVotes: report["nb_vote_irrelevant"],
       simScore: parseFloat(report["sim_score"]).toFixed(3),
-      non: report[userId] !== undefined,
+      userVoted: userId && report["user_id"],
+      userId: userId && parseInt(userId),
       voteId: report['vote_id'],
       votedOption: report['voted_option']
     }
@@ -135,14 +134,18 @@ const applyVote = async (request, response) => {
     .toISOString()
     .split("T")[0]
 
-  const query = userVoted
-    ? `UPDATE public.vote SET voted_option = ${ votedOption } WHERE id = ${ voteId }`
-    : `
-        INSERT INTO public.vote (article_a_id, article_b_id, voted_option, user_id, created_date)
-        VALUES ('${ articleAId }', '${ articleBId }', ${ votedOption }, ${ userId }, '${ createdDate }')
-      `
+  // First, remove current vote if exist
+  // New vote with option
+
+  const query = `
+      DELETE FROM vote WHERE vote.user_id = ${ userId } and vote.article_a_id = '${ articleAId }' and vote.article_b_id = '${ articleBId }';
+      INSERT INTO vote (article_a_id, article_b_id, voted_option, user_id, created_date)
+      VALUES ('${ articleAId }', '${ articleBId }', ${ votedOption }, ${ userId }, '${ createdDate }')
+    `
+  console.log(query)
   await pool.query(query)
   const updateSimReport = await getSimRecordById(simReport.id)
+  console.log(updateSimReport)
   response.status(200).json(updateSimReport)
 }
 
