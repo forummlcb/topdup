@@ -139,7 +139,7 @@ export const DupReportList = (props) => {
             search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
             state: { simReport: simReport }
           }}>
-            <button class="btn btn-outline-secondary">So sánh</button>
+            <button className="btn btn-outline-secondary">So sánh</button>
           </Link>
         </div>
       </div>
@@ -161,7 +161,7 @@ export const DupReportList = (props) => {
                 <button className="btn"
                   disabled={!authContext.isLoggedIn}
                   onClick={() => applyVote(simReport, 1)}>
-                  <div class="centered-container">{iconRenderer(FaCheck, "#3571FF")} (A) </div>
+                  <div className="centered-container">{iconRenderer(FaCheck, "#3571FF")} (A) </div>
                 </button>
               </div>
               {articleANbVotes}
@@ -189,7 +189,7 @@ export const DupReportList = (props) => {
                 <button className="btn"
                   disabled={!authContext.isLoggedIn}
                   onClick={() => applyVote(simReport, 2)}>
-                  <div class="centered-container">{iconRenderer(FaCheck, "#3571FF")} (B) </div>
+                  <div className="centered-container">{iconRenderer(FaCheck, "#3571FF")} (B) </div>
                 </button>
               </div>
               {articleBNbVotes}
@@ -209,29 +209,29 @@ export const DupReportList = (props) => {
           </Popover>
         }
       >
-        <div class="report-row-mobile">
+        <div className="report-row-mobile">
           <Link to={{
             pathname: '/dup-compare',
             search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
             state: { simReport: simReport }
           }}>
-            <div class="centered-container">
+            <div className="centered-container">
               <div style={{ width: '100%' }}>
-                <div class="ellipsis-container">
+                <div className="ellipsis-container">
                   (A) {articleA}
                 </div>
-                <div class="ellipsis-container color--grey">
+                <div className="ellipsis-container color--grey">
                   {domainA}
                 </div>
               </div>
             </div>
 
-            <div class="centered-container">
+            <div className="centered-container">
               <div style={{ width: '100%' }}>
-                <div class="ellipsis-container">
+                <div className="ellipsis-container">
                   (B) {articleB}
                 </div>
-                <div class="ellipsis-container color--grey">
+                <div className="ellipsis-container color--grey">
                   {domainB}
                 </div>
               </div>
@@ -241,7 +241,7 @@ export const DupReportList = (props) => {
                 search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,
                 state: { simReport: simReport }
               }}>
-                <button class="btn btn-dark" style={{ width: '90px' }}>So sánh</button>
+                <button className="btn btn-dark" style={{ width: '90px' }}>So sánh</button>
               </Link>
             </div> */}
             </div>
