@@ -19,10 +19,13 @@ import './App.css'
 function App() {
   // const { userData, setUserData } = useUserData()
   // const token = userData && userData.accessToken
+  const getUser = () => {
+    const currentUser = localStorage.getItem('user')
+    return currentUser && JSON.parse(currentUser)
+  }
   const authContext = useContext(AuthContext)
-
   const [loggedIn, setLoggedIn] = useState(authContext.isLoggedIn)
-  const [user, setUser] = useState(JSON.parse(localStorage['user']))
+  const [user, setUser] = useState(getUser())
 
   const login = (user) => {
     setLoggedIn(true)
@@ -36,7 +39,7 @@ function App() {
     localStorage.removeItem('user')
   }
 
-  const getUser = () => JSON.parse(localStorage['user'])
+
 
   return (
     <AuthContext.Provider value={{ isLoggedIn: loggedIn, login: login, logout: logout, getUser: getUser }}>
