@@ -275,21 +275,21 @@ const DupCompare = (props) => {
       return (
         <>
           <BrowserView>
-            <div class="row margin-bottom--xs compare-item">
+            <div className="row margin-bottom--xs compare-item">
               <div className="col layout-cell text-justify"> {resultRenderer(sourceSegements, sourceSegIdx, `${ idx + 1 }. `)} </div>
               <div className="col layout-cell text-justify"> {resultRenderer(targetSegements, targetSegIdx)} </div>
               <div className="compare-item-info">
-                <span class="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
+                <span className="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
                 {shareButtons}
               </div>
             </div>
             <hr />
           </BrowserView>
           <MobileView>
-            <div class="row no-gutters margin-bottom--xs compare-item">
-              <div class="col-auto">{idx + 1}.&nbsp;</div>
-              <div class="col text-justify">
-                <div class="margin-bottom--20">
+            <div className="row no-gutters margin-bottom--xs compare-item">
+              <div className="col-auto">{idx + 1}.&nbsp;</div>
+              <div className="col text-justify">
+                <div className="margin-bottom--20">
                   {resultRenderer(sourceSegements, sourceSegIdx)}
                 </div>
                 <div>
@@ -305,11 +305,13 @@ const DupCompare = (props) => {
       <div className="compare-results-container">
         {resultList}
       </div>
-      <div className="vote-panel-container" style={{ justifyContent: isMobile ? 'flex-end' : 'center' }}>
-        <div className="floating-vote-panel">
-          {voteBlock()}
-        </div>
-      </div>
+      {isVisibleVoteBlock && (
+        <div className="vote-panel-container" style={{ justifyContent: isMobile ? 'flex-end' : 'center' }}>
+          <div className="floating-vote-panel">
+            {voteBlock()}
+          </div>
+        </div>)
+      }
     </>)
   }
 
@@ -331,22 +333,22 @@ const DupCompare = (props) => {
       <div className="row margin-bottom--40">
         <div className="col-sm-12 col-md-6">
           {inputTextarea(sourceInput, setSourceInput, Side.Source)}
-          <div class="ellipsis-container">
+          <div className="ellipsis-container">
             {sourceTitle}
           </div>
         </div>
         <div className="col-sm-12 col-md-6">
           {inputTextarea(targetInput, setTargetInput, Side.Target)}
-          <div class="ellipsis-container">
+          <div className="ellipsis-container">
             {targetTitle}
           </div>
         </div>
       </div>
-      <div class="row margin-bottom--30">
-        <div class="col-auto mr-auto text-bold label--5" style={{ maxWidth: '260px' }}>
+      <div className="row margin-bottom--30">
+        <div className="col-auto mr-auto text-bold label--5" style={{ maxWidth: '260px' }}>
           Kết quả: {filteredResults.length}
         </div>
-        {/* <div class="layout-cell" style={{ width: '260px' }}>
+        {/* <div className="layout-cell" style={{ width: '260px' }}>
           <Form>
             <Form.Group
               controlId="exampleForm.SelectCustom"
@@ -361,7 +363,7 @@ const DupCompare = (props) => {
             </Form.Group>
           </Form>
         </div> */}
-        <div class="col-auto">
+        <div className="col-auto">
           <button type="button" className="btn btn-warning compare-btn" onClick={checkSimilarity}>So sánh</button>
         </div>
       </div>
@@ -369,7 +371,7 @@ const DupCompare = (props) => {
       {loading ? <div className="sr-list-container centered-container"> <h2>Loading...</h2> </div> : resultPairsRenderer()}
 
       <div className="row text-right margin-horizontal">
-        <div class="col">{shareButtons}</div>
+        <div className="col">{shareButtons}</div>
       </div>
     </div >
   )
