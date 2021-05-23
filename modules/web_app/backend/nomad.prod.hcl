@@ -41,6 +41,7 @@ job "backend" {
         POOL_USR = "$POOL_USR"
         POOL_PWD = "$POOL_PWD"
         ML_API_URL = "$ML_API_URL"
+        ML_API_CUSTOM_HEADERS = "{\"function\":\"api\"}"
         WEB_EMAIL = "$WEB_EMAIL"
         WEB_EMAIL_PASS = "$WEB_EMAIL_PASS"
       }
