@@ -845,8 +845,8 @@ crawling_list:
     skip_checking_topic_length: false
     display_browser: false
     sapo_xpath:
-    - //meta[@name='description']/@content
-    - //meta[@name='description']/@content
+    - //meta[@property='og:description']/@content
+    - //meta[@property='og:description']/@content
     get_publish_date_as_crawl_date: false
     browser_fast_load: true
     skip_repeat_topic: true
