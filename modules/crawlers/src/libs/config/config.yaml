@@ -129,6 +129,67 @@ crawling_list:
     browser_timeout: 400
     prevent_auto_redirect: false
     remove_me: false
+- Kipalog:
+    id_type: href
+    browser_profile: ''
+    web_url: https://kipalog.com/
+    timezone: Asia/Ho_Chi_Minh
+    remove_date_tag_html: false
+    remove_content_html: true
+    use_index_number: false
+    remove_content_html_xpaths:
+    minimum_duration_between_crawls: 15
+    language: vietnamese
+    feature_image_xpath:
+    extract_xpath:
+    - ./text()
+    - ./@title
+    topics_xpath:
+    - //a[text()]
+    - //a[@title]
+    skip_checking_topic_length: false
+    display_browser: false
+    sapo_xpath:
+    - //meta[@property='og:description']/@content
+    - //meta[@property='og:description']/@content
+    get_publish_date_as_crawl_date: false
+    browser_fast_load: true
+    skip_repeat_topic: true
+    use_browser: false
+    date_place: detail_page
+    ignore_topic_not_have_publish_date: false
+    contain: ''
+    crawl_url: https://kipalog.com/
+    output_html: false
+    get_topic_from_link: true
+    date_xpath:
+    - //p[@class="date"]
+    - //p[@class="date"]
+    topic_type: href
+    maximum_url: 10
+    get_detail_content: true
+    content_xpath:
+    - //section[@class="ui pilled segment md"]
+    - //section[@class="ui pilled segment md"]
+    text_xpath:
+    - //section[@class="ui pilled segment md"]
+    image_box_xpath: []
+    image_title_xpath: []
+    video_box_xpath: []
+    video_title_xpath: []
+    audio_box_xpath: []
+    audio_title_xpath: []
+    avatar_type: url
+    avatar_url: ''
+    avatar_xpath: ''
+    crawl_type: newspaper
+    url_pattern_re: https://kipalog.com/
+    minimum_topic_length: 4
+    tags: []
+    only_quality_post: false
+    browser_timeout: 400
+    prevent_auto_redirect: false
+    remove_me: false
 - Cafebiz:
     id_type: href
     browser_profile: ''
