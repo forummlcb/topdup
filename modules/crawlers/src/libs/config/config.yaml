@@ -759,6 +759,69 @@ crawling_list:
     browser_timeout: 60
     prevent_auto_redirect: false
     remove_me: false
+- Ongxuanhong:
+    id_type: href
+    browser_profile: ''
+    web_url: https://ongxuanhong.wordpress.com/
+    timezone: Asia/Ho_Chi_Minh
+    remove_date_tag_html: false
+    remove_content_html: true
+    use_index_number: false
+    remove_content_html_xpaths:
+    minimum_duration_between_crawls: 15
+    language: vietnamese
+    feature_image_xpath:
+    - .//img/@src
+    - .//img/@src
+    extract_xpath:
+    - ./text()
+    - ./@title
+    topics_xpath:
+    - //a[text()]
+    - //a[@title]
+    skip_checking_topic_length: false
+    display_browser: false
+    sapo_xpath:
+    - //meta[@name='description']/@content
+    - //meta[@name='description']/@content
+    get_publish_date_as_crawl_date: false
+    browser_fast_load: true
+    skip_repeat_topic: true
+    use_browser: false
+    date_place: detail_page
+    ignore_topic_not_have_publish_date: true
+    contain: ''
+    crawl_url: https://ongxuanhong.wordpress.com/
+    output_html: false
+    get_topic_from_link: true
+    date_xpath:
+    - //time[@class='entry-date published']
+    - //time[@class='entry-date published']
+    topic_type: href
+    maximum_url: 30
+    get_detail_content: true
+    content_xpath:
+    - //div[@class="entry-content"]
+    - //div[@class="entry-content"]
+    text_xpath:
+    - //div[@class="entry-content"]
+    image_box_xpath: []
+    image_title_xpath: []
+    video_box_xpath: []
+    video_title_xpath: []
+    audio_box_xpath: []
+    audio_title_xpath: []
+    avatar_type: url
+    avatar_url: ''
+    avatar_xpath: ''
+    crawl_type: newspaper
+    url_pattern_re: https://ongxuanhong.wordpress.com/
+    minimum_topic_length: 4
+    tags: []
+    only_quality_post: false
+    browser_timeout: 60
+    prevent_auto_redirect: false
+    remove_me: false
 - Codeaholicguy:
     id_type: href
     browser_profile: ''
