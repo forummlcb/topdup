@@ -93,7 +93,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      {{uppercasefirst build.branch}} - Webapp Backend: 
+      {{uppercasefirst build.branch}} - Webapp Backend:
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
@@ -175,7 +175,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      Production - Webapp Backend: 
+      Production - Webapp Backend:
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
@@ -266,7 +266,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      {{uppercasefirst build.branch}} - Ml Api: 
+      {{uppercasefirst build.branch}} - Ml Api:
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
@@ -338,7 +338,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      Production - Ml Api: 
+      Production - Ml Api:
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
