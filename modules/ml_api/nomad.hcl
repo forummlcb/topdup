@@ -15,10 +15,6 @@ job "ml-api" {
       delay = "15s"
       mode = "fail"
     }
-    update {
-      min_healthy_time  = "1m"
-      healthy_deadline  = "3m"
-    }
     service {
       name = "ml-api"
       port = "http"
@@ -35,19 +31,23 @@ job "ml-api" {
     task "ml-api" {
       driver = "docker"
       resources {
-        cpu = 1024
+        cpu = 512
         memory = 1024
       }
       config {
         image = "$REGISTRY/$REPO:$TAG"
         ports = ["http"]
         volumes = [
-           "/home/ubuntu/artifacts/:/artifacts"
+           "local/:/artifacts/"
         ]
         dns_servers = ["${attr.unique.network.ip-address}"]
       }
       env {
         POSTGRES_URI = "$POSTGRES_URI"
+      }
+      artifact {
+        source      = "ml-api-artifacts.s3-ap-southeast-1.amazonaws.com/cand.bin"
+        destination = "local/"
       }
     }
   }
