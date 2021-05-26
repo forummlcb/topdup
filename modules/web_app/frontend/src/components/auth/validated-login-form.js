@@ -32,13 +32,13 @@ const ValidatedLoginForm = (inputProps) => {
           {errors.email && touched.email && (<div className="input-feedback">{errors.email}</div>)}
         </div>
         <div className="form-group width--80">
-          <input type="password" class="form-control"
+          <input type="password"
             id="exampleInputPassword1" placeholder="Mật khẩu"
             name="password"
             value={values.password}
             onChange={handleChange}
             onBlur={handleBlur}
-            className={errors.password && touched.password && "error"}
+            className={'form-control' + (errors.password && touched.password && "error")}
           />
           {errors.password && touched.password && (<div className="input-feedback">{errors.password}</div>)}
         </div>

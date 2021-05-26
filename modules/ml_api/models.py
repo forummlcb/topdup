@@ -15,3 +15,4 @@ class CompareEntry(BaseModel):
 class QueryResult(BaseModel):
     message: str
     results: Optional[Dict] = None
+    time: float

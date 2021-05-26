@@ -27,7 +27,7 @@ class Footer extends Component {
               </div>
               <div className="layout-grid margin-bottom--xs">Mang đến một cộng đồng sáng tạo và đầy nhiệt huyết</div>
               <div className="layout-grid">
-                <div className="layout-cell" style={{ 'margin-right': '5px' }}>
+                <div className="layout-cell" style={{ marginRight: '5px' }}>
                   <FacebookShareButton url={TopDup.BaseUrl}>
                     <span><FaFacebook /></span>
                   </FacebookShareButton>
@@ -44,7 +44,7 @@ class Footer extends Component {
                 <span>Liên lạc</span>
               </div>
               {contactItems.map((item) => (
-                <div className="layout-grid">
+                <div className="layout-grid" key={item.label}>
                   <a className="footer-link" href={item.link}>
                     {item.label}
                   </a>

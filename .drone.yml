@@ -12,7 +12,8 @@ trigger:
     include:
     - "modules/web_app/backend/**"
     exclude:
-    - ".gitignore"
+    - "modules/web_app/backend/.gitignore"
+    - "modules/web_app/backend/nomad.prod.hcl"
 
 environment:
   REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
@@ -112,10 +113,15 @@ trigger:
     include:
     - "modules/web_app/backend/**"
     exclude:
-    - ".gitignore"
+    - "modules/web_app/backend/nomad.hcl"
+    - "modules/web_app/backend/.gitignore"
+
+environment:
+  REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
+  REPO: topdup-prod-backend
 
 steps:
-- name: Get the Staging-Backend artifacts' version
+- name: get the Staging-Backend artifacts' version
   image: amazon/aws-cli
   pull: if-not-exists
   environment:
@@ -139,13 +145,13 @@ steps:
       from_secret: prod_postgresql_user
     POOL_PWD:
       from_secret: prod_postgresql_password
-    ML_API_URL: http://ml-api.service.consul:8000
+    ML_API_URL: http://traefik.service.consul:8080
     WEB_EMAIL: "topdup.org@gmail.com"
     WEB_EMAIL_PASS:
       from_secret: web_email_password
   commands:
     - apk add gettext
-    - export VERSION=$(awk '/backend/ {print $2}' backend-version)
+    - export TAG=$(awk '/backend/ {print $2}' backend-version)
     - cat modules/web_app/backend/nomad.prod.hcl | envsubst > modules/web_app/backend/nomad.rendered.hcl
     - cat modules/web_app/backend/nomad.rendered.hcl
 
@@ -154,7 +160,7 @@ steps:
   pull: if-not-exists
   network_mode: host
   settings:
-    addr: http://100.65.106.206:4646
+    addr: http://topdup-prod-alb-283622208.ap-southeast-1.elb.amazonaws.com:4646
     template: modules/web_app/backend/nomad.rendered.hcl
     watch_deployment: true
     token:
@@ -169,7 +175,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      {{uppercasefirst build.branch}} - Webapp Backend: 
+      Production - Webapp Backend: 
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
@@ -190,7 +196,7 @@ trigger:
     - "modules/ml_api/**"
     - "modules/ml/**"
     exclude:
-    - ".gitignore"
+    - "modules/ml_api/nomad.prod.hcl"
 
 environment:
   REGISTRY: 221423461835.dkr.ecr.ap-southeast-1.amazonaws.com
@@ -308,7 +314,7 @@ steps:
       from_secret: prod_postgresql_uri
   commands:
     - apk add gettext
-    - export VERSION=$(awk '/ml-api/ {print $2}' ml-api-version)
+    - export TAG=$(awk '/ml-api/ {print $2}' ml-api-version)
     - cat modules/ml_api/nomad.prod.hcl | envsubst > modules/ml_api/nomad.rendered.hcl
     - cat modules/ml_api/nomad.rendered.hcl
 
@@ -317,7 +323,7 @@ steps:
   pull: if-not-exists
   network_mode: host
   settings:
-    addr: http://100.65.106.206:4646
+    addr: http://topdup-prod-alb-283622208.ap-southeast-1.elb.amazonaws.com:4646
     template: modules/ml_api/nomad.rendered.hcl
     watch_deployment: true
     token:
@@ -332,7 +338,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      {{uppercasefirst build.branch}} - Ml Api: 
+      Production - Ml Api: 
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}
@@ -353,7 +359,7 @@ trigger:
     include:
     - "modules/web_app/frontend/**"
     exclude:
-    - ".gitignore"
+    - "modules/web_app/frontend/.gitignore"
 
 steps:
 - name: build Frontend package
@@ -449,7 +455,7 @@ steps:
     icon_emoji: :>
     username: DroneCi
     template: >
-      {{uppercasefirst build.branch}} - Webapp Frontend:
+      Production - Webapp Frontend:
           Build number {{build.number}} is {{build.status}}
           Triggered by commit number {{truncate build.commit 8}}
           Details at {{build.link}}

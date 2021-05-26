@@ -52,6 +52,8 @@ const DupCompare = (props) => {
 
   const [sourceInput, setSourceInput] = useState(_sourceUrl || _sourceText)
   const [targetInput, setTargetInput] = useState(_targetUrl || _targetText)
+  const [sourceTitle, setSourceTitle] = useState('')
+  const [targetTitle, setTargetTitle] = useState('')
 
 
   const [sourceSegements, setSourceSegments] = useState([])
@@ -134,9 +136,13 @@ const DupCompare = (props) => {
     const sourceSegements = compareResult.segmentListA || []
     const targetSegements = compareResult.segmentListB || []
     const resultPairs = compareResult.pairs || []
+    const sourceTitle = compareResult.articleTitleA || ''
+    const targetTitle = compareResult.articleTitleB || ''
     const sortOrder = displayOrder === displayOrderDict.simScore ? 'desc' : 'asc'
     const sortedResultPairs = _.orderBy(resultPairs, [displayOrder], [sortOrder])
     const filteredResults = sortedResultPairs.filter(item => item.similarityScore >= sScoreThreshold)
+    setSourceTitle(sourceTitle)
+    setTargetTitle(targetTitle)
     setSourceSegments(sourceSegements)
     setTargetSegments(targetSegements)
     setResultPairs(sortedResultPairs)
@@ -194,49 +200,68 @@ const DupCompare = (props) => {
     </>
   )
 
+  const getBtnVoteTooltip = (voteOption) => {
+    const isLoggedIn = authContext.isLoggedIn
+
+    if (!isLoggedIn) return 'Đăng nhập để vote'
+    if (voteOption === 1) return 'Vote cho bài ' + (isMobile ? 'ở trên' : 'bên trái')
+    if (voteOption === 2) return 'Vote cho bài ' + (isMobile ? 'ở dưới' : 'bên phải')
+    if (voteOption === 3) return 'Đánh giá lỗi'
+    if (voteOption === 4) return 'Hai bài không liên quan'
+    return ''
+  }
+
   const voteBlock = () => {
     if (!isVisibleVoteBlock) return ''
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
-    const voteTooltip = authContext.isLoggedIn ? '' : 'Đăng nhập để vote'
     const { articleANbVotes, articleBNbVotes } = simReport
+    const voteBlockDivClass = isMobile ? 'mb-vote-bloc-div' : 'vote-bloc-div'
+    const voteBtnDivClass = isMobile ? 'mb-vote-btn-div' : 'vote-btn-div'
     return (
       <>
         <ReactTooltip type="warning" />
-
-        <div class="centered-container">
-          <div className="centered-container flex-column">
-            <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+        <div className={voteBlockDivClass}>
+          <div className={voteBtnDivClass}>
+            {nFormatter(articleANbVotes, 1)}
+            <div className={voteItemClassName(1)}>
               <button className="btn"
+                data-tip={getBtnVoteTooltip(1)}
                 disabled={!authContext.isLoggedIn}
                 onClick={() => applyVote(simReport, 1)}>
                 {iconRenderer(FaCheck, "#3571FF")}
               </button>
             </div>
-            {nFormatter(articleANbVotes, 1)}
           </div>
-          <div className={voteItemClassName(1)} data-tip={voteTooltip}>
-            <button className="btn"
-              disabled={!authContext.isLoggedIn}
-              onClick={() => applyVote(simReport, 3)}>
-              {iconRenderer(FaTimes, "#EF5A5A")}
-            </button>
-          </div>
-          <div className={voteItemClassName(1)} data-tip={voteTooltip}>
-            <button className="btn"
-              disabled={!authContext.isLoggedIn}
-              onClick={() => applyVote(simReport, 4)}>
-              {iconRenderer(FaHashtag, "#F69E0C")}
-            </button>
-          </div>
-          <div className="centered-container flex-column">
-            <div className={voteItemClassName(1)} data-tip={voteTooltip}>
+          <div className={voteBtnDivClass}>
+            <div className={voteItemClassName(3)}>
               <button className="btn"
+                data-tip={getBtnVoteTooltip(3)}
+                disabled={!authContext.isLoggedIn}
+                onClick={() => applyVote(simReport, 3)}>
+                {iconRenderer(FaTimes, "#EF5A5A")}
+              </button>
+            </div>
+          </div>
+          <div className={voteBtnDivClass}>
+            <div className={voteItemClassName(4)}>
+              <button className="btn"
+                data-tip={getBtnVoteTooltip(4)}
+                disabled={!authContext.isLoggedIn}
+                onClick={() => applyVote(simReport, 4)}>
+                {iconRenderer(FaHashtag, "#F69E0C")}
+              </button>
+            </div>
+          </div>
+          <div className={voteBtnDivClass}>
+            {nFormatter(articleBNbVotes, 1)}
+            <div className={voteItemClassName(2)}>
+              <button className="btn"
+                data-tip={getBtnVoteTooltip(2)}
                 disabled={!authContext.isLoggedIn}
                 onClick={() => applyVote(simReport, 2)}>
                 {iconRenderer(FaCheck, "#3571FF")}
               </button>
             </div>
-            {nFormatter(articleBNbVotes, 1)}
           </div>
         </div>
       </>
@@ -250,21 +275,21 @@ const DupCompare = (props) => {
       return (
         <>
           <BrowserView>
-            <div class="row margin-bottom--xs compare-item">
+            <div className="row margin-bottom--xs compare-item">
               <div className="col layout-cell text-justify"> {resultRenderer(sourceSegements, sourceSegIdx, `${ idx + 1 }. `)} </div>
               <div className="col layout-cell text-justify"> {resultRenderer(targetSegements, targetSegIdx)} </div>
               <div className="compare-item-info">
-                <span class="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
+                <span className="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
                 {shareButtons}
               </div>
             </div>
             <hr />
           </BrowserView>
           <MobileView>
-            <div class="row no-gutters margin-bottom--xs compare-item">
-              <div class="col-auto">{idx + 1}.&nbsp;</div>
-              <div class="col text-justify">
-                <div class="margin-bottom--20">
+            <div className="row no-gutters margin-bottom--xs compare-item">
+              <div className="col-auto">{idx + 1}.&nbsp;</div>
+              <div className="col text-justify">
+                <div className="margin-bottom--20">
                   {resultRenderer(sourceSegements, sourceSegIdx)}
                 </div>
                 <div>
@@ -280,11 +305,13 @@ const DupCompare = (props) => {
       <div className="compare-results-container">
         {resultList}
       </div>
-      <div className="vote-panel-container">
-        <div className="floating-vote-panel">
-          {voteBlock()}
-        </div>
-      </div>
+      {isVisibleVoteBlock && (
+        <div className="vote-panel-container" style={{ justifyContent: isMobile ? 'flex-end' : 'center' }}>
+          <div className="floating-vote-panel">
+            {voteBlock()}
+          </div>
+        </div>)
+      }
     </>)
   }
 
@@ -297,7 +324,7 @@ const DupCompare = (props) => {
   }
 
   return (
-    <div className="dup-compare-container" style={{ margin: isMobile ? '-20px 10px 0px 10px' : 'unset' }}>
+    <div className="dup-compare-container" style={{ margin: isMobile ? '-20px 10px 0px 10px' : 'auto' }}>
       <div className="layout-grid margin-bottom--30">
         <div className="layout-cell flex-fill dup-compare-title" style={{ fontSize: isMobile && '32px' }}>
           Nhập liên kết hoặc <br /> nội dung cần so sánh
@@ -306,16 +333,22 @@ const DupCompare = (props) => {
       <div className="row margin-bottom--40">
         <div className="col-sm-12 col-md-6">
           {inputTextarea(sourceInput, setSourceInput, Side.Source)}
+          <div className="ellipsis-container">
+            {sourceTitle}
+          </div>
         </div>
         <div className="col-sm-12 col-md-6">
           {inputTextarea(targetInput, setTargetInput, Side.Target)}
+          <div className="ellipsis-container">
+            {targetTitle}
+          </div>
         </div>
       </div>
-      <div class="row margin-bottom--30">
-        <div class="col-auto mr-auto text-bold label--5" style={{ maxWidth: '260px' }}>
+      <div className="row margin-bottom--30">
+        <div className="col-auto mr-auto text-bold label--5" style={{ maxWidth: '260px' }}>
           Kết quả: {filteredResults.length}
         </div>
-        {/* <div class="layout-cell" style={{ width: '260px' }}>
+        {/* <div className="layout-cell" style={{ width: '260px' }}>
           <Form>
             <Form.Group
               controlId="exampleForm.SelectCustom"
@@ -330,7 +363,7 @@ const DupCompare = (props) => {
             </Form.Group>
           </Form>
         </div> */}
-        <div class="col-auto">
+        <div className="col-auto">
           <button type="button" className="btn btn-warning compare-btn" onClick={checkSimilarity}>So sánh</button>
         </div>
       </div>
@@ -338,7 +371,7 @@ const DupCompare = (props) => {
       {loading ? <div className="sr-list-container centered-container"> <h2>Loading...</h2> </div> : resultPairsRenderer()}
 
       <div className="row text-right margin-horizontal">
-        <div class="col">{shareButtons}</div>
+        <div className="col">{shareButtons}</div>
       </div>
     </div >
   )

@@ -11,6 +11,7 @@
   font-size: 36px;
   line-height: 48px;
   color: #262626;
+  padding-left: 20px
 }
 
 .compare-results-container {
@@ -19,6 +20,7 @@
 }
 
 .vote-panel-container {
+  display: flex;
   position: sticky;
   bottom: 10px;
   left: 0;
@@ -27,9 +29,8 @@
 }
 
 .floating-vote-panel {
-  margin: auto;
   height: 100%;
-  width: 220px;
+  padding: 10px;
   border-radius: 8px;
   background-color: white;
   border: 0.5px solid grey;
@@ -73,6 +74,32 @@ span {
 .compare-item:hover {
   background-color: #f2f2f2;
 }
+
+.vote-bloc-div {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: row;
+}
+
+.mb-vote-bloc-div {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+
+.vote-btn-div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mb-vote-btn-div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 
 /* .compare-item:hover .compare-item-info {
   display: flex;
