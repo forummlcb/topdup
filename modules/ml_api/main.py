@@ -144,7 +144,7 @@ def compare(entry: CompareEntry, response: Response):
             return {"message": "We cannot find your URLs"}
         else:
             title_A = text_A.values[0][0]
-            results.update({"titleA": title_A})
+            results.update({"articleTitleA": title_A})
             text_A = text_A.values[0][1]
     elif entry.pairs[0].mode == "text":
         text_A = entry.pairs[0].content
@@ -170,7 +170,7 @@ def compare(entry: CompareEntry, response: Response):
             return {"message": "We cannot find your URLs"}
         else:
             title_B = text_B.values[0][0]
-            results.update({"titleB": title_B})
+            results.update({"articleTitleB": title_B})
             text_B = text_B.values[0][1]
     elif entry.pairs[1].mode == "text":
         text_B = entry.pairs[1].content
