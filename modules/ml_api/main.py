@@ -1,4 +1,5 @@
 import os
+import time
 from copy import deepcopy
 
 import pandas as pd
@@ -24,20 +25,28 @@ RTRV_DIM = 1024
 EDIT_DISTANCE_THRESHOLD = 0.25
 CAND_PATH = os.getenv("CAND_PATH", "cand.bin")
 URL_QUERY = """
-    SELECT text_original
-    FROM (
-        SELECT value AS url
-            ,document_id
-        FROM meta m
-        WHERE lower(name) IN (
-                'href'
-                ,'url'
-                )
-        ) AS url_table
-    INNER JOIN "document" d ON url_table.document_id = d.id
-    WHERE CAST(levenshtein('{0}', url) AS DECIMAL) / CAST(length(url) AS DECIMAL) < {1}
-    ORDER BY levenshtein('{0}', url) LIMIT 1
-"""
+            SELECT m2.value AS title
+                ,d.text_original
+            FROM (
+                SELECT value AS url
+                    ,document_id
+                FROM meta m
+                WHERE LOWER(name) IN (
+                        'href'
+                        ,'url'
+                        )
+                    AND value LIKE '%%{2}%%'
+                ) AS url_table
+            INNER JOIN "document" d ON url_table.document_id = d.id
+            INNER JOIN meta m2 ON d.id = m2.document_id
+            WHERE CAST(levenshtein('{0}', url) AS DECIMAL) / CAST(length(url) AS DECIMAL) < {1}
+                AND lower(m2."name") IN (
+                    'topic'
+                    ,'title'
+                    )
+            ORDER BY levenshtein('{0}', url) LIMIT 1
+            """
+
 
 # Default methods
 preprocessor = ViPreProcessor(split_by="sentence")
@@ -56,23 +65,17 @@ retriever.train_candidate_vectorizer(retrain=False, save_path=CAND_PATH)
 remote_doc_store = FAISSDocumentStore(sql_url=POSTGRES_URI, vector_dim=CAND_DIM)
 
 tags_metadata = [
-    {"name": "get", "description": "Properly do nothing now"},
     {
         "name": "compare",
         "description": "Compare and show the similar sentences between two documents",
-    },
+    }
 ]
 app = FastAPI(
     title="TopDup-ML",
     description="Allow other services to connect with ML engines",
-    version="0.0.1",
+    version="0.0.2",
     openapi_tags=tags_metadata,
 )
-
-
-@app.get("/", tags=["get"])
-def get_query():
-    return Response()
 
 
 def compare_(text_A: str, text_B: str):
@@ -122,45 +125,74 @@ def compare_(text_A: str, text_B: str):
     tags=["compare"],
 )
 def compare(entry: CompareEntry, response: Response):
+    results = dict()
+    start = time.time()
     if entry.pairs[0].mode == "url":
-        text_A = pd.read_sql(
-            URL_QUERY.format(entry.pairs[0].content, EDIT_DISTANCE_THRESHOLD),
+        domain_A = (
+            entry.pairs[0]
+            .content.replace("https://", "")
+            .replace("http://", "")
+            .split("/")[0]
+        )
+        text_A = pd.read_sql_query(
+            URL_QUERY.format(entry.pairs[0].content, EDIT_DISTANCE_THRESHOLD, domain_A),
             con=remote_doc_store.engine,
         )
         if text_A.empty:
             response.status_code = status.HTTP_400_BAD_REQUEST
+
             return {"message": "We cannot find your URLs"}
         else:
-            text_A = text_A.values[0][0]
+            title_A = text_A.values[0][0]
+            results.update({"articleTitleA": title_A})
+            text_A = text_A.values[0][1]
     elif entry.pairs[0].mode == "text":
         text_A = entry.pairs[0].content
     else:
         response.status_code = status.HTTP_400_BAD_REQUEST
+
         return {"message": "Invalid input mode, either url or text"}
 
     if entry.pairs[1].mode == "url":
-        text_B = pd.read_sql(
-            URL_QUERY.format(entry.pairs[1].content, EDIT_DISTANCE_THRESHOLD),
+        domain_B = (
+            entry.pairs[1]
+            .content.replace("https://", "")
+            .replace("http://", "")
+            .split("/")[0]
+        )
+        text_B = pd.read_sql_query(
+            URL_QUERY.format(entry.pairs[1].content, EDIT_DISTANCE_THRESHOLD, domain_B),
             con=remote_doc_store.engine,
         )
         if text_B.empty:
             response.status_code = status.HTTP_400_BAD_REQUEST
+
             return {"message": "We cannot find your URLs"}
         else:
-            text_B = text_B.values[0][0]
+            title_B = text_B.values[0][0]
+            results.update({"articleTitleB": title_B})
+            text_B = text_B.values[0][1]
     elif entry.pairs[1].mode == "text":
         text_B = entry.pairs[1].content
     else:
         response.status_code = status.HTTP_400_BAD_REQUEST
+
         return {"message": "Invalid input mode, either url or text"}
 
-    results = compare_(text_A, text_B)
-    return {"message": "Successfully requested TopDup-ML [compare]", "results": results}
+    results.update(compare_(text_A, text_B))
+    end = time.time()
+
+    return {
+        "message": "Successfully requested TopDup-ML [compare]",
+        "results": results,
+        "time": end - start,
+    }
 
 
 @app.exception_handler(RequestValidationError)
 def validation_exception_handler(request, exc):
     msg = ", ".join([f'{err["loc"]}: {err["msg"]}' for err in exc.errors()])
+
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"message": msg}
     )
