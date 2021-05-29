@@ -13,8 +13,7 @@ const ValidatedSignupForm = (inputProps) => {
         email: Yup.string().email().required("Required"),
         password: Yup.string()
             .required('No password provided')
-            .min(8, 'Password is too short - should be 8 chars minimum')
-            .matches(/(?=.*[0-9])/, 'Password must contain a number'),
+            .min(8, 'Password is too short - should be 8 chars minimum'),
         verifiedPassword: Yup.string()
             .required('Please confirm password')
             .oneOf([Yup.ref('password'), null], 'Passwords must match')
@@ -58,6 +57,7 @@ const ValidatedSignupForm = (inputProps) => {
                     />
                     {errors.verifiedPassword && touched.verifiedPassword && (<div className="input-feedback">{errors.verifiedPassword}</div>)}
                 </div>
+                {inputProps.signUpError && (<div className="input-feedback">{inputProps.signUpError}</div>)}
                 <div className="form-group width--80">
                     <button className="btn full-width login-btn" type="submit"
                         disabled={isSubmitting || !props.isValid}

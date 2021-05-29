@@ -7,6 +7,7 @@ import SignupModal from "./signup"
 export default function Authentication(props) {
   const [signupModalShow, setSignupModalShow] = useState(false)
   const [loginModalShow, setLoginModalShow] = useState(false)
+  const [isOpenModal, setIsOpenModal] = useState(false)
   const authContext = useContext(AuthContext)
 
   const logouthandler = () => {
@@ -44,7 +45,12 @@ export default function Authentication(props) {
       <SignupModal
         setUserData={props.setUserData}
         show={signupModalShow}
-        onHide={() => setSignupModalShow(false)} />
+        isOpenModal={isOpenModal}
+        onShow={() => setIsOpenModal(true)}
+        onHide={() => {
+          setIsOpenModal(false)
+          setSignupModalShow(false)
+        }} />
       <LoginModal
         setUserData={props.setUserData}
         show={loginModalShow}
