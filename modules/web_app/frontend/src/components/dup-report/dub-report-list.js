@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
 import { OverlayTrigger, Popover } from "react-bootstrap"
-import { BrowserView, MobileView } from "react-device-detect"
 import { IconContext } from "react-icons"
 import { FaCheck, FaHashtag, FaTimes } from "react-icons/fa"
 import { Link } from 'react-router-dom'
@@ -11,11 +10,13 @@ import DupReportService from "./dup-report.service"
 export const DupReportList = (props) => {
   const [simReports, setSimReports] = useState({ ...props.simReports })
   const [loading, setLoading] = useState({ ...props.loading })
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const dupReportService = new DupReportService()
   const authContext = useContext(AuthContext)
 
   useEffect(() => setSimReports(props.simReports), [props.simReports])
   useEffect(() => setLoading(props.loading), [props.loading])
+  useEffect(() => window.addEventListener('resize', setWindowWidth(window.innerWidth)), [])
 
   if (loading) {
     return (
@@ -251,15 +252,13 @@ export const DupReportList = (props) => {
     )
   }
 
-  return <>
-    <BrowserView>
-      <div className="sr-list-container">{simReports.map((item, idx) => reportRowDesktopRenderer(item, idx === simReports.length - 1))}</div>
-    </BrowserView>
-    <MobileView>
-      {simReports.map(item => reportMobileRowRenderer(item))}
-    </MobileView>
-  </>
-
+  const mobileOnlyView = <>{simReports.map(item => reportMobileRowRenderer(item))}</>
+  const notMobileView = (
+    <div className="sr-list-container">
+      {simReports.map((item, idx) => reportRowDesktopRenderer(item, idx === simReports.length - 1))}
+    </div>
+  )
+  return windowWidth < 1024 ? mobileOnlyView : notMobileView
 }
 
 export default DupReportList

@@ -1,5 +1,5 @@
 import { useContext, useState } from "react"
-import { Nav, NavDropdown } from "react-bootstrap"
+import { Nav } from "react-bootstrap"
 import { AuthContext } from "./auth-context"
 import LoginModal from "./login"
 import SignupModal from "./signup"
@@ -15,13 +15,6 @@ export default function Authentication(props) {
 
   const loggedInItems = (
     <>
-      <NavDropdown title="User Dashboard" id="collasible-nav-dropdown">
-        <NavDropdown.Item href="#">Action</NavDropdown.Item>
-        <NavDropdown.Item href="#">Another action</NavDropdown.Item>
-        <NavDropdown.Item href="#">Something</NavDropdown.Item>
-        <NavDropdown.Divider />
-        <NavDropdown.Item href="#">Separated link</NavDropdown.Item>
-      </NavDropdown>
       <Nav.Link href="#">
         <button className="btn btn-outline-secondary bg-sm" onClick={logouthandler}>
           Thoát
@@ -47,7 +40,7 @@ export default function Authentication(props) {
 
   return (
     <>
-      { authContext.isLoggedIn ? loggedInItems : notLoggedInItems}
+      {authContext.isLoggedIn ? loggedInItems : notLoggedInItems}
       <SignupModal
         setUserData={props.setUserData}
         show={signupModalShow}

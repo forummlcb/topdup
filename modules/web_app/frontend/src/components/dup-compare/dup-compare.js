@@ -1,6 +1,6 @@
 import * as _ from 'lodash'
 import { useContext, useEffect, useState } from "react"
-import { BrowserView, isMobile, MobileView } from 'react-device-detect'
+import { isMobileOnly } from 'react-device-detect'
 import { IconContext } from 'react-icons'
 import { FaCheck, FaFacebookSquare, FaHashtag, FaTimes, FaTwitterSquare } from 'react-icons/fa'
 import { useLocation } from "react-router-dom"
@@ -161,7 +161,7 @@ const DupCompare = (props) => {
     let placeholder = 'Nhập nội dung'
     if (side === Side.Source) placeholder = placeholder + ' nguồn'
     if (side === Side.Target) placeholder = placeholder + ' đích'
-    const nbRows = isMobile ? 5 : 8
+    const nbRows = isMobileOnly ? 5 : 8
     return (
       <form className="full-width margin-horizontal--xs">
         <div className="input-group">
@@ -204,8 +204,8 @@ const DupCompare = (props) => {
     const isLoggedIn = authContext.isLoggedIn
 
     if (!isLoggedIn) return 'Đăng nhập để vote'
-    if (voteOption === 1) return 'Vote cho bài ' + (isMobile ? 'ở trên' : 'bên trái')
-    if (voteOption === 2) return 'Vote cho bài ' + (isMobile ? 'ở dưới' : 'bên phải')
+    if (voteOption === 1) return 'Vote cho bài ' + (isMobileOnly ? 'ở trên' : 'bên trái')
+    if (voteOption === 2) return 'Vote cho bài ' + (isMobileOnly ? 'ở dưới' : 'bên phải')
     if (voteOption === 3) return 'Đánh giá lỗi'
     if (voteOption === 4) return 'Hai bài không liên quan'
     return ''
@@ -215,8 +215,8 @@ const DupCompare = (props) => {
     if (!isVisibleVoteBlock) return ''
     const voteItemClassName = value => "sr-vote-item " + (simReport["votedOption"] === value ? "selected" : "")
     const { articleANbVotes, articleBNbVotes } = simReport
-    const voteBlockDivClass = isMobile ? 'mb-vote-bloc-div' : 'vote-bloc-div'
-    const voteBtnDivClass = isMobile ? 'mb-vote-btn-div' : 'vote-btn-div'
+    const voteBlockDivClass = isMobileOnly ? 'mb-vote-bloc-div' : 'vote-bloc-div'
+    const voteBtnDivClass = isMobileOnly ? 'mb-vote-btn-div' : 'vote-btn-div'
     return (
       <>
         <ReactTooltip type="warning" />
@@ -272,41 +272,40 @@ const DupCompare = (props) => {
     const resultList = filteredResults.map((pair, idx) => {
       const sourceSegIdx = pair.segmentIdxA
       const targetSegIdx = pair.segmentIdxB
-      return (
+      const mobileOnlyView = (
+        <div className="row no-gutters margin-bottom--xs compare-item">
+          <div className="col-auto">{idx + 1}.&nbsp;</div>
+          <div className="col text-justify">
+            <div className="margin-bottom--20">
+              {resultRenderer(sourceSegements, sourceSegIdx)}
+            </div>
+            <div>
+              {resultRenderer(targetSegements, targetSegIdx)}
+            </div>
+          </div>
+        </div>
+      )
+      const notMobileView = (
         <>
-          <BrowserView>
-            <div className="row margin-bottom--xs compare-item">
-              <div className="col layout-cell text-justify"> {resultRenderer(sourceSegements, sourceSegIdx, `${ idx + 1 }. `)} </div>
-              <div className="col layout-cell text-justify"> {resultRenderer(targetSegements, targetSegIdx)} </div>
-              <div className="compare-item-info">
-                <span className="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
-                {shareButtons}
-              </div>
+          <div className="row margin-bottom--xs compare-item">
+            <div className="col layout-cell text-justify"> {resultRenderer(sourceSegements, sourceSegIdx, `${ idx + 1 }. `)} </div>
+            <div className="col layout-cell text-justify"> {resultRenderer(targetSegements, targetSegIdx)} </div>
+            <div className="compare-item-info">
+              <span className="text-bold text-underline">{pair.similarityScore.toFixed(2)}</span>
+              {shareButtons}
             </div>
-            <hr />
-          </BrowserView>
-          <MobileView>
-            <div className="row no-gutters margin-bottom--xs compare-item">
-              <div className="col-auto">{idx + 1}.&nbsp;</div>
-              <div className="col text-justify">
-                <div className="margin-bottom--20">
-                  {resultRenderer(sourceSegements, sourceSegIdx)}
-                </div>
-                <div>
-                  {resultRenderer(targetSegements, targetSegIdx)}
-                </div>
-              </div>
-            </div>
-          </MobileView>
+          </div>
+          <hr />
         </>
       )
+      return isMobileOnly ? mobileOnlyView : notMobileView
     })
     return (<>
       <div className="compare-results-container">
         {resultList}
       </div>
       {isVisibleVoteBlock && (
-        <div className="vote-panel-container" style={{ justifyContent: isMobile ? 'flex-end' : 'center' }}>
+        <div className="vote-panel-container" style={{ justifyContent: isMobileOnly ? 'flex-end' : 'center' }}>
           <div className="floating-vote-panel">
             {voteBlock()}
           </div>
@@ -324,9 +323,9 @@ const DupCompare = (props) => {
   }
 
   return (
-    <div className="dup-compare-container" style={{ margin: isMobile ? '-20px 10px 0px 10px' : 'auto' }}>
+    <div className="dup-compare-container" style={{ margin: isMobileOnly ? '-20px 10px 0px 10px' : 'auto' }}>
       <div className="layout-grid margin-bottom--30">
-        <div className="layout-cell flex-fill dup-compare-title" style={{ fontSize: isMobile && '32px' }}>
+        <div className="layout-cell flex-fill dup-compare-title" style={{ fontSize: isMobileOnly && '32px' }}>
           Nhập liên kết hoặc <br /> nội dung cần so sánh
         </div>
       </div>
