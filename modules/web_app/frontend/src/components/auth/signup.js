@@ -20,7 +20,7 @@ function SignupModal(props) {
   useEffect(() => {
     console.log(props)
     setSignUpError('')
-  }, [props.isOpenModal])
+  }, [])
 
   const onSubmitSignup = (signupMode, userCredential, modalProps) => {
     let httpRequest
