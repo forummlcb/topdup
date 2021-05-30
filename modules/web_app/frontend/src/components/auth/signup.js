@@ -18,7 +18,6 @@ function SignupModal(props) {
   const [signUpError, setSignUpError] = useState('')
 
   useEffect(() => {
-    console.log(props)
     setSignUpError('')
   }, [])
 
