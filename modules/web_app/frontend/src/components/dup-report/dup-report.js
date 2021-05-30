@@ -1,7 +1,6 @@
 import "ag-grid-community/dist/styles/ag-grid.css"
 import "ag-grid-community/dist/styles/ag-theme-alpine.css"
 import React, { Component } from "react"
-import { BrowserView, MobileView } from "react-device-detect"
 import DupReportList from "./dub-report-list"
 import "./dup-report.css"
 import DupReportService from "./dup-report.service"
@@ -32,12 +31,17 @@ class DupReport extends Component {
         titleSearchT: '',
         domainSearchT: '',
         dateRangeSearch: []
-      }
+      },
+      windowWidth: window.innerWidth
     }
   }
 
   componentDidMount = () => {
     this.getData()
+    // Update windowWidth when resizing
+    window.addEventListener('resize', () => {
+      this.setState({ windowWidth: window.innerWidth })
+    })
   };
 
   componentDidUpdate = (_prevProps, prevState, _snapshot) => {
@@ -111,7 +115,7 @@ class DupReport extends Component {
 
   render() {
     console.log('Dup report - rerendered')
-    const { simReports, reportsPerPage, totalNbReports, loading, currentPage, searchObj } = this.state
+    const { simReports, reportsPerPage, totalNbReports, loading, currentPage, searchObj, windowWidth } = this.state
     const paginate = pageNum => this.setState({ currentPage: pageNum })
     const nextPage = () => this.setState({ currentPage: currentPage + 1 })
     const prevPage = () => {
@@ -142,46 +146,38 @@ class DupReport extends Component {
       loading={loading}
     />
 
-    const listDesktopView = (
-      <div className="sim-reports-container">
-        <div className="sr-list-with-header">
-          <HeaderRow searchObjectChanged={this.onChangeSearchObject} searchObj={searchObj} />
-          {dupReportListPanel}
-        </div>
-        {paginationPanel}
-      </div>
-    )
-
-    const listMobileView = (
+    const mobileOnlyView = (
       <div>
-        <div style={{ 'marginBottom': '20px' }}>
-          {dupReportListPanel}
+        <div className="slogan-container-mobile">
+          <div className="slogan-heading-mobile">Bảo vệ nội dung của bạn</div>
         </div>
-        {paginationPanel}
+        <div style={{ width: "100%", minHeight: "950px", marginBottom: "20px" }}>
+          <div style={{ 'marginBottom': '20px' }}>
+            {dupReportListPanel}
+          </div>
+          {paginationPanel}
+        </div>
       </div>
     )
 
-    return (
+    const notMobileView = (
       <div>
-        <BrowserView>
-          <div className="slogan-container">
-            <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
+        <div className="slogan-container">
+          <div className="slogan-heading">Bảo vệ nội dung của bạn</div>
+        </div>
+        <div style={{ width: "100%", minHeight: "900px" }}>
+          <div className="sim-reports-container">
+            <div className="sr-list-with-header">
+              <HeaderRow searchObjectChanged={this.onChangeSearchObject} searchObj={searchObj} />
+              {dupReportListPanel}
+            </div>
+            {paginationPanel}
           </div>
-          <div style={{ width: "100%", minHeight: "900px" }}>
-            {listDesktopView}
-          </div>
-        </BrowserView>
-
-        <MobileView>
-          <div className="slogan-container-mobile">
-            <div className="slogan-heading-mobile">Bảo vệ nội dung của bạn</div>
-          </div>
-          <div style={{ width: "100%", minHeight: "950px", marginBottom: "20px" }}>
-            {listMobileView}
-          </div>
-        </MobileView>
+        </div>
       </div>
     )
+
+    return windowWidth < 1024 ? mobileOnlyView : notMobileView
   }
 }
 

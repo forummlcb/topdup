@@ -1,4 +1,4 @@
-import { useContext } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Modal } from "react-bootstrap"
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props'
 import { GoogleLogin } from 'react-google-login'
@@ -15,6 +15,12 @@ function SignupModal(props) {
   const setUserData = props.setUserData
   const authService = new AuthService()
   const authContext = useContext(AuthContext)
+  const [signUpError, setSignUpError] = useState('')
+
+  useEffect(() => {
+    console.log(props)
+    setSignUpError('')
+  }, [props.isOpenModal])
 
   const onSubmitSignup = (signupMode, userCredential, modalProps) => {
     let httpRequest
@@ -24,13 +30,20 @@ function SignupModal(props) {
     if (signupMode === AuthMode.Google) httpRequest = authService.authByGoogle(userCredential)
 
     if (httpRequest) {
-      httpRequest.then(
-        result => {
-          authContext.login(result.data.user)
-          setUserData(result.data && result.data.user)
-          modalProps.onHide()
-        }
-      )
+      httpRequest
+        .then(result => {
+          const user = result.data && result.data.user
+          if (user) {
+            authContext.login(result.data.user)
+            setUserData(result.data && result.data.user)
+            modalProps.onHide()
+          }
+        })
+        .catch(error => {
+          const response = error.response
+          const message = response.data && response.data.message
+          setSignUpError(message)
+        })
     }
   }
 
@@ -69,7 +82,7 @@ function SignupModal(props) {
         </div>
 
         <div className="layout-grid centered-container margin-bottom--20">
-          <ValidatedSignupForm onSubmitSignup={(values) => onSubmitSignup(AuthMode.Normal, values, props)} />
+          <ValidatedSignupForm onSubmitSignup={(values) => onSubmitSignup(AuthMode.Normal, values, props)} signUpError={signUpError} />
         </div>
       </div>
     </Modal>

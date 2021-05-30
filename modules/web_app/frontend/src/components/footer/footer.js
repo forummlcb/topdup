@@ -65,7 +65,7 @@ class Footer extends Component {
             </a>
           </div>
           <div className="layout-cell">
-            <a href="/terms-conditions" className="footer-link">
+            <a href="/term-condition" className="footer-link">
               Điều khoản
             </a>
           </div>
