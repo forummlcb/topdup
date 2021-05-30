@@ -2,7 +2,7 @@ import { CODE } from "../constants/index.js"
 
 const axios = require('axios')
 
-const getCompareResults = async (request, réponse, next) => {
+const getCompareResults = async (request, response, next) => {
   console.log(request.body)
   const callCompareService = (sourceMode, sourceContent, targetMode, targetContent) => {
     const apiUrl = process.env.ML_API_URL + '/compare/'
