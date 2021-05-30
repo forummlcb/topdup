@@ -114,7 +114,7 @@ export const DupReportList = (props) => {
     )
 
     return (
-      <div className="sim-report-row" style={{ borderBottom: isLastItem && 'unset' }}>
+      <div className="sim-report-row" style={{ borderBottom: isLastItem && 'unset' }} key={simReport.id}>
         <div className="sr-title-container">
           <div className="sr-title">
             <span><a href={urlA} target="_blank" rel="noreferrer"> {articleA} </a></span>
@@ -210,7 +210,7 @@ export const DupReportList = (props) => {
           </Popover>
         }
       >
-        <div className="report-row-mobile">
+        <div className="report-row-mobile" key={simReport.id}>
           <Link to={{
             pathname: '/dup-compare',
             search: `?sourceUrl=${ urlA }&targetUrl=${ urlB }`,

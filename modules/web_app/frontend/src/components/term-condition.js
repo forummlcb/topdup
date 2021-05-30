@@ -2,8 +2,8 @@ import React from "react"
 
 export default function TermCondition() {
   return (
-      <>
-        Về TopDup
-      </>
+    <div className="mx-auto w-75" style={{ width: '70%' }}>
+      Về TopDup
+    </div>
   )
 }

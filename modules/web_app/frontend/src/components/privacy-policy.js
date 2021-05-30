@@ -2,8 +2,8 @@ import React from "react"
 
 export default function PrivacyPolicy() {
   return (
-      <>
-        Về TopDup
-      </>
+    <div className="mx-auto w-75">
+      Về TopDup
+    </div>
   )
 }

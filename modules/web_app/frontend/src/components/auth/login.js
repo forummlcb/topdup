@@ -82,9 +82,9 @@ export default function LoginModal(props) {
           <ValidatedLoginForm onSubmitLogin={(userCredential) => onSubmitLogin(AuthMode.Standard, userCredential, props)} />
         </div>
 
-        <div className="layout-grid centered-container margin-bottom--20">
+        {/* <div className="layout-grid centered-container margin-bottom--20">
           Quên mật khẩu?
-        </div>
+        </div> */}
 
         <div className="layout-grid centered-container margin-bottom--20">
           Chưa có tài khoản? &nbsp; <button type="button" className="link-button" onClick={openSignUp} > Đăng ký </button>
