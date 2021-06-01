@@ -11,6 +11,8 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func
+from sqlalchemy import exists
 from libs.data import Article
 
 POSTGRES_USERNAME = os.environ['DOCBAO_POSTGRES_USERNAME']
@@ -33,7 +35,6 @@ class Postgres_Article(sqlalchemy_base):
     language = Column(String)
     sapo = Column(String)
     content = Column(String)  # full content
-    feature_image = Column(String)
 
 
 class PostgresClient():
@@ -46,13 +47,6 @@ class PostgresClient():
         sqlalchemy_base.metadata.create_all(db)
 
     def push_article(self, article):
-        feature_image = article.get_feature_image()
-        feature_image_url = ''
-
-        if feature_image:
-            if feature_image[0] != '':
-                feature_image_url = feature_image[0]
-
         new_article = Postgres_Article(
             article_id=article.get_id(),
             topic=article.get_topic(),
@@ -62,12 +56,15 @@ class PostgresClient():
             created_date=article.get_creation_date(),
             language=article.get_language(),
             sapo=article.get_sapo(),
-            content=article.get_full_content(),
-            feature_image=feature_image_url
+            content=article.get_full_content()
         )
 
-        self._session.add(new_article)
-        self._session.commit()
+        if not self._session.query(exists().where(Postgres_Article.href==article.get_href())).scalar():
+            self._session.add(new_article)
+            self._session.commit()
+
+    def count_post(self):
+        return self._session.query(Postgres_Article.newspaper, func.count(Postgres_Article.newspaper).label("# urls")).group_by(Postgres_Article.newspaper).all()
 
     def get_sample_articles(self):
         for article in self._session.query(Postgres_Article):
