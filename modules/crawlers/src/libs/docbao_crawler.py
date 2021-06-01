@@ -72,6 +72,9 @@ class Docbao_Crawler():
                 postgres = PostgresClient()
                 for article in rb_articles:
                     postgres.push_article(article)
+
+                logger.info("Count posts...")
+                logger.info(postgres.count_post())
             except Exception as ex:
                 logger.exception(ex)
 
