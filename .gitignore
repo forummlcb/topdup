@@ -83,6 +83,7 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
+!modules/dashboards/TfIDF-FAISS-demo.ipynb
 
 # IPython
 profile_default/
