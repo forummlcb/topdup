@@ -188,10 +188,8 @@ def check_contain_filter(topic, contain_filter):
     else:
         return False
 
-
 def is_another_session_running():
     return os.path.exists("docbao.lock")
-
 
 def finish_session():
     try:
@@ -204,13 +202,11 @@ def new_session():
     with open_utf8_file_to_write("docbao.lock") as stream:
         stream.write("locked")
 
-
 def get_independent_os_path(path_list):
     path = ""
     for item in path_list:
         path = os.path.join(path, item)
     return path
-
 
 def open_utf8_file_to_read(filename):
     try:
@@ -226,7 +222,6 @@ def open_utf8_file_to_write(filename):
     except Exception as ex:
         logger.exception(ex)
         return None
-
 
 def open_binary_file_to_write(filename):
     try:

@@ -33,10 +33,10 @@ def print_elapsed_time(func):
 
 @print_elapsed_time
 def main():
-    if not is_another_session_running():
+    if not is_another_session_running(): # -> this to create a file name 'docbao.lock' to avoid running multiple crawler at the sametime
         new_session()
         try:
-            crawler = Docbao_Crawler(crawl_newspaper=True, export_to_postgres=True)
+            crawler = Docbao_Crawler(crawl_newspaper=True, export_to_postgres=True, yamlfile = "libs/config/test_config.yaml")
             crawler.load_data_from_file()
             crawler.run_crawler()
         except Exception as ex:

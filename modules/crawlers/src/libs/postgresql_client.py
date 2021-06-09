@@ -12,15 +12,15 @@ from sqlalchemy import Column, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from libs.data import Article
+from loguru import logger
 
-POSTGRES_USERNAME = os.environ['DOCBAO_POSTGRES_USERNAME']
-POSTGRES_PASSWORD = os.environ['DOCBAO_POSTGRES_PASSWORD']
-POSTGRES_DB = os.environ['DOCBAO_POSTGRES_DATABASE']
-POSTGRES_HOST = os.environ['DOCBAO_POSTGRES_HOST']
-POSTGRES_PORT = os.environ['DOCBAO_POSTGRES_PORT']
+POSTGRES_USERNAME = os.environ.get('DOCBAO_POSTGRES_USERNAME')
+POSTGRES_PASSWORD = os.environ.get('DOCBAO_POSTGRES_PASSWORD')
+POSTGRES_DB = os.environ.get('DOCBAO_POSTGRES_DATABASE')
+POSTGRES_HOST = os.environ.get('DOCBAO_POSTGRES_HOST')
+POSTGRES_PORT = os.environ.get('DOCBAO_POSTGRES_PORT')
 
 sqlalchemy_base = declarative_base()
-
 
 class Postgres_Article(sqlalchemy_base):
     __tablename__ = POSTGRES_DB
@@ -66,8 +66,11 @@ class PostgresClient():
             feature_image=feature_image_url
         )
 
-        self._session.add(new_article)
-        self._session.commit()
+        try:
+            self._session.add(new_article)
+            self._session.commit()
+        except Exception as ex:
+            logger.exception(ex)
 
     def get_sample_articles(self):
         for article in self._session.query(Postgres_Article):

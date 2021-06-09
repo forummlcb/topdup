@@ -2,21 +2,18 @@ from loguru import logger
 from libs.data import ArticleManager
 from libs.config import ConfigManager
 from libs.browser_crawler import BrowserWrapper
-from libs.postgresql_client import PostgresClient
 
 
 class Docbao_Crawler():
 
     _crawl_newspaper = True
 
-    def __init__(self, crawl_newspaper=True, export_to_postgres=False):
+    def __init__(self, crawl_newspaper=True, export_to_postgres=False, yamlfile=""):
         self._crawl_newspaper = crawl_newspaper
         self._export_to_postgres = export_to_postgres
+        self._config_manager = ConfigManager(yamlfile)
 
-        self._config_manager = ConfigManager('./libs/config/config.yaml')
-
-        self._data_manager =\
-            ArticleManager(self._config_manager)  # article database object
+        self._data_manager = ArticleManager(self._config_manager)  # article database object
 
     def load_data_from_file(self):
         # Load data from file
@@ -25,7 +22,7 @@ class Docbao_Crawler():
 
     def run_crawler(self):
         logger.info("Start crawling...")
-        crawl_queue = self._config_manager.get_newspaper_list()
+        crawl_queue = self._config_manager.get_newspaper_list() # crawl_queue is a list contains WebConfig objects
         data_manager = self._data_manager
 
         browser = BrowserWrapper()
@@ -69,10 +66,14 @@ class Docbao_Crawler():
         if self._export_to_postgres:
             try:
                 # push to Postgres
+                from libs.postgresql_client import PostgresClient
                 postgres = PostgresClient()
                 for article in rb_articles:
                     postgres.push_article(article)
             except Exception as ex:
                 logger.exception(ex)
-
-        logger.info("FINISH ADD TO POSTGRE DATABASE...")
+            logger.info("FINISH ADD TO POSTGRE DATABASE...")
+        else:
+            for articles in rb_articles:
+                print(articles.get_href())
+            logging.info("FINISH EXPORTING INFO")

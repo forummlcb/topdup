@@ -5,6 +5,9 @@ from libs.utils import open_utf8_file_to_read, open_utf8_file_to_write
 
 
 class WebConfig:
+    """
+        This class is to parse over a website configuration
+    """
     def __init__(self, web=None):
         if web is None:
             self._web = {"default": {}}
@@ -258,10 +261,22 @@ class WebConfig:
 class ConfigManager:
     _filename = ""
     _config = {}
-
     def __init__(self, config_filename):
         self._filename = config_filename
 
+    ### These functions is not original, detail at ticket dieu-chinh-crawler
+    def load_yaml_config(self, filepath):
+        """
+            This will load an Yaml configuration file.
+            The output will be a dictionary
+        """
+        return yaml.load(open(filepath, "r"), Loader=yaml.FullLoader)
+
+    @property
+    def config(self):
+        return self._config
+
+    ### Old functions
     def load_data(self, crawl_newspaper=True):
         stream = open_utf8_file_to_read(self._filename)
         self._config = yaml.full_load(stream)
