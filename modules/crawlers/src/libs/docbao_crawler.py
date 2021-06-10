@@ -8,12 +8,14 @@ class Docbao_Crawler():
 
     _crawl_newspaper = True
 
-    def __init__(self, crawl_newspaper=True, export_to_postgres=False, yamlfile=""):
+    def __init__(self, crawl_newspaper=True, export_to_postgres=False, export_to_json=True, export_jsonfile="./test.json", config_yamlfile="libs/config/config.yaml"):
         self._crawl_newspaper = crawl_newspaper
         self._export_to_postgres = export_to_postgres
-        self._config_manager = ConfigManager(yamlfile)
+        self._config_manager = ConfigManager(config_yamlfile)
+        self._export_to_json = export_to_json
 
         self._data_manager = ArticleManager(self._config_manager)  # article database object
+        self._jsonfile = export_jsonfile
 
     def load_data_from_file(self):
         # Load data from file
@@ -73,7 +75,9 @@ class Docbao_Crawler():
             except Exception as ex:
                 logger.exception(ex)
             logger.info("FINISH ADD TO POSTGRE DATABASE...")
-        else:
-            for articles in rb_articles:
-                print(articles.get_href())
-            logging.info("FINISH EXPORTING INFO")
+        elif self._export_to_json:
+            from libs.json_exporter import JsonExporter
+            json_exporter = JsonExporter(self._jsonfile)
+            for article in rb_articles:
+                json_exporter.write_to_file(article)
+            logger.info("FINISH EXPORTING TO AN JSON FILE")

@@ -11,7 +11,7 @@ def main():
     if not is_another_session_running(): # -> this to create a file name 'docbao.lock' to avoid running multiple crawlers at the sametime
         new_session()
         try:
-            crawler = Docbao_Crawler(crawl_newspaper=True, export_to_postgres=False, yamlfile="libs/config/test_config.yaml")
+            crawler = Docbao_Crawler(crawl_newspaper=True, export_to_json=True, export_jsonfile="./test.json", config_yamlfile="libs/config/test_config.yaml")
             crawler.load_data_from_file()
             crawler.run_crawler()
         except Exception as ex:
